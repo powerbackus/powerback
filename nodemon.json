@@ -1,0 +1,14 @@
+{
+  "watch": [
+    "server.js",
+    "auth/**/*.js",
+    "jobs/**/*.js",
+    "models/**/*.js",
+    "routes/**/*.js",
+    "services/**/*.js",
+    "controller/**/*.js",
+    "validation/**/*.js"
+  ],
+  "ext": "js,json,ts,tsx",
+  "ignore": ["*/**/*_.*"]
+}

@@ -1,0 +1,7 @@
+dev
+test
+tests
+__tests__
+tests-examples
+client/build
+node_modules

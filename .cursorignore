@@ -1,0 +1,53 @@
+# Dependencies (large, not useful for context)
+node_modules/
+client/node_modules/
+
+# Build and compile outputs
+client/build/
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# Cache and tooling
+.cache/
+.parcel-cache/
+.rpt2_cache/
+.rts2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.nyc_output/
+.eslintcache
+.stylelintcache
+
+# Logs and runtime
+logs/
+*.log
+
+# Coverage (generated)
+coverage/
+
+# Environment and secrets (never index)
+.env
+.env.*
+!.env.example
+!.env.example.backend
+!client/.env.example.client
+ecosystem.config.js
+ecosystem.config
+ecosystem.*.config.js
+ecosystem.*.config
+
+# Git and Cursor internals
+.git/
+.cursor/
+
+# Project-specific: runtime snapshots/deltas (keep dirs, ignore contents)
+snapshots/*
+!snapshots/.gitkeep
+jobs/deltas/*
+!jobs/deltas/.gitkeep
+
+# Optional: uncomment if worktrees or dev scripts bloat indexing
+# worktrees/
+# dev/

@@ -1,0 +1,25 @@
+module.exports = {
+  testEnvironment: 'node',
+  testMatch: ['**/__tests__/**/*.js', '**/?(*.)+(spec|test).js'],
+  testPathIgnorePatterns: ['/tests-examples/', 'client/src/App.test.js'],
+  moduleNameMapper: {
+    '^url-join$': '<rootDir>/__mocks__/url-join.js',
+    '^@scure/bip32$': '<rootDir>/__mocks__/scureBip32.js',
+  },
+  collectCoverageFrom: [
+    '**/*.{js,jsx}',
+    '!**/node_modules/**',
+    '!**/client/**',
+    '!**/coverage/**',
+    '!**/migrations/**',
+    '!**/jobs/**',
+    '!**/dev/**',
+  ],
+  coverageDirectory: 'coverage',
+  setupFilesAfterEnv: ['<rootDir>/test/setup.js'],
+  testTimeout: 10000,
+  maxWorkers: 1,
+  workerIdleMemoryLimit: '512MB',
+  forceExit: true,
+  detectOpenHandles: true,
+};
