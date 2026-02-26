@@ -1,0 +1,53 @@
+type: environment.insomnia.rest/5.0
+schema_version: '5.1'
+name: Prod
+meta:
+  id: wrk_5884a56a87bf40309f4f176864e02008
+  created: 1771367876737
+  modified: 1771367876737
+  description: ''
+environments:
+  name: Base Environment
+  meta:
+    id: env_a88c7f4085c8caf17ce8a82d1db0b4f9d4409cdf
+    created: 1771367876739
+    modified: 1771959677801
+    isPrivate: false
+  data:
+    SOCIAL_WEBHOOK_URL: https://hook.us2.make.com/mock_SOCIAL_WEBHOOK_URL
+    SOCIAL_WEBHOOK_API_KEY: mock_API_KEY
+    MASTODON_ACCESS_TOKEN: mock_ACCESS_TOKEN
+    DISCORD_WEBHOOK_URL: mock_WEBHOOK_URL
+    event_type: house_membership
+    action: added
+    state: TX
+    district: '12'
+    polName: Jane Smith
+    handles:
+      bluesky: ''
+      mastodon: ''
+      twitter: ''
+      youtube: ''
+      facebook: ''
+      truth: ''
+      instagram: ''
+    states:
+      - CA
+      - TX
+    change_summary:
+      - 'Updated CA: 2026-03-05/2026-11-05 → 2026-03-12/2026-11-05'
+    session_label: 119th Congress, 2nd Session
+    converted_count: 11
+    bill_id: H.J.Res.54
+    bill_title: We The People Amendment
+    previous_status: Introduced
+    new_status: Committee Consideration
+    last_action_text: Referred to the Committee on the Judiciary.
+    update_date: 2026-12-31
+    committees_changed: true
+    committees:
+      - HJUD
+    total_donations: 99999
+    donation: 999
+    text: <single line summary of the deploy>
+    dedupe_key: "{{event_type}}:test-{% now 'unix', '' %}"

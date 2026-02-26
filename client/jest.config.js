@@ -1,0 +1,41 @@
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'jsdom',
+  setupFilesAfterEnv: ['<rootDir>/src/setupTests.js'],
+  moduleNameMapper: {
+    '^@Components/(.*)$': '<rootDir>/src/components/$1',
+    '^@Hooks/(.*)$': '<rootDir>/src/hooks/$1',
+    '^@CONSTANTS/(.*)$': '<rootDir>/src/constants/$1',
+    '^@CONSTANTS$': '<rootDir>/src/constants',
+    '^@Tuples/(.*)$': '<rootDir>/src/tuples/$1',
+    '^@Contexts/(.*)$': '<rootDir>/src/contexts/$1',
+    '^@Contexts$': '<rootDir>/src/contexts',
+    '^@Utils/(.*)$': '<rootDir>/src/utils/$1',
+    '^@Utils$': '<rootDir>/src/utils',
+    '^@API/(.*)$': '<rootDir>/src/api/$1',
+    '^@API$': '<rootDir>/src/api',
+    '^@Interfaces/(.*)$': '<rootDir>/src/interfaces/$1',
+    '^@Types/(.*)$': '<rootDir>/src/types/$1',
+    '^@Pages/(.*)$': '<rootDir>/src/pages/$1',
+    '^@Pages$': '<rootDir>/src/pages',
+    '^@Hooks$': '<rootDir>/src/hooks/index',
+    '^axios$': '<rootDir>/src/__mocks__/axios.js',
+  },
+  transform: {
+    '^.+\\.(ts|tsx)$': 'ts-jest',
+  },
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json'],
+  testMatch: [
+    '<rootDir>/src/**/__tests__/**/*.(ts|tsx|js)',
+    '<rootDir>/src/**/?(*.)(spec|test).(ts|tsx|js)',
+  ],
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    '!src/**/*.d.ts',
+    '!src/index.tsx',
+    '!src/setupTests.js',
+  ],
+  transformIgnorePatterns: [
+    'node_modules/(?!(react|react-dom|@testing-library|axios)/)',
+  ],
+};
