@@ -1,0 +1,101 @@
+---
+description: Election dates handling, snapshots, fallbacks, and client bundling
+globs:
+  - "jobs/electionDatesUpdater.js"
+  - "snapshots/electionDates.snapshot.json"
+  - "controller/congress/**/*"
+  - "services/congress/**/*"
+  - "client/src/**/*"
+alwaysApply: false
+priority: 2
+---
+
+# Election Dates System
+
+## Client Bundling
+
+### Bundled Snapshot
+- **Read-only snapshot**: Client ships a read-only bundled snapshot of election dates
+- **Never invent dates**: Client must never invent dates client-side
+- **Bundled with build**: Snapshot is bundled with production build
+- **Default source**: Client default is bundled snapshot
+
+### Runtime Updates
+- **Memory-only**: May use newer server snapshot at runtime (in-memory only)
+- **No persistent write**: Do NOT persist server-updated dates to storage
+- **Session only**: Server updates cached in memory for session only
+
+## Fallback Priority
+
+### General Election Dates
+- **Project constants**: Use project constants/snapshot for general election dates
+- **Authoritative**: Project constants are authoritative for general elections
+
+### Primary/Runoff/Special Elections
+Fallback priority (in order):
+1. **OpenFEC API**: Fetch from OpenFEC API
+2. **Snapshot diff**: Check diff against snapshot (project constant)
+3. **Generic dates**: Only if explicitly approved (explain concept to user first)
+
+### When Dates Are Missing
+- **Show notice**: Display "dates unavailable" notice when relevant
+- **Don't block**: Do not block transactions due to missing dates
+- **Server decides**: Server is authoritative and will decide to proceed or block
+- **Log fallback**: Log fallback usage and reasons at info/warn level
+
+## Server Authority
+
+### Server Snapshot
+- **Authoritative**: Server snapshot is authoritative for election dates
+- **Eastern Time**: Dates normalized to Washington, D.C. timezone (EST)
+- **Election boundaries**: Server defines election cycle boundaries
+
+### Validation
+- **Server enforces**: Server enforces compliance based on election dates
+- **Can block**: Server can block donations if validation cannot be ensured
+- **Client shows notice**: Client shows "dates unavailable" but allows submission
+
+## Jobs and Updates
+
+### Election Dates Updater
+- **Cadence**: 
+  - Monthly in odd years
+  - Weekly in even years
+- **API paging**: Cap API paging at 100 pages maximum
+- **Permission required**: Only run with explicit permission
+
+### Snapshot Management
+- **Snapshot files**: `snapshots/electionDates.snapshot.json`
+- **Diff logic**: Check for differences before updating
+- **Changelog**: Write both snapshot and changelog when changes detected
+
+## Logging
+
+### Election Date Notifications
+- **Log on diff only**: Log only when diffs exist (state/date changes)
+- **Include counts**: Log counts of changed states/dates
+- **Info/warn level**: Use info/warn level for fallback usage
+
+### What to Log
+- **State changes**: Which states had date changes
+- **Date changes**: What dates changed
+- **Counts**: Number of changes
+- **Fallback reasons**: Why fallback was used
+
+## Production Build
+
+### Bundling Process
+- **Open question**: Production build flow for bundling and syncing election dates snapshot into client
+- **Note for future**: This needs to be addressed when building for production
+
+## Best Practices
+
+1. **Bundled snapshot**: Client ships read-only bundled snapshot
+2. **Memory-only updates**: Server updates cached in memory only
+3. **Never invent dates**: Client must not create dates client-side
+4. **Fallback priority**: OpenFEC → snapshot diff → generic dates (if approved)
+5. **Show notice**: Display "dates unavailable" when dates missing
+6. **Server authoritative**: Server decides to proceed or block
+7. **Log on diff**: Only log when changes detected
+8. **EST normalization**: All dates normalized to Eastern Time
+9. **Ask about generic dates**: Explain generic dates concept before using

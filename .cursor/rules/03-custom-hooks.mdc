@@ -1,0 +1,382 @@
+---
+description: Custom React hooks patterns, state management, and memoization
+globs:
+  - "client/src/hooks/**/*"
+  - "client/src/hooks/**/*.ts"
+  - "client/src/hooks/**/*.js"
+alwaysApply: false
+priority: 3
+---
+
+# Custom React Hooks Patterns
+
+## Hook Structure
+
+### Standard Hook Pattern
+```typescript
+interface Handlers {
+  action1: () => void;
+  action2: (value: string) => void;
+}
+
+export default function useHookName(
+  param1: Type1,
+  param2?: Type2
+): [StateType, Handlers] {
+  const [state, setState] = useState<StateType>(initialState);
+  
+  const handlers = useMemo<Handlers>(
+    () => ({
+      action1: () => {
+        // action logic
+      },
+      action2: (value: string) => {
+        // action logic
+      },
+    }),
+    [dependencies]
+  );
+  
+  return [state, handlers];
+}
+```
+
+### Reducer Pattern (for complex state)
+```typescript
+const [state, dispatch] = useReducer(reducer, initialState);
+
+const handlers = useMemo(
+  () => ({
+    action1: () => dispatch({ type: 'ACTION_1' }),
+    action2: (value: string) => dispatch({ type: 'ACTION_2', payload: value }),
+  }),
+  []
+);
+
+return [state, handlers];
+```
+
+## Hook Categories
+
+### Form Management Hooks
+
+#### useEntryForm
+Manages user entry forms (login, registration, password changes).
+
+```typescript
+const [userEntry, { setUserEntryForm, setUserFormValidated }] = useEntryForm();
+```
+
+#### useFormValidation
+Manages form field validation state.
+
+```typescript
+const [validatingFields, { validateField, resetValidation }] = useFormValidation();
+```
+
+#### useFormCompliance
+Validates form compliance with legal requirements.
+
+```typescript
+const [compliance, { setFormCompliance }] = useFormCompliance(contactInfo, formIsInvalid);
+```
+
+#### useFieldList
+Manages dynamic field lists for forms.
+
+```typescript
+const [fieldList, { setFieldList }] = useFieldList(CONTROLS, activeTab, userData);
+```
+
+### UI State Management Hooks
+
+#### useSpinner
+Manages loading spinner state.
+
+```typescript
+const [isLoading, { start, stop }] = useSpinner();
+```
+
+#### useButtonErrorSwapper
+Manages button state transitions between normal and error states.
+
+```typescript
+const [buttonState, { swapToButton, swapToError }] = useButtonErrorSwapper();
+```
+
+#### useMontyHall
+Manages modal door states for password change and account deletion.
+
+```typescript
+const [doors, { openDoor, closeDoors }] = useMontyHall(['changePassword', 'deleteAccount']);
+```
+
+### Data Management Hooks
+
+#### useContactInfo
+Manages user contact information with phone normalization.
+
+```typescript
+const [contactInfo, { setContactInfo, loadContactInfo }] = useContactInfo(userData);
+```
+
+#### useDisplayName
+Generates responsive display names with truncation.
+
+```typescript
+const [displayName, { setDisplayName }] = useDisplayName({ first, middle, last });
+```
+
+#### useParade
+Manages politician parade/carousel state.
+
+```typescript
+const [parade, { setPolsOnParade, searchPolsByName }] = useParade();
+```
+
+#### useComboboxItems
+Manages combobox items for search interfaces.
+
+```typescript
+const [items, { setInputItems, resetSearchBar }] = useComboboxItems(
+  itemToString,
+  initialPoliticians,
+  'NAME'
+);
+```
+
+#### useCelebrationEvents
+Manages user Celebration/donation history.
+
+```typescript
+const [celebrations, { setCelebrationEvents }] = useCelebrationEvents(userDonations);
+```
+
+### Business Logic Hooks
+
+#### usePaymentProcessing
+Encapsulates payment processing logic for Stripe.
+
+```typescript
+const { processDonation, attemptPayment, handlePaymentSubmit } = usePaymentProcessing({
+  stripe,
+  setPaymentError,
+  setShowModal,
+  setRejectedDonationReasons,
+  stopProcessingSpinner,
+  startProcessingSpinner,
+});
+```
+
+#### useGuestTierLimit
+Calculates donation limits for Guest tier.
+
+```typescript
+const [suggestedDonations, { setDonationLimit }] = useGuestTierLimit(
+  formCompliance,
+  LEGAL_LIMIT,
+  userData,
+  polData
+);
+```
+
+#### useCompliantTierLimit
+Calculates donation limits for Compliant tier with election cycles.
+
+```typescript
+const [suggestedDonations, { setDonationLimit }, resetInfo] = useHighestTierLimit(
+  formCompliance,
+  LEGAL_LIMIT,
+  userData,
+  polData
+);
+```
+
+## Hook Patterns
+
+### Return Value Pattern
+Always return a tuple: `[state, handlers]`
+
+```typescript
+return [state, handlers];
+```
+
+### Handler Memoization
+Memoize handlers with `useMemo` to prevent unnecessary re-renders:
+
+```typescript
+const handlers = useMemo(
+  () => ({
+    action1: () => { /* logic */ },
+    action2: (value: string) => { /* logic */ },
+  }),
+  [dependencies]
+);
+```
+
+### Effect Cleanup
+Always return cleanup functions from `useEffect`:
+
+```typescript
+useEffect(() => {
+  const subscription = subscribe();
+  return () => {
+    subscription.unsubscribe();
+  };
+}, [dependencies]);
+```
+
+### Dependency Arrays
+- Include all dependencies used in the effect/handler
+- Use ESLint rule `exhaustive-deps` to catch missing dependencies
+- Be careful with object/array dependencies (use refs or memoization)
+
+## Hook File Organization
+
+### Directory Structure
+```
+hooks/
+  compliance/
+    useComplianceCaps.ts
+    tiers/
+      useLowerTierLimit.ts
+      useHighestTierLimit.ts
+  data/
+    useCelebrationEvents.ts
+    useComboboxItems.ts
+    useContactInfo.ts
+    useParade.ts
+  forms/
+    useAccountModalLifecycle.ts
+    useAccountTabs.ts
+    useAccountUpdate.ts
+    useEntryForm.ts
+    useFieldList.ts
+    useFormCompliance.ts
+    useFormValidation.ts
+  fn/
+    normalize.js
+    prune.js
+  ui/
+    useBtnErrorSwapper.ts
+    useSpinner.ts
+    useMontyHall.ts
+```
+
+### File Naming
+- camelCase starting with `use`: `useFormValidation.ts`
+- Utility functions: camelCase: `normalize.js`, `prune.js`
+
+## Hook Best Practices
+
+### Single Responsibility
+Each hook should manage one specific concern.
+
+### Type Safety
+All hooks should be fully typed with TypeScript:
+
+```typescript
+interface Handlers {
+  action: (value: string) => void;
+}
+
+export default function useHook(): [StateType, Handlers] {
+  // implementation
+}
+```
+
+### Performance Optimization
+- Use `useMemo` for expensive calculations
+- Use `useCallback` for function dependencies
+- Avoid unnecessary re-renders
+- Implement proper cleanup in `useEffect`
+
+### Error Handling
+Include error handling for:
+- Invalid parameters
+- Network failures
+- State validation errors
+- Boundary conditions
+
+### Documentation
+Document hooks with:
+- Purpose description
+- Parameter types and descriptions
+- Return value types
+- Usage examples
+
+## Hook Testing
+
+### Testing Pattern
+```typescript
+import { renderHook, act } from '@testing-library/react';
+
+const { result } = renderHook(() => useMyHook(initialProps));
+
+act(() => {
+  result.current[1].handler();
+});
+
+expect(result.current[0]).toBe(expectedValue);
+```
+
+## Common Patterns
+
+### State + Handlers Pattern
+```typescript
+const [state, handlers] = useHook();
+// handlers.action1()
+```
+
+### Reducer Pattern
+```typescript
+const [state, dispatch] = useReducer(reducer, initialState);
+// dispatch({ type: 'ACTION', payload: value })
+```
+
+### Memoization Pattern
+```typescript
+const memoizedValue = useMemo(() => expensiveCalculation(deps), [deps]);
+const memoizedHandler = useCallback(() => action(), [deps]);
+```
+
+## Utility Functions
+
+### Pure Functions
+Extract pure functions to `/hooks/fn/`:
+
+```typescript
+// hooks/fn/normalize.js
+export const normalize = (value: string, previousValue: string): string => {
+  // pure function logic
+};
+```
+
+### Data Pruning
+Use `prune` utility to remove sensitive data:
+
+```typescript
+import { prune } from '@Hooks/fn';
+const sanitizedUser = prune(userData);
+```
+
+## Integration with Contexts
+
+### Context Integration Pattern
+```typescript
+const { userData } = useAuth();
+const [contactInfo, handlers] = useContactInfo(userData);
+```
+
+Hooks can consume context values but should not provide context (use Context providers for that).
+
+## Best Practices Summary
+
+1. **Return Tuple**: Always return `[state, handlers]` tuple
+2. **Memoize Handlers**: Use `useMemo` for handler objects
+3. **Type Safety**: Fully type all hooks with TypeScript
+4. **Single Responsibility**: One concern per hook
+5. **Performance**: Optimize with memoization and cleanup
+6. **Error Handling**: Handle errors gracefully
+7. **Documentation**: Document purpose, params, and return values
+8. **Testing**: Test hooks independently with React Testing Library

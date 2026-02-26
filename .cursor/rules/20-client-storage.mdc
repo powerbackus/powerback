@@ -1,0 +1,125 @@
+---
+description: Client storage policy - what can and cannot be stored in localStorage/sessionStorage
+globs:
+  - "client/src/**/*.ts"
+  - "client/src/**/*.tsx"
+  - "client/src/**/*.js"
+alwaysApply: false
+priority: 2
+---
+
+# Client Storage Policy
+
+## Core Principles
+
+### Conservative Approach
+- **Prefer session memory**: Prefer session memory over persistent storage
+- **Ask before storing**: Be conservative; ask before storing new data in local/session storage
+- **Single utility**: Access storage through a single utility that enforces prefixing, JSON encoding, size/TTL checks, and try/catch
+
+## What's Forbidden
+
+### Authentication and Tokens
+- **No access tokens**: Do NOT store access tokens in localStorage/sessionStorage
+- **Memory only**: Keep tokens in memory only
+- **HTTP-only cookies**: Token refresh uses HTTP-only cookies; no client-side persistence beyond axios defaults
+- **Clear on logout**: On logout, clear all app-specific storage keys
+
+### PII (Personally Identifiable Information)
+- **No PII**: Do NOT store any PII:
+  - Names (first, last, middle)
+  - Email addresses
+  - Physical addresses
+  - Phone numbers
+  - `ocd_id` (location identifier)
+  - Employer
+  - Occupation
+
+### Payment and Compliance Data
+- **No payment data**: Do NOT store:
+  - Donation amounts in progress
+  - Card data
+  - Stripe IDs
+  - Server constants
+  - Compliance-sensitive data
+
+### Server Responses and Logs
+- **No server responses**: Do NOT store server responses containing PII
+- **No logs**: Do NOT store logs or stack traces
+- **No error payloads**: Strip/avoid storing error payloads
+
+## What's Allowed
+
+### Non-Sensitive UI Preferences
+- **Theme**: Theme preferences
+- **Tooltip toggles**: Tooltip visibility preferences
+- **Dismissed banners**: Banner dismissal state
+- **Tour progress**: Product tour completion state
+
+### Non-Sensitive Navigation/UI State
+- **Last active tab**: Last active tab for better UX
+- **Feature flags**: Feature flag states (non-sensitive)
+- **UI state**: Navigation state that improves UX
+
+### Election Dates
+- **Bundled snapshot only**: Ship a read-only bundled snapshot with the client
+- **Memory-only updates**: If newer snapshot fetched from server, cache in memory only for session (no persistent write)
+- **No persistent election dates**: Do NOT persist server-updated election dates
+
+## Storage Implementation
+
+### Namespacing
+- **Prefix keys**: Prefix all keys with `pb:` (e.g., `pb:theme`, `pb:lastTab`)
+- **JSON encoding**: Keep values JSON-encoded
+- **Consistent format**: Use consistent naming convention
+
+### Lifetime and Size
+- **Set TTL**: If persistent storage is used, set a TTL and purge stale entries on load
+- **Size cap**: Keep total persistent storage under conservative cap (e.g., <200KB across all keys)
+- **Purge on load**: Remove stale entries when app loads
+
+### Safety and Hygiene
+- **Single utility**: Access storage through single utility that:
+  - Enforces prefixing (`pb:`)
+  - JSON encoding/decoding
+  - Size/TTL checks
+  - Try/catch error handling
+- **Clear on logout**: On "Clear data" or logout, remove all `pb:` keys
+- **Error handling**: Wrap all storage access in try/catch
+
+## Storage Utility Pattern
+
+### Recommended Implementation
+```typescript
+// Storage utility with prefixing, JSON encoding, size checks
+const storage = {
+  set: (key: string, value: any, ttl?: number) => {
+    const prefixedKey = `pb:${key}`;
+    const data = {
+      value: JSON.stringify(value),
+      expires: ttl ? Date.now() + ttl : null,
+    };
+    // Size check, try/catch, etc.
+  },
+  get: (key: string) => {
+    const prefixedKey = `pb:${key}`;
+    // Get, check expiry, JSON parse, try/catch
+  },
+  clear: () => {
+    // Remove all pb: keys
+  },
+};
+```
+
+## Best Practices Summary
+
+1. **No tokens/PII**: Never store authentication tokens or PII
+2. **Memory for tokens**: Keep tokens in memory only
+3. **Prefix with pb:** Use `pb:` prefix for all storage keys
+4. **JSON encode**: JSON encode all values
+5. **Size limits**: Keep total storage under 200KB
+6. **TTL**: Set TTL for persistent storage
+7. **Single utility**: Use single storage utility with validation
+8. **Clear on logout**: Remove all `pb:` keys on logout
+9. **Bundled dates only**: Only store bundled election date snapshot, not server updates
+10. **Ask before storing**: Ask before adding new storage usage

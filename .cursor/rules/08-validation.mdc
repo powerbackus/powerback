@@ -1,0 +1,331 @@
+---
+description: Validation patterns, Joi schemas, form validation, and compliance
+globs:
+  - "validation/**/*"
+  - "validation/**/*.js"
+  - "validation/joi/**/*"
+  - "client/src/hooks/forms/**/*"
+  - "client/src/components/forms/**/*"
+  - "client/src/pages/**/Account/**/*"
+alwaysApply: false
+priority: 3
+---
+
+# Validation Patterns
+
+## Backend Validation
+
+### Joi Schema Pattern (`/validation/joi`)
+```javascript
+const Joi = require('joi');
+
+const schema = Joi.object({
+  username: Joi.string()
+    .email()
+    .required()
+    .messages({
+      'string.email': 'Username must be a valid email',
+      'any.required': 'Username is required',
+    }),
+  password: Joi.string()
+    .min(8)
+    .required()
+    .messages({
+      'string.min': 'Password must be at least 8 characters',
+      'any.required': 'Password is required',
+    }),
+});
+
+module.exports = schema;
+```
+
+### Validation Middleware (`/validation/validate.js`)
+```javascript
+const validate = async (schema, data) => {
+  const { error, value } = schema.validate(data, {
+    abortEarly: false,
+    stripUnknown: true,
+  });
+  
+  if (error) {
+    throw error;
+  }
+  
+  return value;
+};
+```
+
+### Route Validation Pattern
+```javascript
+const { validate } = require('../../validation');
+const schemas = require('../../validation');
+
+router.post('/endpoint', async (req, res, next) => {
+  try {
+    const validated = await validate(schemas.resourceSchema, req.body);
+    // Use validated data
+    const result = await Controller.action(validated);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+```
+
+## Frontend Validation
+
+### HTML5 Validation
+```typescript
+<input
+  type="email"
+  required
+  pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
+  minLength={8}
+  maxLength={100}
+/>
+```
+
+### Custom Validation Hook (`useFormValidation`)
+```typescript
+const [validatingFields, { validateField, resetValidation }] = useFormValidation();
+
+const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  validateField(e);
+  // Update field value
+};
+```
+
+### Form Compliance Hook (`useFormCompliance`)
+```typescript
+const [compliance, { setFormCompliance }] = useFormCompliance(
+  contactInfo,
+  formIsInvalid
+);
+```
+
+### Field Validation Pattern
+```typescript
+interface ValidatingFields {
+  phoneNumber: boolean;
+  employment: boolean;
+  occupation: boolean;
+  firstName: boolean;
+  employer: boolean;
+  lastName: boolean;
+  passport: boolean;
+  address: boolean;
+  country: boolean;
+  email: boolean;
+  state: boolean;
+  city: boolean;
+  zip: boolean;
+}
+
+const validateField = (e: ChangeEvent<HTMLInputElement>) => {
+  if (e.target.type !== 'text' && e.target.type !== 'select-one') {
+    return;
+  }
+  setState((v: ValidatingFields) => ({
+    ...v,
+    [e.target.name]: !e.target.checkValidity(),
+  }));
+};
+```
+
+## Validation Schemas
+
+### User Entry Form Schema
+```javascript
+const userEntryFormSchema = Joi.object({
+  username: Joi.string().email().required(),
+  password: Joi.string().min(8).required(),
+  confirmPassword: Joi.string().valid(Joi.ref('password')).required(),
+});
+```
+
+### Contact Info Schema
+```javascript
+const contactInfoSchema = Joi.object({
+  firstName: Joi.string().min(1).max(100).required(),
+  lastName: Joi.string().min(1).max(100).required(),
+  email: Joi.string().email().required(),
+  phoneNumber: Joi.string().pattern(/^\(\d{3}\) \d{3}-\d{4}$/).optional(),
+  address: Joi.string().min(1).max(200).required(),
+  city: Joi.string().min(1).max(100).required(),
+  state: Joi.string().valid(...states).required(),
+  zip: Joi.string().pattern(/^\d{5}(-\d{4})?$/).required(),
+  country: Joi.string().valid(...countries).default('United States'),
+});
+```
+
+### Celebration Schema
+```javascript
+const celebrationSchema = Joi.object({
+  donation: Joi.number().min(1).max(10000).required(),
+  FEC_id: Joi.string().required(),
+  donatedBy: Joi.string().required(),
+  tip: Joi.number().min(0).optional(),
+});
+```
+
+## Validation Error Handling
+
+### Backend Validation Errors
+```javascript
+try {
+  const validated = await validate(schema, req.body);
+} catch (error) {
+  if (error.isJoi) {
+    res.status(422).json({
+      error: {
+        message: 'Validation failed',
+        status: 422,
+        details: error.details.map(detail => ({
+          field: detail.path.join('.'),
+          message: detail.message,
+        })),
+      },
+    });
+  } else {
+    next(error);
+  }
+}
+```
+
+### Frontend Validation Errors
+```typescript
+const [validatingFields, handlers] = useFormValidation();
+
+// Display validation errors
+{validatingFields.firstName && (
+  <div className="invalid-feedback">
+    First name is required
+  </div>
+)}
+```
+
+## Custom Validation
+
+### Phone Number Normalization
+```typescript
+const normalize = (value: string, previousValue: string): string => {
+  // Format phone number: (XXX) XXX-XXXX
+  const numbers = value.replace(/\D/g, '');
+  if (numbers.length <= 3) return numbers;
+  if (numbers.length <= 6) {
+    return `(${numbers.slice(0, 3)}) ${numbers.slice(3)}`;
+  }
+  return `(${numbers.slice(0, 3)}) ${numbers.slice(3, 6)}-${numbers.slice(6, 10)}`;
+};
+```
+
+### Email Validation
+```typescript
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+```
+
+### Password Strength Validation
+```typescript
+const validatePassword = (password: string): {
+  isValid: boolean;
+  errors: string[];
+} => {
+  const errors: string[] = [];
+  
+  if (password.length < 8) {
+    errors.push('Password must be at least 8 characters');
+  }
+  if (!/[A-Z]/.test(password)) {
+    errors.push('Password must contain at least one uppercase letter');
+  }
+  if (!/[a-z]/.test(password)) {
+    errors.push('Password must contain at least one lowercase letter');
+  }
+  if (!/[0-9]/.test(password)) {
+    errors.push('Password must contain at least one number');
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors,
+  };
+};
+```
+
+## Compliance Validation
+
+### FEC Compliance Validation
+```typescript
+const validateFECCompliance = (
+  donation: number,
+  userCompliance: ComplianceTier,
+  existingDonations: Celebration[]
+): {
+  complies: boolean;
+  remainingLimit: number;
+  message: string;
+} => {
+  // Validation logic based on compliance tier
+  // Guest: per-donation + annual cap
+  // Compliant: per-candidate per-election limit
+};
+```
+
+### PAC Limit Validation
+```typescript
+const validatePACLimit = (
+  tipAmount: number,
+  currentPACTotal: number,
+  pacLimit: number
+): {
+  tipComplies: boolean;
+  remainingPACLimit: number;
+  message: string;
+} => {
+  const remaining = pacLimit - currentPACTotal;
+  return {
+    tipComplies: tipAmount <= remaining,
+    remainingPACLimit: remaining,
+    message: tipAmount > remaining 
+      ? `Tip exceeds PAC limit. Remaining: $${remaining}`
+      : 'Tip is compliant',
+  };
+};
+```
+
+## Real-time Validation
+
+### Input Validation Pattern
+```typescript
+const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const value = e.target.value;
+  
+  // Update value
+  setValue(value);
+  
+  // Validate in real-time
+  validateField(e);
+  
+  // Custom validation
+  if (e.target.name === 'email' && value) {
+    const isValid = isValidEmail(value);
+    setEmailValid(isValid);
+  }
+};
+```
+
+## Validation Best Practices
+
+1. **Server-Side Authority**: Server is authoritative for validation
+2. **Client-Side UX**: Validate on client for better UX
+3. **Joi Schemas**: Use Joi for backend validation
+4. **HTML5 Validation**: Use HTML5 validation attributes
+5. **Custom Hooks**: Use custom hooks for form validation
+6. **Error Messages**: Provide clear, user-friendly error messages
+7. **Real-time Validation**: Validate as user types for better UX
+8. **Compliance Validation**: Validate FEC compliance and PAC limits
+9. **Normalization**: Normalize input data (phone numbers, etc.)
+10. **Error Display**: Show validation errors clearly to users

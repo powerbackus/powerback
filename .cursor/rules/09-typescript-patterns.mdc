@@ -1,0 +1,276 @@
+---
+description: TypeScript patterns, interfaces, type guards, and generics
+globs:
+  - "client/src/**/*.ts"
+  - "client/src/**/*.tsx"
+excludeGlobs:
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.ts"
+alwaysApply: false
+priority: 2
+---
+
+# TypeScript Patterns
+
+## Type Definitions
+
+### Interface Pattern (`/client/src/interfaces`)
+```typescript
+// interfaces/user/UserData.ts
+export interface UserData {
+  id: string;
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  compliance: ComplianceTier;
+  celebrations: Celebration[];
+  // ...
+}
+```
+
+### Type Pattern (`/client/src/types`)
+```typescript
+// types/events/User.ts
+export type UserEvent = 
+  | { type: 'LOGIN'; payload: UserData }
+  | { type: 'LOGOUT' }
+  | { type: 'UPDATE'; payload: Partial<UserData> };
+```
+
+### Interface Organization
+- `/interfaces/api` - API request/response interfaces
+- `/interfaces/celebrations` - Celebration-related interfaces
+- `/interfaces/info` - Information interfaces (Contact, Updated)
+- `/interfaces/pols` - Politician interfaces
+- `/interfaces/ui` - UI component interfaces
+
+## Type Safety Patterns
+
+### Component Props
+```typescript
+interface ComponentProps {
+  required: string;
+  optional?: number;
+  handler: (value: string) => void;
+  children?: React.ReactNode;
+}
+
+const Component: React.FC<ComponentProps> = ({
+  required,
+  optional,
+  handler,
+  children,
+}) => {
+  // Component implementation
+};
+```
+
+### Hook Return Types
+```typescript
+interface Handlers {
+  action1: () => void;
+  action2: (value: string) => void;
+}
+
+export default function useHook(): [StateType, Handlers] {
+  // Hook implementation
+}
+```
+
+### API Response Types
+```typescript
+interface AuthResponse extends UserData {
+  accessToken: string;
+}
+
+interface StripePaymentResponse {
+  paymentIntent: string;
+  clientSecret: string;
+}
+
+interface PaymentValidationResponse {
+  donation: number;
+  complies: boolean;
+  has_stakes: boolean;
+  understands: boolean;
+  tip?: number;
+  tipComplies?: boolean;
+  pacLimitInfo?: {
+    currentPACTotal: number;
+    pacLimit: number;
+    remainingPACLimit: number;
+    message: string;
+  };
+}
+```
+
+## Type Guards
+
+### Type Guard Pattern
+```typescript
+function isUserData(obj: any): obj is UserData {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof obj.id === 'string' &&
+    typeof obj.username === 'string'
+  );
+}
+
+// Usage
+if (isUserData(data)) {
+  // TypeScript knows data is UserData
+  console.log(data.username);
+}
+```
+
+### Null/Undefined Checks
+```typescript
+// Optional chaining
+const email = userData?.email;
+
+// Nullish coalescing
+const displayName = userData?.firstName ?? 'Guest';
+
+// Type narrowing
+if (userData && userData.email) {
+  // TypeScript knows userData.email exists
+  sendEmail(userData.email);
+}
+```
+
+## Generic Types
+
+### Generic Function Pattern
+```typescript
+function fetchData<T>(url: string): Promise<T> {
+  return axios.get<T>(url).then(response => response.data);
+}
+
+// Usage
+const userData = await fetchData<UserData>('/api/users/data');
+```
+
+### Generic Hook Pattern
+```typescript
+function useApiData<T>(
+  url: string,
+  initialValue: T
+): [T, boolean, Error | null] {
+  const [data, setData] = useState<T>(initialValue);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  
+  // Implementation
+  
+  return [data, loading, error];
+}
+```
+
+## Union Types
+
+### Discriminated Unions
+```typescript
+type SearchOption = 
+  | { type: 'NAME'; label: 'Searching by name.' }
+  | { type: 'STATE'; label: 'Searching by state.' }
+  | { type: 'DISTRICT'; label: 'Searching by address.' };
+
+function handleSearch(option: SearchOption) {
+  switch (option.type) {
+    case 'NAME':
+      // TypeScript knows option.label is 'Searching by name.'
+      break;
+    case 'STATE':
+      // TypeScript knows option.label is 'Searching by state.'
+      break;
+    case 'DISTRICT':
+      // TypeScript knows option.label is 'Searching by address.'
+      break;
+  }
+}
+```
+
+## Utility Types
+
+### Partial
+```typescript
+type PartialUserData = Partial<UserData>;
+// All properties optional
+```
+
+### Pick
+```typescript
+type UserContact = Pick<UserData, 'email' | 'phoneNumber' | 'address'>;
+// Only selected properties
+```
+
+### Omit
+```typescript
+type UserWithoutId = Omit<UserData, 'id'>;
+// All properties except id
+```
+
+### Record
+```typescript
+type ErrorMessages = Record<string, string>;
+// Object with string keys and string values
+```
+
+## Type Assertions
+
+### Type Assertion Pattern
+```typescript
+// Use type assertions sparingly
+const data = response.data as UserData;
+
+// Prefer type guards
+if (isUserData(response.data)) {
+  const data = response.data; // TypeScript knows it's UserData
+}
+```
+
+## Import/Export Patterns
+
+### Type Exports
+```typescript
+// interfaces/index.ts
+export type { UserData } from './user/UserData';
+export type { ContactInfo } from './info/Contact';
+export type { Celebration } from './celebrations/Celebrations';
+```
+
+### Import Aliases
+```typescript
+// Use path aliases for clean imports
+import { UserData } from '@Interfaces';
+import { useAuth } from '@Contexts';
+import { API } from '@API';
+```
+
+## Type Definitions for External Libraries
+
+### Declaration Files
+```typescript
+// types/stripe.d.ts
+declare module '@stripe/stripe-js' {
+  export interface Stripe {
+    confirmCardPayment(clientSecret: string): Promise<any>;
+  }
+}
+```
+
+## Type Safety Best Practices
+
+1. **Define Interfaces**: Define interfaces for all data structures
+2. **Type Props**: Always type component props
+3. **Type Hooks**: Type hook return values and parameters
+4. **Type Guards**: Use type guards for runtime type checking
+5. **Avoid Any**: Avoid `any` type, use `unknown` if needed
+6. **Null Checks**: Use optional chaining and nullish coalescing
+7. **Generic Types**: Use generics for reusable code
+8. **Union Types**: Use discriminated unions for type-safe state
+9. **Utility Types**: Use utility types (Partial, Pick, Omit) when appropriate
+10. **Type Exports**: Export types from index files for clean imports

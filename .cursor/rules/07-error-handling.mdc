@@ -1,0 +1,363 @@
+---
+description: Error handling patterns, error types, and error boundaries - always active
+alwaysApply: true
+priority: 2
+---
+
+# Error Handling Patterns
+
+## Frontend Error Handling
+
+### Error State Management
+```typescript
+const [error, setError] = useState<Error | null>(null);
+
+try {
+  await performOperation();
+} catch (err) {
+  setError(err instanceof Error ? err : new Error('Unknown error'));
+}
+```
+
+### Error Display Pattern
+```typescript
+{error && (
+  <StyledAlert
+    show={{ error: true }}
+    type="error"
+    message={error.message}
+    variant="danger"
+  />
+)}
+```
+
+### Error Tuples (`/client/src/tuples/errors.js`)
+Centralized error messages mapped to HTTP status codes:
+
+```javascript
+module.exports = [
+  {
+    status: 400,
+    icon: 'person-fill-exclamation',
+    msg: ' Bad request. Please try again.',
+  },
+  {
+    status: 401,
+    icon: 'shield-slash',
+    msg: ' Incorrect username or password.',
+  },
+  {
+    status: 403,
+    icon: 'person-x-fill',
+    msg: ' This account is not authorized.',
+  },
+  {
+    status: 409,
+    icon: 'person-x-fill',
+    msg: ' Please try again with a different password.',
+  },
+  {
+    status: 422,
+    icon: 'shield-fill-exclamation',
+    msg: ' Server processing error. Please try again later.',
+  },
+  {
+    status: 500,
+    icon: 'bug-fill',
+    msg: ' Something went wrong. Please try again.',
+  },
+];
+```
+
+### API Error Handling
+```typescript
+API.method()
+  .then((response) => {
+    // Handle success
+  })
+  .catch((error) => {
+    if (error.response) {
+      // Server responded with error
+      const status = error.response.status;
+      const message = error.response.data?.error?.message || 'Unknown error';
+      setError(new Error(message));
+    } else if (error.request) {
+      // Request made but no response
+      setError(new Error('Network error. Please check your connection.'));
+    } else {
+      // Error setting up request
+      setError(error);
+    }
+  });
+```
+
+### Payment Error Handling
+```typescript
+const { handlePaymentSubmit } = usePaymentProcessing({
+  stripe,
+  setPaymentError,
+  setShowModal,
+  setRejectedDonationReasons,
+  stopProcessingSpinner,
+  startProcessingSpinner,
+});
+
+// Handle payment validation failures
+if (validationResponse.tipComplies === false && validationResponse.pacLimitInfo) {
+  setShowModal((s) => ({ ...s, limit: true }));
+} else {
+  setRejectedDonationReasons(donationFailure(validationResponse));
+}
+```
+
+## Backend Error Handling
+
+### Error Handler Middleware (`/routes/api/middleware/errorHandler.js`)
+```javascript
+const errorHandler = (err, req, res, next) => {
+  logger.error(err.stack);
+  res.status(err.status || 500).json({
+    error: {
+      message: err.message || 'Internal Server Error',
+      status: err.status || 500,
+    },
+  });
+};
+```
+
+### Error Response Format
+```json
+{
+  "error": {
+    "message": "Error message",
+    "status": 400
+  }
+}
+```
+
+### Route Error Handling Pattern
+```javascript
+router.post('/endpoint', async (req, res, next) => {
+  try {
+    const result = await Controller.action(req.body);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error); // Pass to error handler middleware
+  }
+});
+```
+
+### Service Error Handling
+```javascript
+async function serviceFunction(param) {
+  try {
+    const result = await performOperation(param);
+    return result;
+  } catch (error) {
+    logger.error('Service function error', {
+      error: error.message,
+      stack: error.stack,
+      param,
+    });
+    throw error; // Re-throw for controller to handle
+  }
+}
+```
+
+## Error Types
+
+### HTTP Status Codes
+- `400` - Bad Request (invalid input)
+- `401` - Unauthorized (authentication required)
+- `403` - Forbidden (authorization failed)
+- `404` - Not Found (resource doesn't exist)
+- `409` - Conflict (duplicate resource)
+- `422` - Unprocessable Entity (validation failed)
+- `500` - Internal Server Error (server error)
+
+### Custom Error Classes
+```javascript
+class ValidationError extends Error {
+  constructor(message, field) {
+    super(message);
+    this.name = 'ValidationError';
+    this.status = 422;
+    this.field = field;
+  }
+}
+
+class NotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'NotFoundError';
+    this.status = 404;
+  }
+}
+
+class UnauthorizedError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'UnauthorizedError';
+    this.status = 401;
+  }
+}
+```
+
+## Validation Error Handling
+
+### Joi Validation Errors
+```javascript
+const { validate } = require('../../validation');
+
+try {
+  const validated = await validate(schema, req.body);
+} catch (error) {
+  if (error.isJoi) {
+    // Joi validation error
+    res.status(422).json({
+      error: {
+        message: 'Validation failed',
+        status: 422,
+        details: error.details,
+      },
+    });
+  } else {
+    next(error);
+  }
+}
+```
+
+### Frontend Validation Errors
+```typescript
+const [validatingFields, { validateField }] = useFormValidation();
+
+const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  validateField(e);
+  // Update field value
+};
+```
+
+## Error Logging
+
+### Frontend Error Logging
+```typescript
+// Log to console in development
+if (process.env.NODE_ENV === 'development') {
+  console.error('Error:', error);
+}
+
+// Log to external service in production
+if (process.env.NODE_ENV === 'production') {
+  // Send to error tracking service
+  errorTrackingService.log(error);
+}
+```
+
+### Backend Error Logging
+```javascript
+logger.error('Error processing request', {
+  error: error.message,
+  stack: error.stack,
+  userId: req.user?.id,
+  path: req.path,
+  method: req.method,
+  body: req.body,
+  timestamp: new Date().toISOString(),
+});
+```
+
+## Error Boundaries
+
+### React Error Boundary
+```typescript
+class ErrorBoundary extends React.Component {
+  state = { hasError: false, error: null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('Error caught by boundary:', error, errorInfo);
+    // Log to error tracking service
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <ServerDown error={this.state.error} />;
+    }
+    return this.props.children;
+  }
+}
+```
+
+## Graceful Degradation
+
+### Network Error Handling
+```typescript
+try {
+  const data = await API.fetchData();
+} catch (error) {
+  if (error.message === 'Network Error') {
+    // Show offline message
+    setShowModal({ offline: true });
+  } else {
+    // Show generic error
+    setError(error);
+  }
+}
+```
+
+### Fallback Values
+```typescript
+const data = await API.fetchData().catch(() => {
+  // Return fallback data
+  return defaultData;
+});
+```
+
+## Error Recovery
+
+### Retry Logic
+```typescript
+async function fetchWithRetry(url, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await axios.get(url);
+      return response.data;
+    } catch (error) {
+      if (i === maxRetries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+    }
+  }
+}
+```
+
+### User-Friendly Error Messages
+```typescript
+const getErrorMessage = (error: Error): string => {
+  if (error.message.includes('Network')) {
+    return 'Network error. Please check your connection.';
+  }
+  if (error.message.includes('401')) {
+    return 'Session expired. Please log in again.';
+  }
+  if (error.message.includes('403')) {
+    return 'You do not have permission to perform this action.';
+  }
+  return error.message || 'An unexpected error occurred.';
+};
+```
+
+## Best Practices
+
+1. **Centralized Error Messages**: Use error tuples for consistent messages
+2. **Error Logging**: Log errors with context for debugging
+3. **User-Friendly Messages**: Show user-friendly error messages
+4. **Error Boundaries**: Use error boundaries to catch React errors
+5. **Graceful Degradation**: Handle errors gracefully with fallbacks
+6. **Error Recovery**: Implement retry logic for transient errors
+7. **Status Codes**: Use appropriate HTTP status codes
+8. **Error Propagation**: Pass errors to error handler middleware
+9. **Error Types**: Use custom error classes for different error types
+10. **Error Context**: Include relevant context in error logs

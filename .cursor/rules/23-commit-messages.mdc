@@ -1,0 +1,18 @@
+---
+description: Commit message format - no double-quotes
+alwaysApply: true
+---
+
+# Commit Messages
+
+## No double-quotes
+
+Never use double-quotes (`"`) in commit messages (title or body). Use single-quotes (`'`) or no quotes when referring to code or strings.
+
+```text
+Bad:  Fix "Open Account" button styling
+Good: Fix Open Account button styling
+
+Bad:  Celebration tour: one step, "sessionStorage" for desktop
+Good: Celebration tour: one step, sessionStorage for desktop
+```

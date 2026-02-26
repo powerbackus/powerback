@@ -1,0 +1,116 @@
+---
+description: FEC compliance system, tiers, limits, and backend authority
+globs:
+  - "services/**/compliance/**/*"
+  - "services/**/electionCycleService.js"
+  - "client/src/hooks/compliance/**/*"
+  - "client/src/contexts/ComplianceTierContext.tsx"
+  - "client/src/pages/**/Compliance/**/*"
+  - "constants/fec.js"
+  - "constants/compliance.js"
+alwaysApply: false
+priority: 2
+---
+
+# FEC Compliance System
+
+## Backend Authority
+
+### Single Source of Truth
+- **Backend constants**: Backend constants are the single source of truth for limits and policy
+- **Server is the gate**: Server enforces compliance and can block donations if validation cannot be ensured
+- **Client never blocks**: Client never blocks preemptively; instead shows friendly errors on non-2xx responses
+- **Server decides**: If dates are missing or validation fails, server decides to proceed or block
+
+### Constants Location
+- **Backend constants**: `constants/fec.js`, `constants/compliance.js`
+- **Not frontend**: Frontend `client/src/constants/constants.js` is NOT the source of truth
+- **Todo**: Ensure all limits come from backend constants (work in progress)
+
+## Compliance Tiers
+
+### Tier Naming
+- **Guest tier**: Anonymous users with basic account
+- **Compliant tier**: Full compliance with name, address, and employment information
+- **Never use "enhanced"**: This term is deprecated
+
+### Compliant Tier Limits
+- **Amount**: $3,500 per candidate per election (NOT $3,300 - that's outdated)
+- **Across all candidates**: Compliant tier limit is across all candidates per election
+- **Supersedes per-candidate**: The across-all-candidates cap doesn't just supersede, it IS the only standard
+- **Deprecated rules**: Any reference to "per-candidate" rules for Compliant tier is deprecated and should be ignored
+- **Documentation may be outdated**: Docs may still reference old rules; defer to code
+
+### Guest Tier Limits
+- **Guest**: Per-donation limit + annual cap across all candidates
+- **Resets**: Annual resets normalized to Washington, D.C. timezone (Eastern Time)
+
+## Reset Timing
+
+### Timezone Normalization
+- **Eastern Time**: All reset calculations normalize to EST (Washington, D.C. timezone)
+- **Server-side**: Resets are calculated server-side
+- **Consistent timing**: Use consistent timezone handling across all reset logic
+
+### Compliant Tier Resets
+- **Election cycles**: Resets on election boundaries (primary/general separate)
+- **Server authoritative**: Server snapshot is authoritative for election dates
+- **Per-election**: Primary and general elections are separate cycles
+
+### Guest Tier Resets
+- **Annual**: Resets at year boundary (January 1st)
+- **Eastern Time**: Normalized to EST
+
+## Client Behavior
+
+### UI Gates
+- **When data known**: Client enforces UI gates when data is known
+- **Show limits**: Display remaining limits and suggested amounts
+- **Never exceed**: Suggested amounts and max input must never exceed remaining limit
+- **Clamp to limit**: If user exceeds limit, clamp to remaining and show limit modal
+
+### Error Handling
+- **Friendly errors**: Show friendly errors on non-2xx responses
+- **Don't block**: Client never blocks preemptively
+- **Server response**: Surface server responses clearly to users
+
+### Dates Unavailable
+- **Show notice**: If dates are unavailable, show "dates unavailable" notice
+- **Allow submission**: May allow submission with notice
+- **Server decides**: Server is final gate and will block non-compliant transactions
+
+## Escrow and Limits
+
+### Escrow Commitment
+- **Immediate escrow**: Celebration immediately moves funds out of user control to POWERBACK
+- **Counts toward limit**: Unresolved/pending Celebrations count toward cap same as resolved ones
+- **Defunct excluded**: Defunct/paused Celebrations do NOT count toward limits
+
+### Limit Calculation
+- **Compliant tier**: Remaining limit = per-election cap − sum of all non-defunct Celebrations to candidate in active election cycle
+- **Guest tier**: Remaining limit = annual cap − sum of all non-defunct Celebrations across all candidates
+- **Include unresolved**: Count unresolved Celebrations toward limits
+
+## Fallback Logic
+
+### When APIs Fail
+- **Use project constants**: When external election-date APIs fail, use project constants/legacy limits
+- **Don't block**: Do not block transactions due to API failures
+- **Show notice**: Show "dates unavailable" notice when relevant
+- **Log fallback**: Log fallback usage and reasons at info/warn level
+
+### Election Date Fallbacks
+- **General election**: Use project constants/snapshot
+- **Primary/runoff/special**: OpenFEC → snapshot diff → generic dates (if explicitly approved)
+- **Never invent dates**: Client must not invent dates client-side
+
+## Best Practices
+
+1. **Backend is authoritative**: Server enforces all compliance
+2. **Constants from backend**: All limits come from backend constants
+3. **Compliant tier**: $3,500 across all candidates per election
+4. **Never use "enhanced"**: Use "guest" and "compliant" for tiers
+5. **EST normalization**: All resets normalized to Eastern Time
+6. **Client shows limits**: Display limits when data available
+7. **Don't block preemptively**: Let server decide, show friendly errors
+8. **Count unresolved**: Include unresolved Celebrations in limit calculations

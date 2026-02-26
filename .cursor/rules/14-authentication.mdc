@@ -1,0 +1,318 @@
+---
+description: JWT authentication, token management, and password handling
+globs:
+  - "auth/**/*"
+  - "auth/**/*.js"
+  - "routes/api/users.js"
+  - "controller/users/**/*"
+  - "controller/users/account/**/*"
+  - "client/src/contexts/AuthContext.tsx"
+  - "client/src/pages/Login/**/*"
+  - "client/src/pages/Reset/**/*"
+  - "client/src/components/modals/Credentials/**/*"
+alwaysApply: false
+priority: 3
+---
+
+# Authentication Patterns
+
+## Authentication Architecture
+
+### Core Components (`/auth`)
+- `authbase.js` - Base authentication class with JWT token management
+- `tokenizer.js` - Concrete implementation extending AuthBase
+- `tokenStore.js` - In-memory token store for refresh tokens
+
+## JWT Token System
+
+### Token Types
+1. **Access Tokens** - Short-lived tokens for API authorization
+2. **Refresh Tokens** - Long-lived tokens (18 days) stored in HTTP-only cookies
+
+### Token Generation
+```javascript
+const jwt = require('jsonwebtoken');
+
+// Access token
+const accessToken = jwt.sign(
+  { userId: user.id, tokenVersion: user.tokenVersion },
+  process.env.JWT_SECRET,
+  { expiresIn: '15m' }
+);
+
+// Refresh token
+const refreshToken = jwt.sign(
+  { userId: user.id, tokenVersion: user.tokenVersion },
+  process.env.JWT_REFRESH_SECRET,
+  { expiresIn: '18d' }
+);
+```
+
+## Authentication Flow
+
+### Login Process
+```javascript
+router.post('/login', async (req, res) => {
+  // 1. Validate credentials
+  const user = await User.findOne({ username: req.body.username });
+  const isValid = await bcrypt.compare(req.body.password, user.password);
+  
+  if (!isValid) {
+    return res.status(401).json({ error: { message: 'Invalid credentials' } });
+  }
+  
+  // 2. Generate tokens
+  const accessToken = tokenizer.generateAccessToken(user);
+  const refreshToken = tokenizer.generateRefreshToken(user);
+  
+  // 3. Store refresh token
+  tokenizer.storeRefreshToken(refreshToken, user.id);
+  
+  // 4. Set HTTP-only cookie
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 18 * 24 * 60 * 60 * 1000, // 18 days
+  });
+  
+  // 5. Return access token
+  res.json({
+    accessToken,
+    user: sanitizeUser(user),
+  });
+});
+```
+
+### Token Refresh Process
+```javascript
+router.post('/refresh', async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  
+  if (!refreshToken) {
+    return res.status(401).json({ error: { message: 'No refresh token' } });
+  }
+  
+  // 1. Verify refresh token
+  const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+  
+  // 2. Check token store
+  const stored = tokenizer.findRefreshToken(refreshToken);
+  if (!stored) {
+    return res.status(401).json({ error: { message: 'Invalid refresh token' } });
+  }
+  
+  // 3. Check user token version
+  const user = await User.findById(decoded.userId);
+  if (user.tokenVersion !== decoded.tokenVersion) {
+    return res.status(401).json({ error: { message: 'Token invalidated' } });
+  }
+  
+  // 4. Generate new tokens
+  const newAccessToken = tokenizer.generateAccessToken(user);
+  const newRefreshToken = tokenizer.generateRefreshToken(user);
+  
+  // 5. Rotate refresh token (single-use)
+  tokenizer.removeRefreshToken(refreshToken);
+  tokenizer.storeRefreshToken(newRefreshToken, user.id);
+  
+  // 6. Set new cookie
+  res.cookie('refreshToken', newRefreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 18 * 24 * 60 * 60 * 1000,
+  });
+  
+  // 7. Return new access token
+  res.json({
+    accessToken: newAccessToken,
+    user: sanitizeUser(user),
+  });
+});
+```
+
+## Token Guard Middleware
+
+### Guard Pattern (`tokenizer.guard()`)
+```javascript
+guard: async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({ error: { message: 'No token provided' } });
+    }
+    
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+    
+    if (!user || user.tokenVersion !== decoded.tokenVersion) {
+      return res.status(401).json({ error: { message: 'Invalid token' } });
+    }
+    
+    req.user = user;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: { message: 'Invalid token' } });
+  }
+}
+```
+
+### Route Protection
+```javascript
+router.get('/protected', tokenizer.guard(), async (req, res) => {
+  // req.user contains authenticated user
+  res.json({ data: req.user });
+});
+```
+
+## Password Management
+
+### Password Hashing
+```javascript
+const bcrypt = require('bcryptjs');
+
+// Hash password
+const hashedPassword = await bcrypt.hash(password, 10);
+
+// Verify password
+const isValid = await bcrypt.compare(password, hashedPassword);
+```
+
+### Password Change with Token Invalidation
+```javascript
+router.put('/change/:userId', tokenizer.guard(), async (req, res) => {
+  const user = await User.findById(req.params.userId);
+  
+  // 1. Hash new password
+  const hashedPassword = await bcrypt.hash(req.body.newPassword, 10);
+  
+  // 2. Update password
+  user.password = hashedPassword;
+  user.tokenVersion += 1; // Invalidate all existing tokens
+  await user.save();
+  
+  // 3. Remove all refresh tokens
+  tokenizer.removeAllUserTokens(user.id);
+  
+  // 4. Generate new tokens
+  const accessToken = tokenizer.generateAccessToken(user);
+  const refreshToken = tokenizer.generateRefreshToken(user);
+  tokenizer.storeRefreshToken(refreshToken, user.id);
+  
+  // 5. Set new cookie
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 18 * 24 * 60 * 60 * 1000,
+  });
+  
+  res.json({
+    message: 'Password changed',
+    accessToken,
+  });
+});
+```
+
+## Token Store Management
+
+### In-Memory Token Store (`/auth/tokenStore.js`)
+```javascript
+class TokenStore {
+  constructor() {
+    this.tokens = new Map();
+    this.startCleanup();
+  }
+  
+  store(token, userId, expiresIn) {
+    const expiresAt = Date.now() + expiresIn;
+    this.tokens.set(token, { userId, expiresAt });
+  }
+  
+  find(token) {
+    const stored = this.tokens.get(token);
+    if (!stored || stored.expiresAt < Date.now()) {
+      this.tokens.delete(token);
+      return null;
+    }
+    return stored;
+  }
+  
+  remove(token) {
+    this.tokens.delete(token);
+  }
+  
+  removeAll(userId) {
+    for (const [token, data] of this.tokens.entries()) {
+      if (data.userId === userId) {
+        this.tokens.delete(token);
+      }
+    }
+  }
+  
+  startCleanup() {
+    setInterval(() => {
+      for (const [token, data] of this.tokens.entries()) {
+        if (data.expiresAt < Date.now()) {
+          this.tokens.delete(token);
+        }
+      }
+    }, 60 * 60 * 1000); // Cleanup every hour
+  }
+}
+```
+
+## Frontend Authentication
+
+### Auth Context (`/client/src/contexts/AuthContext.tsx`)
+```typescript
+interface AuthState {
+  isLoggingIn: boolean;
+  isLoggedIn: boolean;
+  userData: UserData | null;
+}
+
+interface AuthActions {
+  authIn: (credentials: UserEntryForm) => Promise<boolean>;
+  authOut: () => void;
+  setUserData: Dispatch<SetStateAction<UserData | null>>;
+}
+
+const { userData, isLoggedIn, authIn, authOut } = useAuth();
+```
+
+### Axios Interceptor for Token Refresh
+```typescript
+axios.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    if (error.response?.status === 401) {
+      try {
+        const response = await axios.post('/api/users/refresh');
+        const { accessToken } = response.data;
+        error.config.headers.Authorization = `Bearer ${accessToken}`;
+        return axios.request(error.config);
+      } catch (refreshError) {
+        authOut(); // Logout on refresh failure
+        return Promise.reject(refreshError);
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+```
+
+## Security Best Practices
+
+1. **HTTP-only Cookies**: Store refresh tokens in HTTP-only cookies
+2. **Secure Cookies**: Use secure flag in production (HTTPS only)
+3. **Token Rotation**: Rotate refresh tokens on each use (single-use)
+4. **Token Versioning**: Invalidate tokens on password change
+5. **Token Expiration**: Use appropriate expiration times
+6. **Password Hashing**: Use bcrypt with salt rounds
+7. **CSRF Protection**: Include CSRF tokens in requests
+8. **Rate Limiting**: Rate limit authentication endpoints
+9. **Error Messages**: Don't reveal if user exists in error messages
+10. **Token Cleanup**: Clean up expired tokens regularly

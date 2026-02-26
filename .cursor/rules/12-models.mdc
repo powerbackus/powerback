@@ -1,0 +1,318 @@
+---
+description: Mongoose model patterns, schemas, queries, and indexes
+globs:
+  - 'models/**/*'
+  - 'models/**/*.js'
+alwaysApply: false
+priority: 3
+---
+
+# Mongoose Model Patterns
+
+## Model Structure
+
+### Basic Model Pattern (`/models`)
+
+```javascript
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+
+const ModelSchema = new Schema(
+  {
+    field1: {
+      type: String,
+      required: true,
+    },
+    field2: {
+      type: Number,
+      default: 0,
+    },
+  },
+  {
+    timestamps: true, // Adds createdAt and updatedAt
+  }
+);
+
+module.exports = mongoose.model('Model', ModelSchema);
+```
+
+## Model Organization
+
+### Model Files (`/models`)
+
+- `User.js` - User accounts and profiles
+- `Celebration.js` - Donation events
+- `Bill.js` - Congressional bills
+- `Pol.js` - Politicians and candidates
+- `Applicant.js` - Users awaiting account verification
+- `ExUser.js` - Deleted users (prevent re-registration)
+- `Key.js` - API keys and credentials
+
+### Model Index (`/models/index.js`)
+
+```javascript
+const User = require('./User');
+const Celebration = require('./Celebration');
+const Pol = require('./Pol');
+const Bill = require('./Bill');
+const Applicant = require('./Applicant');
+const ExUser = require('./ExUser');
+const Key = require('./Key');
+
+module.exports = {
+  User,
+  Celebration,
+  Pol,
+  Bill,
+  Applicant,
+  ExUser,
+  Key,
+};
+```
+
+## Schema Patterns
+
+### Required Fields
+
+```javascript
+field: {
+  type: String,
+  required: true,
+}
+```
+
+### Default Values
+
+```javascript
+field: {
+  type: Boolean,
+  default: false,
+  required: true,
+}
+```
+
+### Enums
+
+```javascript
+field: {
+  type: String,
+  enum: ['value1', 'value2', 'value3'],
+  default: 'value1',
+}
+```
+
+### References
+
+```javascript
+field: {
+  type: Schema.Types.ObjectId,
+  ref: 'Model',
+}
+```
+
+### Arrays
+
+```javascript
+field: {
+  type: [{
+    subField: String,
+    subField2: Number,
+  }],
+  default: [],
+}
+```
+
+### Nested Objects
+
+```javascript
+field: {
+  nestedField: {
+    type: String,
+    required: true,
+  },
+  nestedField2: {
+    type: Number,
+    default: 0,
+  },
+}
+```
+
+## User Model Pattern
+
+### User Schema Structure
+
+```javascript
+const UserSchema = new Schema(
+  {
+    // Account fields
+    username: {
+      type: String,
+      required: true,
+      lowercase: true,
+      index: { unique: true },
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+
+    // Profile fields
+    email: String,
+    firstName: String,
+    lastName: String,
+
+    // Status fields
+    compliance: {
+      type: String,
+      enum: FEC.COMPLIANCE_TIER_NAMES,
+      default: FEC.COMPLIANCE_TIER_NAMES[0],
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+```
+
+## Query Patterns
+
+### Find One
+
+```javascript
+const user = await User.findOne({ username }).exec();
+```
+
+### Find Many
+
+```javascript
+const celebrations = await Celebration.find({
+  donatedBy: userId,
+  resolved: false,
+}).exec();
+```
+
+### Find by ID
+
+```javascript
+const user = await User.findById(userId).exec();
+```
+
+### Create
+
+```javascript
+const user = await User.create({
+  username: 'user@example.com',
+  password: 'hashedPassword',
+});
+```
+
+### Update
+
+```javascript
+const updated = await User.findByIdAndUpdate(
+  userId,
+  { $set: { email: 'new@example.com' } },
+  { new: true }
+).exec();
+```
+
+### Delete
+
+```javascript
+await User.findByIdAndDelete(userId).exec();
+```
+
+### Atomic Updates
+
+```javascript
+const result = await Pol.updateMany(
+  {
+    'roles.0.fec_candidate_id': { $in: finalIds },
+    has_stakes: { $ne: true },
+  },
+  { $set: { has_stakes: true } }
+);
+```
+
+## Indexes
+
+### Single Field Index
+
+```javascript
+username: {
+  type: String,
+  index: { unique: true },
+}
+```
+
+### Compound Index
+
+```javascript
+ModelSchema.index({ field1: 1, field2: -1 });
+```
+
+## Virtual Properties
+
+### Virtual Pattern
+
+```javascript
+ModelSchema.virtual('fullName').get(function () {
+  return `${this.firstName} ${this.lastName}`;
+});
+```
+
+## Methods
+
+### Instance Methods
+
+```javascript
+ModelSchema.methods.methodName = function () {
+  // Instance method logic
+  return this.field;
+};
+```
+
+### Static Methods
+
+```javascript
+ModelSchema.statics.staticMethod = async function (param) {
+  // Static method logic
+  return this.find({ field: param });
+};
+```
+
+## Pre/Post Hooks
+
+### Pre-Save Hook
+
+```javascript
+ModelSchema.pre('save', async function (next) {
+  // Pre-save logic
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+  next();
+});
+```
+
+### Post-Save Hook
+
+```javascript
+ModelSchema.post('save', function (doc) {
+  // Post-save logic
+  console.log('Document saved:', doc._id);
+});
+```
+
+## Model Best Practices
+
+1. **Schema Definition**: Define schemas clearly with types and validation
+2. **Required Fields**: Mark required fields explicitly
+3. **Defaults**: Provide sensible defaults where appropriate
+4. **Indexes**: Add indexes for frequently queried fields
+5. **References**: Use references for relationships between models
+6. **Timestamps**: Use timestamps option for createdAt/updatedAt
+7. **Validation**: Use Mongoose validators and enums
+8. **Methods**: Use instance/static methods for model-specific logic
+9. **Hooks**: Use pre/post hooks for cross-cutting concerns
+10. **Queries**: Always use `.exec()` for promise-based queries

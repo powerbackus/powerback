@@ -1,0 +1,312 @@
+---
+description: Code style guidelines, formatting, and best practices - always active
+alwaysApply: true
+priority: 1
+---
+
+# Code Style Guidelines
+
+## General Principles
+
+### Readability First
+- Code should be readable and self-documenting
+- Use descriptive variable and function names
+- Prefer clarity over cleverness
+
+### Consistency
+- Follow established patterns in the codebase
+- Use consistent formatting and style
+- Maintain consistency across files
+
+## Formatting
+
+### Indentation
+- Use 2 spaces for indentation (not tabs)
+- Consistent indentation throughout files
+
+### Line Length
+- Prefer lines under 100 characters
+- Break long lines at logical points
+- Use line breaks for readability
+
+### Spacing
+- Use spaces around operators: `const sum = a + b;`
+- Use spaces after commas: `[a, b, c]`
+- Use spaces in object literals: `{ key: value }`
+- No spaces inside parentheses: `if (condition)`
+
+### Semicolons
+- Use semicolons consistently
+- Always use semicolons in JavaScript
+- Optional in TypeScript (but be consistent)
+
+## Variable Declarations
+
+### const vs let
+- Use `const` by default
+- Use `let` only when reassignment is needed
+- Never use `var`
+
+```javascript
+// Good
+const userData = getUserData();
+let counter = 0;
+counter++;
+
+// Bad
+var userData = getUserData();
+let counter = 0; // when const would work
+```
+
+## Function Declarations
+
+### Function Style
+- Use arrow functions for callbacks and short functions
+- Use function declarations for named functions
+- Use function expressions when needed
+
+```javascript
+// Good
+function processData(data) {
+  // Named function
+}
+
+const handler = (e) => {
+  // Arrow function for callback
+};
+
+// Bad
+const processData = function(data) {
+  // Unnecessary function expression
+};
+```
+
+## Object and Array Patterns
+
+### Object Literals
+```javascript
+// Good
+const user = {
+  id: '123',
+  name: 'John',
+  email: 'john@example.com',
+};
+
+// Bad
+const user = {id:'123',name:'John',email:'john@example.com'};
+```
+
+### Array Methods
+```javascript
+// Good
+const filtered = items.filter(item => item.active);
+const mapped = items.map(item => item.id);
+
+// Bad
+const filtered = [];
+items.forEach(item => {
+  if (item.active) filtered.push(item);
+});
+```
+
+## Destructuring
+
+### Object Destructuring
+```javascript
+// Good
+const { username, email } = userData;
+const { state, handlers } = useHook();
+
+// Bad
+const username = userData.username;
+const email = userData.email;
+```
+
+### Array Destructuring
+```javascript
+// Good
+const [first, second] = array;
+const [state, handlers] = useHook();
+
+// Bad
+const first = array[0];
+const second = array[1];
+```
+
+## Conditional Statements
+
+### if/else
+```javascript
+// Good
+if (condition) {
+  doSomething();
+} else {
+  doSomethingElse();
+}
+
+// Ternary for simple assignments
+const value = condition ? trueValue : falseValue;
+```
+
+### Switch Statements
+```javascript
+// Good
+switch (type) {
+  case 'TYPE1':
+    handleType1();
+    break;
+  case 'TYPE2':
+    handleType2();
+    break;
+  default:
+    handleDefault();
+}
+```
+
+## Error Handling
+
+### Try/Catch
+```javascript
+// Good
+try {
+  const result = await performOperation();
+  return result;
+} catch (error) {
+  logger.error('Operation failed', { error: error.message });
+  throw error;
+}
+
+// Bad
+try {
+  const result = await performOperation();
+  return result;
+} catch (error) {
+  // Silent failure
+}
+```
+
+## Async/Await
+
+### Async Patterns
+```javascript
+// Good
+async function fetchData() {
+  try {
+    const response = await axios.get('/api/data');
+    return response.data;
+  } catch (error) {
+    logger.error('Fetch failed', { error: error.message });
+    throw error;
+  }
+}
+
+// Bad
+function fetchData() {
+  return axios.get('/api/data')
+    .then(response => response.data)
+    .catch(error => {
+      console.log(error);
+    });
+}
+```
+
+## React Patterns
+
+### Component Structure
+```typescript
+// Good
+const Component: React.FC<Props> = ({ prop1, prop2 }) => {
+  // Hooks
+  const [state, setState] = useState(initialState);
+  
+  // Effects
+  useEffect(() => {
+    // Effect logic
+  }, [dependencies]);
+  
+  // Handlers
+  const handleClick = useCallback(() => {
+    // Handler logic
+  }, [dependencies]);
+  
+  // Render
+  return <div>{/* JSX */}</div>;
+};
+
+export default React.memo(Component);
+```
+
+### JSX Formatting
+```tsx
+// Good
+<div className="container">
+  <h1>Title</h1>
+  <p>Content</p>
+</div>
+
+// Bad
+<div className="container"><h1>Title</h1><p>Content</p></div>
+```
+
+## Import Organization
+
+### Import Order
+1. Node built-in modules
+2. External npm packages
+3. Internal absolute imports (`@/**`)
+4. Parent directory imports (`../`)
+5. Sibling imports (`./`)
+6. Index imports (`./index`)
+
+```typescript
+// Good
+import React, { useState, useCallback } from 'react';
+import axios from 'axios';
+
+import { useAuth } from '@Contexts';
+import { API } from '@API';
+
+import { normalize } from './fn';
+import './style.css';
+```
+
+## Comments
+
+### When to Comment
+- Complex business logic
+- Non-obvious code behavior
+- Workarounds or temporary solutions
+- Important constraints or assumptions
+
+### Comment Style
+```javascript
+// Good: Explains why
+// Check token version to invalidate tokens after password change
+if (user.tokenVersion !== decoded.tokenVersion) {
+  return res.status(401).json({ error: { message: 'Token invalidated' } });
+}
+
+// Bad: States the obvious
+// Set user variable
+const user = await User.findById(userId);
+```
+
+## ESLint Configuration
+
+### ESLint Rules
+- Follow ESLint configuration in `.eslintrc.js`
+- Fix linting errors before committing
+- Use `npm run lint:fix` to auto-fix issues
+
+## Code Style Best Practices
+
+1. **Readability**: Prioritize readable code over clever code
+2. **Consistency**: Follow established patterns
+3. **Formatting**: Use consistent formatting
+4. **Naming**: Use descriptive names
+5. **Comments**: Comment complex logic, not obvious code
+6. **Error Handling**: Always handle errors appropriately
+7. **Async/Await**: Prefer async/await over promises
+8. **Destructuring**: Use destructuring for cleaner code
+9. **const/let**: Use const by default, let when needed
+10. **ESLint**: Follow ESLint rules and fix errors

@@ -1,0 +1,385 @@
+---
+description: React Context patterns, provider composition, and dependency injection
+globs:
+  - 'client/src/contexts/**/*'
+  - 'client/src/contexts/**/*.tsx'
+  - 'client/src/contexts/**/*.ts'
+alwaysApply: false
+priority: 3
+---
+
+# React Context Patterns
+
+## Context Hierarchy
+
+### Provider Composition Order
+
+```
+AuthProvider (outermost)
+├── DeviceProvider
+│   └── DialogueProvider
+│       └── ProfileProvider (with auth dependency)
+│           └── NavigationProvider (with device/donation-limits dependency)
+│               └── DonationStateProvider (with multi-context dependencies)
+│                   └── SearchProvider (innermost)
+```
+
+## Context Pattern
+
+### Basic Context Structure
+
+```typescript
+interface ContextState {
+  // State properties
+}
+
+interface ContextActions {
+  // Action methods
+}
+
+interface ContextType extends ContextState, ContextActions {}
+
+const Context = React.createContext<ContextType | undefined>(undefined);
+
+export const useContext = () => {
+  const context = React.useContext(Context);
+  if (!context) {
+    throw new Error('useContext must be used within ContextProvider');
+  }
+  return context;
+};
+```
+
+### Provider Component
+
+```typescript
+export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const [state, setState] = useState<ContextState>(initialState);
+
+  const actions = useMemo<ContextActions>(
+    () => ({
+      action1: () => {
+        // Action logic
+      },
+      action2: (value: string) => {
+        // Action logic
+      },
+    }),
+    [dependencies]
+  );
+
+  const value = useMemo<ContextType>(
+    () => ({ ...state, ...actions }),
+    [state, actions]
+  );
+
+  return <Context.Provider value={value}>{children}</Context.Provider>;
+};
+```
+
+## Core Contexts
+
+### AuthContext
+
+Manages user authentication state and JWT tokens.
+
+```typescript
+interface AuthState {
+  isLoggingIn: boolean;
+  isLoggedIn: boolean;
+  userData: UserData | null;
+}
+
+interface AuthActions {
+  setUserData: Dispatch<SetStateAction<UserData | null>>;
+  authIn: (credentials: UserEntryForm) => Promise<boolean>;
+  authOut: () => void;
+}
+
+const { userData, isLoggedIn, authIn, authOut } = useAuth();
+```
+
+### DeviceContext
+
+Provides responsive breakpoint detection.
+
+```typescript
+interface DeviceContext {
+  isMobileHorizontal: boolean;
+  isMobilePortraitSmall: boolean;
+  isMobilePortrait: boolean;
+  isTabletPortrait: boolean;
+  isTabletLandscape: boolean;
+  isDesktop: boolean;
+  isBigScreen: boolean;
+  isMobile: boolean;
+  isShortMobile: boolean;
+  orientation: 'portrait' | 'landscape';
+  deviceType: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'xxl';
+  height: number;
+  width: number;
+}
+
+const { isDesktop, isMobile, deviceType, width, height } = useDevice();
+```
+
+### DialogueContext
+
+Manages UI dialogue components (modals, alerts, overlays).
+
+```typescript
+interface DialogueState {
+  showAlert: ShowAlert;
+  showModal: ShowModal;
+  showSideNav: boolean;
+  showOverlay: ShowOverlay;
+}
+
+interface DialogueActions {
+  setShowAlert: Dispatch<SetStateAction<ShowAlert>>;
+  setShowModal: Dispatch<SetStateAction<ShowModal>>;
+  setShowSideNav: Dispatch<SetStateAction<boolean>>;
+  setShowOverlay: Dispatch<SetStateAction<ShowOverlay>>;
+}
+
+const { showModal, setShowModal, showAlert, setShowAlert } = useDialogue();
+```
+
+### ProfileContext
+
+Manages user settings and server configuration.
+
+```typescript
+interface ProfileValues {
+  serverConstants: ServerConstants;
+  settings: Settings;
+}
+
+interface ProfileActions {
+  setSettings: (settings: Settings) => void;
+}
+
+const { settings, serverConstants, setSettings } = useProfile();
+```
+
+### NavigationContext
+
+Single source for splash and funnel navigation; manages `splash` and `navigateToSplashView` (and raw `navigateToSplash`). Popstate/history helpers live in `contexts/navigationHistory.ts`.
+
+```typescript
+interface NavigationState {
+  splash?: LandingNavView | CredentialsFormView;
+  navContext: 'splash' | 'funnel';
+  canGoForward?: boolean;
+  canGoBack?: boolean;
+  funnel?: FunnelView;
+  step?: number;
+}
+
+interface NavigationActions {
+  goBack: () => void;
+  goForward: () => void;
+  getCurrentState: () => NavigationState;
+  canNavigate: (direction: 'back' | 'forward') => boolean;
+  navigateToFunnel: (step: FunnelView, stepIndex?: number) => void;
+  navigateToSplash: (view: LandingNavView | CredentialsFormView) => void;
+  navigateToSplashView: (view: LandingNavView | CredentialsFormView) => void;
+}
+
+const {
+  splash,
+  navigateToSplashView,
+  navigateToFunnel,
+  goBack,
+  navContext,
+  funnel,
+} = useNavigation();
+```
+
+### DonationStateContext
+
+Manages core donation state and actions.
+
+```typescript
+interface DonationState {
+  donation: number;
+  selectedPol: string | null;
+  tip: number;
+  paymentMethodId: string | null;
+  polData: PolData | null;
+}
+
+interface DonationActions {
+  setDonation: (amount: number) => void;
+  setSelectedPol: (polId: string | null) => void;
+  setTip: (amount: number) => void;
+  setPaymentMethodId: (id: string | null) => void;
+  selectPol: (pol: PolData) => void;
+  resetDonationState: () => void;
+  createDonationPackage: (bill?: Bill, userId?: string) => Celebration;
+}
+
+const {
+  donation,
+  selectedPol,
+  polData,
+  setDonation,
+  selectPol,
+  resetDonationState,
+  createDonationPackage,
+} = useDonationState();
+```
+
+### SearchContext
+
+Manages search state and functionality.
+
+```typescript
+interface SearchState {
+  searchQuery: string;
+  isSearching: boolean;
+  showClearBtn: string;
+  items: ComboboxItem[];
+  linksClass: LinksClass;
+  searchOption: SearchOption;
+  initialItems: HouseMember[];
+  selectedItem: ComboboxItem | null;
+}
+
+interface SearchActions {
+  resetSearch: () => void;
+  searchByName: (query: string) => void;
+  searchByState: (query: string) => void;
+  setInitialItems: (items: HouseMember[]) => void;
+  setLinksClass: (linksClass: LinksClass) => void;
+  setShowClearBtn: (showClearBtn: string) => void;
+  itemToString: (item: ComboboxItem | null) => string;
+  setSearchOption: (searchOption: SearchOption) => void;
+}
+
+const { searchQuery, items, searchByName, searchByState, resetSearch } =
+  useSearch();
+```
+
+## Dependency Injection Pattern
+
+### Provider with Props
+
+```typescript
+// Wrap provider to inject dependencies
+export const ProfileProviderWithProps: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { userData } = useAuth(); // Inject auth dependency
+
+  return (
+    <ProfileProvider userData={userData}>
+      {children}
+    </ProfileProvider>
+  );
+};
+```
+
+### Context Dependency Pattern
+
+```typescript
+// NavigationProviderWithProps injects device, donation limits, auth, and validateNavigation
+// See client/src/contexts/index.js for full implementation.
+```
+
+## Context Best Practices
+
+### Memoization
+
+```typescript
+const value = useMemo(() => ({ ...state, ...actions }), [state, actions]);
+```
+
+### Action Memoization
+
+```typescript
+const actions = useMemo(
+  () => ({
+    action1: () => {
+      /* logic */
+    },
+    action2: (value: string) => {
+      /* logic */
+    },
+  }),
+  [dependencies]
+);
+```
+
+### Error Handling
+
+```typescript
+export const useContext = () => {
+  const context = React.useContext(Context);
+  if (!context) {
+    throw new Error('useContext must be used within ContextProvider');
+  }
+  return context;
+};
+```
+
+## Context Composition
+
+### App.tsx Provider Composition
+
+```typescript
+<AuthProvider>
+  <DeviceProvider>
+    <DialogueProvider>
+      <ProfileProviderWithProps>
+        <NavigationProviderWithProps>
+          <DonationStateProviderWithProps>
+            <SearchProvider>
+              <AppContent />
+            </SearchProvider>
+          </DonationStateProviderWithProps>
+        </NavigationProviderWithProps>
+      </ProfileProviderWithProps>
+    </DialogueProvider>
+  </DeviceProvider>
+</AuthProvider>
+```
+
+## Context Testing
+
+### Mock Context Provider
+
+```typescript
+const MockContextProvider: React.FC<{ value: ContextType; children: React.ReactNode }> = ({
+  value,
+  children,
+}) => (
+  <Context.Provider value={value}>
+    {children}
+  </Context.Provider>
+);
+
+// Usage in tests
+render(
+  <MockContextProvider value={mockContextValue}>
+    <Component />
+  </MockContextProvider>
+);
+```
+
+## Best Practices
+
+1. **Extend Existing Contexts**: Extend existing contexts (Auth, Device, Dialogue, Profile, Navigation, DonationState, Search) unless confirming a new context is needed
+2. **Dependency Order**: Order providers from outermost to innermost based on dependencies
+3. **Dependency Injection**: Use wrapper components to inject dependencies
+4. **State Isolation**: Each context manages a specific domain of state
+5. **Performance**: Use `useMemo` to prevent unnecessary re-renders
+6. **Type Safety**: Fully type all contexts with TypeScript interfaces
+7. **Error Handling**: Throw errors when hooks used outside provider
+8. **Memoization**: Memoize context values and actions
+9. **Single Responsibility**: Each context should manage one domain
+10. **Avoid Prop Drilling**: Use context instead of prop drilling
+11. **Documentation**: Document context purpose, state, and actions
+12. **Ask Before Creating**: Ask user before creating new contexts

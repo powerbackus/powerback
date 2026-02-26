@@ -1,0 +1,269 @@
+---
+description: Documentation patterns, JSDoc, comments, and README structure - always active
+alwaysApply: true
+priority: 1
+---
+
+# Documentation Patterns
+
+## Code Documentation
+
+### JSDoc Comments (Backend)
+```javascript
+/**
+ * Function description
+ * @param {Type1} param1 - Parameter description
+ * @param {Type2} param2 - Parameter description
+ * @returns {Promise<ReturnType>} Return description
+ * @throws {ErrorType} Error description
+ * @example
+ * ```javascript
+ * const result = await function(param1, param2);
+ * ```
+ */
+async function functionName(param1, param2) {
+  // Implementation
+}
+```
+
+### TypeScript Comments (Frontend)
+```typescript
+/**
+ * Function description
+ * @param param1 - Parameter description
+ * @param param2 - Parameter description
+ * @returns Return description
+ */
+function functionName(param1: Type1, param2: Type2): ReturnType {
+  // Implementation
+}
+```
+
+## File Headers
+
+Use a tiered policy so most files stay short and only barrels or high-complexity entry points use extended headers.
+
+### Tier 1 (default): Short header
+For all non-barrel, non–entry-point files: 2–4 lines plus `@module`. Pair with a component/hook/function block below (`@param`, `@returns` as needed).
+
+**Backend (short):**
+```javascript
+/**
+ * @fileoverview Brief description.
+ * @module path/to/module
+ */
+```
+
+**Frontend (short):**
+```typescript
+/**
+ * Component/Hook description in one line.
+ * @module ComponentName
+ */
+```
+
+### Tier 2 (extended): Barrels and high-complexity entry points
+Reserve for: (1) barrel files that aggregate many exports (index files that re-export a single module use Tier 1), (2) high-complexity entry points (e.g. API.ts, usePaymentProcessing.ts). Use one consistent structure: EXPORTS / KEY FUNCTIONS / FLOW (or similar) and @module. Do not add ad-hoc long headers elsewhere.
+
+### Backend File Header (when extended)
+```javascript
+/**
+ * @fileoverview File description
+ *
+ * This module provides [functionality description].
+ *
+ * @module path/to/module
+ * @requires dependency1
+ * @requires dependency2
+ */
+```
+
+### Frontend File Header (when extended)
+```typescript
+/**
+ * Component/Hook description
+ *
+ * This component/hook provides [functionality description].
+ *
+ * @module ComponentName
+ */
+```
+
+## Component Documentation
+
+### React Component Documentation
+```typescript
+/**
+ * ComponentName component
+ *
+ * Description of what the component does and when to use it.
+ *
+ * @param props - Component props
+ * @param props.prop1 - Description of prop1
+ * @param props.prop2 - Description of prop2
+ *
+ * @example
+ * ```tsx
+ * <ComponentName prop1="value1" prop2="value2" />
+ * ```
+ */
+const ComponentName: React.FC<ComponentProps> = ({ prop1, prop2 }) => {
+  // Implementation
+};
+```
+
+## Hook Documentation
+
+### Custom Hook Documentation
+```typescript
+/**
+ * useHookName hook
+ *
+ * Description of what the hook does and when to use it.
+ *
+ * @param param1 - Parameter description
+ * @param param2 - Optional parameter description
+ * @returns Tuple of [state, handlers]
+ *
+ * @example
+ * ```typescript
+ * const [state, { action1, action2 }] = useHookName(param1, param2);
+ * ```
+ */
+export default function useHookName(
+  param1: Type1,
+  param2?: Type2
+): [StateType, Handlers] {
+  // Implementation
+}
+```
+
+## API Documentation
+
+### Route Documentation
+```javascript
+/**
+ * POST /api/endpoint
+ * 
+ * Description of what the endpoint does.
+ *
+ * @route POST /api/endpoint
+ * @param {Object} req.body - Request body
+ * @param {string} req.body.field1 - Field description
+ * @param {number} req.body.field2 - Field description
+ * @returns {Object} Response object
+ * @returns {Object} response.data - Response data
+ * @throws {400} Bad request
+ * @throws {401} Unauthorized
+ */
+router.post('/endpoint', async (req, res) => {
+  // Implementation
+});
+```
+
+## Model Documentation
+
+### Mongoose Schema Documentation
+```javascript
+/**
+ * User model schema
+ *
+ * Represents a user account in the system.
+ *
+ * @module models/User
+ * @property {String} username - User's email/username (unique, required)
+ * @property {String} password - Hashed password (required)
+ * @property {String} email - User's email address
+ * @property {String} firstName - User's first name
+ * @property {String} lastName - User's last name
+ * @property {String} compliance - FEC compliance tier (guest/compliant)
+ */
+const UserSchema = new Schema({
+  // Schema definition
+});
+```
+
+## Service Documentation
+
+### Service Function Documentation
+```javascript
+/**
+ * Service function description
+ *
+ * Detailed description of what the function does, including
+ * any important behavior, side effects, or constraints.
+ *
+ * @param {Type1} param1 - Parameter description
+ * @param {Type2} param2 - Parameter description
+ * @returns {Promise<ReturnType>} Return description
+ *
+ * @example
+ * ```javascript
+ * const result = await serviceFunction(param1, param2);
+ * ```
+ */
+async function serviceFunction(param1, param2) {
+  // Implementation
+}
+```
+
+## README Documentation
+
+### Project README Structure
+```markdown
+# Project Name
+
+Brief description of the project.
+
+## Table of Contents
+- [Installation](#installation)
+- [Usage](#usage)
+- [API](#api)
+- [Contributing](#contributing)
+
+## Installation
+Instructions for installation.
+
+## Usage
+How to use the project.
+
+## API
+API documentation.
+
+## Contributing
+Contributing guidelines.
+```
+
+## Inline Comments
+
+### When to Comment
+- Complex logic that isn't self-explanatory
+- Business rules and constraints
+- Workarounds or temporary solutions
+- Non-obvious performance optimizations
+
+### Comment Style
+```javascript
+// Good: Explains why, not what
+// Check token version to invalidate tokens after password change
+if (user.tokenVersion !== decoded.tokenVersion) {
+  return res.status(401).json({ error: { message: 'Token invalidated' } });
+}
+
+// Bad: States the obvious
+// Set the user variable
+const user = await User.findById(userId);
+```
+
+## Documentation Best Practices
+
+1. **JSDoc/TSDoc**: Use JSDoc for backend, TSDoc for frontend
+2. **File Headers**: Include file overview comments
+3. **Function Documentation**: Document all public functions
+4. **Parameter Documentation**: Document all parameters
+5. **Return Documentation**: Document return values
+6. **Examples**: Include usage examples for complex functions
+7. **Keep Updated**: Update documentation when code changes
+8. **Clear Language**: Use clear, concise language
+9. **Format Consistently**: Use consistent formatting
+10. **Avoid Redundancy**: Don't state the obvious
