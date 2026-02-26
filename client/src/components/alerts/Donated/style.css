@@ -1,0 +1,21 @@
+.donation-ok-alert {
+  color: var(--alert) !important;
+}
+
+.alert-donation-amt {
+  color: var(--alert-dark) !important;
+  font-size: 1.2rem;
+  font-family: 'Inter';
+  font-weight: 600;
+}
+
+.donation-ok-alert .alert-dismissible {
+  line-height: 2rem;
+}
+
+@media only screen and (min-height: 937px) and (orientation: landscape) {
+  .donation-ok-alert {
+    padding-right: 8rem;
+  }
+
+}

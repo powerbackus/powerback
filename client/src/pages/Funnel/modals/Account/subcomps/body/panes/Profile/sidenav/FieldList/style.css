@@ -1,0 +1,17 @@
+#account-modal div.list-group-item:first-child {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+#account-modal i.bi.bi-list-check {
+  color: var(--success-theme);
+  font-size: clamp(6rem, 9vw, 10rem);
+  text-shadow: 1px 1px var(--contrast) !important;
+  display: flex;
+}
+
+#account-modal span.full-compliance {
+  color: var(--success-theme);
+  font-size: max(1.25vw, 1rem);
+  font-weight: 700;
+}

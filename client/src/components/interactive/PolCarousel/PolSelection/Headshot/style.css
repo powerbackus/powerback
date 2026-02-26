@@ -1,0 +1,82 @@
+.headshot-container {
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+/* Selected state: allow focus ring to paint outside so it is not clipped by ancestor overflow */
+.headshot-container:has(.pol-headshot-selected) {
+  overflow: visible;
+}
+
+.headshot {
+  border-radius: 5px;
+  background-color: rgb(from var(--accent) r g b / 30%);
+  border: 2px solid rgb(from var(--btn) r g b / 66%);
+  filter: saturate(81%);
+  cursor: pointer;
+}
+
+.headshot:active {
+  padding: 2px;
+}
+
+.headshot:hover {
+  filter: brightness(90%) contrast(106%);
+  transition: all 0.15s ease-in !important;
+}
+
+.pol-headshot-selected {
+  transform: scale(1) !important;
+  filter: brightness(105%) contrast(118%) !important;
+  border: 2px dashed var(--primary);
+  cursor: default;
+}
+
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .headshot {
+    min-width: calc(23vh - 5vw);
+    max-width: calc(11vh + 20vw);
+    min-height: 28vh;
+    height: 28vh;
+  }
+}
+
+/* Mobile, portrait (tall): cap headshot at container so focus ring is never clipped by .headshot-container overflow */
+@media (max-width: 599px) and (orientation: portrait) and (min-height: 800px) {
+  .headshot {
+    box-sizing: border-box;
+    min-width: max(23vh - 5vw, 157px);
+    max-width: min(max(11vh + 20vw, 177px), 100%);
+    min-height: min(28vh, 77px);
+    height: min(28vh, 277px);
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .headshot {
+    min-width: clamp(210px, 11vw, 227px) !important;
+  }
+
+  .headshot-container img {
+    max-width: clamp(210px, 11vw, 227px) !important;
+    height: clamp(13vw, 17rem, 30vh);
+    max-height: 277px !important;
+    margin: 0 auto;
+    text-align: center;
+    font-family: 'Inconsolata', sans-serif;
+  }
+
+  .headshot-placeholder {
+    display: inline-block;
+    height: clamp(13vw, 17rem, 30vh);
+    max-height: 277px !important;
+  }
+  img.headshot-placeholder {
+    max-width: clamp(210px, 11vw, 227px) !important;
+    height: clamp(13vw, 17rem, 30vh);
+    max-height: 277px !important;
+    padding: 3vh 0.5vw;
+  }
+}

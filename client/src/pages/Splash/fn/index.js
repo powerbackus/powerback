@@ -1,0 +1,1 @@
+export { handleSecret } from './secret';

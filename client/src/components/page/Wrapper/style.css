@@ -1,0 +1,43 @@
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  main {
+    height: min(35rem, 77vh) !important;
+  }
+}
+
+/* Mobile, portrait (tall) */
+@media (max-width: 599px) and (orientation: portrait) and (min-height: 800px) {
+  main {
+    height: max(35rem, 77vh) !important;
+  }
+}
+
+/* Mobile, landscape */
+@media only screen and (max-height: 450px) and (orientation: landscape) {
+  main.wrapper-pol-donation,
+  main.wrapper-payment,
+  main.wrapper-loading,
+  main.wrapper-confirmation,
+  main.wrapper-tips {
+    height: min(35rem, 77vh) !important;
+  }
+}
+
+/* Desktop and Big Screen */
+@media only screen and (min-width: 1200px) {
+  main.wrapper-confirmation,
+  main.wrapper-loading {
+    height: 80vh;
+  }
+}
+
+@media only screen and (min-width: 2000px) and (orientation: landscape) {
+  main.wrapper-pol-donation,
+  main.wrapper-payment,
+  main.wrapper-confirmation,
+  main.wrapper-tips,
+  main.wrapper-loading {
+    padding-top: 85px;
+  }
+}

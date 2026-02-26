@@ -1,0 +1,28 @@
+.settings-pane span {
+  letter-spacing: 0.025em;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .settings-pane {
+    vertical-align: middle;
+  }
+
+  .settings-pane,
+  .settings-pane label.form-check-label {
+    text-align: left;
+    margin-left: -1vw;
+    font-size: 0.85rem !important;
+  }
+}
+
+/* Desktop */
+@media only screen and (min-width: 1200px) {
+  .settings-pane .button--continue:active {
+    border-top-style: inset !important;
+    border-right-style: inset !important;
+    border-bottom-style: inset !important;
+    border-left-style: inset !important;
+  }
+}

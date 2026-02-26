@@ -1,0 +1,93 @@
+.delete-account--col {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: space-evenly;
+}
+
+.delete-acct-instructions {
+  line-height: 1.5rem;
+  user-select: none;
+}
+
+.input-pattern {
+  color: var(--input-valid) !important;
+  vertical-align: middle;
+  font-family: 'Inconsolata';
+}
+
+.delete-account-btn {
+  color: black !important;
+  border: 1px solid var(--shadow-dark);
+  text-shadow: -1px 1px 3px white;
+  background: repeating-linear-gradient(45deg,
+      var(--delete-account-btn),
+      var(--delete-account-btn) 40px,
+      var(--delete-account-btn-gradient) 40px,
+      var(--delete-account-btn-gradient) 60px);
+  font-family: 'Inconsolata';
+  font-weight: 900 !important;
+}
+
+.delete-account-btn:hover {
+  color: #e9ffd1 !important;
+  text-shadow: -1px 1px 3px var(--shadow-dark);
+  background: repeating-linear-gradient(45deg,
+      var(--delete-account-btn-hover),
+      var(--delete-account-btn-hover) 40px,
+      var(--delete-account-btn) 40px,
+      var(--delete-account-btn) 60px);
+}
+
+.delete-account-btn:active {
+  color: var(--secondary) !important;
+  text-shadow: 1px -1px 3px var(--shadow-dark);
+  background: repeating-linear-gradient(45deg,
+      var(--delete-account-btn-hover),
+      var(--delete-account-btn-hover) 40px,
+      var(--delete-account-btn-active) 40px,
+      var(--delete-account-btn-active) 60px);
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .delete-acct-instructions {
+    font-size: 1.125em;
+  }
+
+  .settings-security .form-input-wfeedback {
+    height: 51px !important;
+  }
+
+  .input-pattern {
+    font-size: 1.8em;
+  }
+
+  .no-refunds {
+    font-size: 0.7em !important;
+  }
+
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+
+  form#delete-modal-input .row,
+  form#delete-modal-input p {
+    font-size: 1em;
+  }
+
+  .input-pattern {
+    font-size: 1.8em;
+  }
+
+  .no-refunds {
+    font-size: max(0.75em, 12px);
+  }
+
+  form.change-password .userpass--field {
+    height: 8vh;
+  }
+
+}

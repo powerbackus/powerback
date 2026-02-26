@@ -1,0 +1,46 @@
+div[id^='escrow-display-'] {
+  justify-content: center;
+}
+
+.escrow-badge {
+  background: var(--accent) !important;
+  border-bottom-right-radius: 0px;
+  border-bottom-left-radius: 0px;
+  z-index: 500;
+}
+
+.escrow-badge .info-tooltip {
+  color: var(--escrow-badge) !important;
+}
+
+.donation-popper {
+  color: var(--success);
+  font-family: 'Inter';
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .escrow-badge {
+    padding-right: 0.18rem;
+    padding-left: 0.18rem;
+    margin-right: 0.125rem;
+    margin-left: 0.15rem;
+    margin-bottom: -0.5rem !important;
+    font-size: 1em;
+  }
+
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .escrow-badge {
+    padding-right: 0.125rem;
+    padding-left: 0.125rem;
+    margin-right: 0.33rem;
+    padding-top: 0.125em;
+    margin-bottom: -0.37em !important;
+    font-size: 1.25em;
+  }
+
+}

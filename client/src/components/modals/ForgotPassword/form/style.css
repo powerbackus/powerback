@@ -1,0 +1,63 @@
+#forgot-pass-form input#validation-username {
+  background-color: var(--contrast-black) !important;
+}
+
+#forgot-pass-form .special-invalid .form-control.is-valid,
+.was-validated .form-control:valid,
+.form-control.is-invalid,
+.was-validated .form-control:invalid {
+  border-color: none;
+  background-image: none;
+}
+
+#forgot-pass-form .valid-feedback,
+#forgot-pass-form .invalid-feedback {
+  color: var(--validation-feedback) !important;
+}
+
+#forgot-password--submit-btn {
+  color: var(--contrast-black) !important;
+  background-color: var(--btn) !important;
+  border: 2px solid var(--contrast-black) !important;
+  box-shadow: 15px 5px 0px var(--bg) !important;
+  transform: translate(-2px, -2px) !important;
+}
+
+#forgot-password--submit-btn:hover {
+  color: var(--contrast-black) !important;
+  background-color: var(--btn-hover) !important;
+  box-shadow: 5px 5px 0px var(--contrast-black) !important;
+  transform: translate(-2px, -2px) !important;
+}
+
+#forgot-password--submit-btn:active {
+  background-color: var(--btn-active) !important;
+  border: 2px inset var(--contrast-black) !important;
+  box-shadow: 0px 0px 1px var(--accent) !important;
+  transition: all 0.06s ease-out !important;
+  transform: translate(-1px, 0px) !important;
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+
+  #forgot-pass-form .special-invalid .form-control.is-valid,
+  #forgot-pass-form .was-validated .form-control:valid,
+  #forgot-pass-form .form-control.is-invalid,
+  #forgot-pass-form .was-validated .form-control:invalid {
+    margin-top: 0 !important;
+  }
+
+  #forgot-password-input {
+    height: 8.5vh;
+  }
+
+  #forgot-pass-form .invalid-feedback {
+    margin-top: 0 !important;
+  }
+
+  #forgot-pass-form .valid-feedback {
+    margin-top: 0 !important;
+  }
+
+}

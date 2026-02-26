@@ -1,0 +1,55 @@
+#account-modal div.modal-title {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.modal-heading-account {
+  background: var(--bg);
+}
+
+.modal-heading-account,
+.styled-modal .modal-title h1 {
+  border-color: var(--accent);
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #account-modal div.modal-title .mobile-tabs.nav.nav-pills {
+    margin-left: 3vw;
+    min-width: 54vw;
+  }
+
+  .mobile-tabs.nav.nav-pills {
+    display: flex;
+    margin-left: 8vw !important;
+    min-width: 45vw !important;
+    flex-direction: row;
+    justify-content: space-evenly;
+  }
+
+  #account-modal div.modal-title .mobile-tabs .nav-link {
+    font-size: 4vw !important;
+    padding-top: 1vw;
+    margin-bottom: calc(1vw - 1vh);
+    padding-right: 8px;
+    padding-bottom: 5px;
+    padding-left: 8px;
+  }
+
+  #account-modal div.modal-title .mobile-tabs .nav-link {
+    font-size: 5vw;
+  }
+
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #account-modal div.modal-title {
+    width: 765px;
+  }
+
+}
+

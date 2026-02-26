@@ -1,0 +1,121 @@
+#faq-modal div.modal-title {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.modal-heading {
+  background: var(--bg);
+}
+
+.modal-heading,
+.styled-modal .modal-title h1 {
+  border-color: var(--accent);
+}
+
+#faq-modal .nav-link {
+  color: var(--btn);
+}
+
+#faq-modal .nav-link.active {
+  background-color: var(--secondary);
+  color: var(--modal);
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, THIN portrait */
+@media only screen and (max-width: 389px) and (orientation: portrait) {
+  #faq-modal .nav {
+    --bs-nav-link-padding-x: 1vw !important;
+  }
+
+}
+
+/* Mobile, SHORT portrait */
+@media only screen and (max-height: 650px) and (max-width: 420px) and (orientation: portrait) {
+  #faq-modal div.modal-title {
+    margin-right: 5vw;
+  }
+
+  #faq-modal-nav.nav-pills {
+    margin-left: 5vw;
+    margin-right: -5vw;
+  }
+
+  #faq-modal div.modal-title .nav-link {
+    font-size: calc(5vh - 4.85vw) !important;
+    padding-top: 1vw;
+    padding-bottom: 1vw;
+    padding-left: 2vw;
+    padding-right: 2vw;
+  }
+
+  #faq-modal .accordion-button {
+    padding-top: 0.8rem !important;
+    padding-bottom: 0.85rem !important;
+  }
+
+}
+
+/* Mobile, portrait */
+@media only screen and (min-height: 651px) and (max-width: 599px) and (orientation: portrait) {
+  #faq-modal div.modal-title .nav-link {
+    padding-top: 1vw;
+    margin-top: 0.125vh;
+    padding-right: 2vw;
+    padding-bottom: 1vw;
+    padding-left: 2vw;
+  }
+
+  #faq-modal .nav {
+    --bs-nav-link-padding-x: 1.75vw;
+  }
+
+  #faq-modal .nav-link,
+  #faq-modal .nav-link.active {
+    font-size: calc(-3vh + 9.3vw);
+  }
+
+  #faq-modal-nav {
+    margin-left: calc(-2vh + 6vw);
+  }
+
+  #faq-modal .modal-header button.btn-close.btn-close-white {
+    padding-right: 0;
+  }
+
+}
+
+/* Mobile, landscape */
+@media only screen and (min-width: 600px) and (max-width: 900px) and (orientation: landscape) {
+  #faq-modal div.modal-title .nav-link {
+    padding-top: 1vw;
+    margin-top: 0.125vh;
+    padding-right: 2vw;
+    padding-bottom: 1vw;
+    padding-left: 2vw;
+  }
+
+  #faq-modal .nav {
+    --bs-nav-link-padding-x: 1.75vw;
+  }
+
+  #faq-modal .nav-link,
+  #faq-modal .nav-link.active {
+    font-size: 2.25vw;
+  }
+
+  #faq-modal-nav {
+    margin-left: 5vw;
+  }
+
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #faq-modal div.modal-title {
+    width: 765px;
+  }
+
+}
+

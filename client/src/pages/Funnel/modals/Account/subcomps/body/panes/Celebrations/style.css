@@ -1,0 +1,118 @@
+.stop-scroll {
+  overflow-y: hidden !important;
+}
+
+.timeline-bg {
+  background: var(--modal-blend);
+  overflow-x: hidden;
+  overflow-y: scroll;
+  border-top-left-radius: 12%;
+  border-bottom-right-radius: 2%;
+  border-top: 1px solid var(--shadow-dark);
+  border-right: 1px solid var(--border);
+  border-left: 1px solid var(--border) !important;
+  box-shadow: 0 0 2vh var(--border-gray);
+  touch-action: pan-y;
+}
+
+.viewed-celebrations-total-wrapper {
+  padding: 1rem 0.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.viewed-celebrations-total {
+  color: var(--success);
+  font-family: 'Inter';
+  text-align: center;
+}
+
+.export-csv-btn {
+  white-space: nowrap;
+  color: var(--text-contrast);
+  border-color: var(--text-contrast);
+}
+
+.export-csv-btn:hover,
+.export-csv-btn:active,
+.export-csv-btn:focus {
+  color: var(--text-black);
+  background-color: var(--text);
+}
+
+.export-csv-btn:active {
+  color: var(--text-contrast);
+  background-color: var(--modal-blend) !important;
+  border-style: inset;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .celebrations-modal-subpane {
+    overflow-x: hidden !important;
+  }
+
+  .timeline-bg {
+    width: 105%;
+    min-height: 50vh;
+    max-height: 50vh;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+  }
+
+  .viewed-celebrations-total-wrapper {
+    padding: 0.75rem 0.5rem;
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .viewed-celebrations-total-wrapper .stack {
+    gap: 0.75rem !important;
+  }
+
+  .viewed-celebrations-total {
+    font-size: 0.9rem;
+  }
+
+  .vertical-timeline-element-content.bounce-in {
+    height: calc(25vw + 12vh) !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .placeholder-glow.vertical-timeline-element
+    .vertical-timeline-element-content.bounce-in {
+    height: calc(25vw + 12vh);
+  }
+
+  span.vertical-timeline-element-date .row .col-auto {
+    font-size: calc(3vh - 2vw) !important;
+  }
+
+  .vertical-timeline.vertical-timeline--animate.vertical-timeline--one-column-right:last-child {
+    margin-bottom: 2rem;
+  }
+}
+
+/* Desktop */
+@media only screen and (min-width: 1200px) {
+  .timeline-bg {
+    width: 96.33%;
+    max-height: 38vh;
+    height: 38vh;
+  }
+
+  .viewed-celebrations-total-wrapper {
+    padding: 0.75rem 0.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .vertical-timeline-element-content.bounce-in {
+    min-height: 21vh;
+    height: 21vh;
+  }
+}

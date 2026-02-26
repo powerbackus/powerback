@@ -1,0 +1,34 @@
+.donation-prompt {
+  color: var(--btn);
+}
+
+.donation-prompt.confirm {
+  color: var(--secondary);
+}
+
+span.donation-prompt .bi-question-circle {
+  color: var(--contrast);
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .donation-prompt {
+    max-height: 1em;
+    display: inline-flex;
+    padding-left: 5vw;
+    margin-bottom: 0.125em !important;
+    font-size: 1.125em;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .donation-prompt {
+    height: clamp(1.3125rem, 21px, 2.5vh);
+    font-size: 2.25vh;
+    /* margin-top: 4px;
+    margin-bottom: 1px !important; */
+    display: inline-flex;
+  }
+}

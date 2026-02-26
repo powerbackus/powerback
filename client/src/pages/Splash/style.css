@@ -1,0 +1,285 @@
+#splash {
+  text-align: left;
+  text-shadow: 0px 0px 0px;
+}
+
+#splash i.bi {
+  text-shadow: 0px 0px 0px;
+}
+
+#splash .btn {
+  background-color: var(--btn) !important;
+  font-family: 'Inconsolata';
+  font-weight: 700;
+}
+
+.mission-statement {
+  color: var(--text-mission);
+  text-align: left;
+  font-weight: 900;
+  text-shadow: -1px 1px 0px #e3bbbbbb !important;
+}
+
+.intro {
+  text-align: center;
+  font-weight: 500;
+  font-family: 'Inconsolata';
+}
+
+.cta-w-icon {
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-splash-btns {
+  display: flex;
+  justify-content: center;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait (small) */
+@media only screen and (max-width: 379px) and (orientation: portrait) {
+  .intro {
+    font-size: 1rem !important;
+  }
+}
+
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #splash {
+    overflow-y: hidden !important;
+    padding-right: 1.75rem !important;
+    padding-left: 1.75rem !important;
+  }
+
+  .mission-statement {
+    padding-top: 0.35em;
+    padding-bottom: calc(6vh - 5vw);
+    font-size: calc(8vmin + 2vmax);
+    line-height: calc(0.5em + 2vw + 3vh);
+    text-shadow: none !important;
+  }
+  .intro {
+    padding-bottom: 2.75vw;
+    margin-top: 0.5em;
+    font-size: 1.06875rem;
+    text-align: left;
+    line-height: 1.5em;
+    text-shadow: 0px 0px 1px var(--bg);
+  }
+
+  .credentials-fields {
+    height: 46vw;
+  }
+
+  .credentials-fields .row {
+    height: 23vw;
+  }
+
+  .cta-w-icon {
+    flex-direction: row;
+    font-size: 1.125em;
+  }
+}
+
+/* Mobile, portrait (tall) */
+@media (max-width: 599px) and (orientation: portrait) and (min-height: 800px) {
+  #splash {
+    height: 100vh !important;
+  }
+}
+
+/* Mobile, landscape */
+@media only screen and (max-height: 450px) and (orientation: landscape) {
+  #splash {
+    height: 63vh !important;
+    padding-right: 2rem !important;
+    padding-left: 2rem !important;
+  }
+
+  .mission-statement {
+    font-size: calc(3vh + 4vw) !important;
+    text-shadow: none !important;
+    margin-right: 5%;
+    max-width: 100%;
+  }
+
+  .intro {
+    margin-left: 2vw;
+    padding-bottom: 1rem;
+    text-align: left;
+  }
+
+  .splash-content.react-player {
+    margin-top: -4vh;
+  }
+}
+
+/* Tablet, portrait */
+@media only screen and (min-width: 600px) and (orientation: portrait) {
+  #splash {
+    padding-right: 1.75rem !important;
+    padding-left: 1.75rem !important;
+  }
+
+  .mission-statement {
+    margin-top: 0.1em !important;
+    margin-left: 0 !important;
+    padding-top: 3.75rem;
+    padding-bottom: 6.75rem;
+    font-size: 8em;
+    line-height: 8.25rem;
+  }
+
+  .intro {
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 2em;
+    padding-bottom: 8rem;
+    letter-spacing: -0.025rem;
+    line-height: 2.75rem;
+  }
+
+  .cta-w-icon {
+    height: 7.13vh;
+    margin-top: 2rem;
+    font-size: 2em;
+  }
+
+  .splash-icon {
+    margin-left: 0.25em;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #splash {
+    /* Navbar/footer are fixed-position; reserve space so the grid can stay balanced. */
+    --nav-h: 6vh;
+    /* Footer includes the "paid for" block + citations row; give it more room on desktop. */
+    /* --footer-h: 140px; */
+    padding-top: calc(var(--nav-h) + 1rem) !important;
+    padding-left: 0 !important;
+    max-height: 100%;
+  }
+
+  #splash .splash-grid {
+    /*
+     * Make the grid span the available Container width so the right column can stay "in place"
+     * (pinned to the right) while the left column breathes further left.
+     */
+    /* max-height: clamp(72vh, 73.5dvh, 73.5svh); */
+    max-height: clamp(72vh, 76.5dvh, 78.5svh);
+    display: grid;
+    /*
+     * Keep the video column stable by constraining it; let the left column take the rest.
+     * This shifts the left-side content further left without moving the video column.
+     */
+    grid-template-columns: minmax(0, 1fr) clamp(20rem, 28vw, 32rem);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas: 'headline blank' 'copy video';
+    column-gap: clamp(0.75rem, 1.5vw, 1.5rem);
+    row-gap: clamp(1.25rem, 5vh, 3.25rem);
+  }
+
+  #splash .splash-grid > * {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  #splash .splash-grid .mission-statement {
+    font-size: clamp(4rem, 7vw, 7.75rem);
+    line-height: 0.98;
+    letter-spacing: -0.06rem;
+    text-shadow: none !important;
+  }
+
+  #splash .splash-blank {
+    grid-area: blank;
+  }
+
+  #splash .splash-copy {
+    display: flex;
+    flex-direction: column;
+    align-self: start;
+    align-items: flex-start;
+    gap: clamp(1rem, 4vh, 2.75rem);
+    grid-area: copy;
+  }
+
+  #splash .splash-grid .intro {
+    margin: 0;
+    padding: 0;
+    max-width: 44rem;
+    font-size: clamp(1rem, 1.5vw, 1.75rem);
+    line-height: 1.4;
+    letter-spacing: -0.025rem;
+    text-align: left;
+    text-shadow: 0px 0px 1px var(--bg);
+  }
+
+  #splash .splash-grid .intro span.natural-link {
+    letter-spacing: 0;
+  }
+
+  #splash .splash-grid .cta-w-icon {
+    font-size: clamp(1.1rem, 1.75vw, 2rem);
+  }
+
+  #splash .splash-grid .cta-w-icon .splash-icon {
+    margin-left: 0.5em;
+  }
+
+  #splash .splash-video {
+    grid-area: video;
+    align-self: end;
+  }
+
+  #splash .splash-video .react-player {
+    margin: 0 !important;
+  }
+}
+
+/* Big Screen */
+@media only screen and (min-width: 2000px) and (orientation: landscape) {
+  #splash {
+    --nav-h: 85px;
+    --footer-h: 110px;
+  }
+
+  #splash .splash-grid {
+    max-width: 90rem;
+  }
+
+  .mission-statement {
+    width: 62.5vw;
+    margin-top: 0.1em !important;
+    margin-left: -2.33em;
+    padding-top: 0.5em;
+    padding-bottom: 0.25em;
+    font-size: 12em;
+    line-height: 0.95em;
+  }
+
+  .intro {
+    font-size: 2.75em;
+    padding-bottom: 0.5em;
+    letter-spacing: -0.025rem;
+    line-height: 1.5em;
+  }
+
+  .cta-w-icon {
+    height: 7.13vh;
+    margin-top: 2rem;
+    font-size: 2em;
+  }
+
+  #splash label.form-check-label {
+    margin-top: -1.75em;
+    margin-right: 1.5em;
+    font-size: 1rem !important;
+  }
+}

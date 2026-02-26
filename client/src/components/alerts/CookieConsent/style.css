@@ -1,0 +1,96 @@
+.cookie-consent-banner {
+  color: var(--text-contrast);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  padding: 1rem;
+  background: var(--semi-dark);
+  border-top: 1px solid var(--contrast);
+  font-family: 'Inter';
+}
+
+.cookie-consent-banner .alert {
+  margin-bottom: 0;
+  background: transparent;
+  border: none;
+}
+
+.cookie-consent-banner span {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+
+.cookie-consent-banner span:hover {
+  color: var(--link-active);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.cookie-consent-banner .btn-outline-light {
+  color: var(--btn);
+  border-color: var(--btn);
+}
+
+.cookie-consent-banner .btn-outline-light:hover {
+  color: var(--bg);
+  background-color: var(--btn);
+}
+
+.cookie-consent-banner .btn-outline-light:active {
+  color: var(--bg) !important;
+  background-color: var(--btn) !important;
+  border-color: var(--btn) !important;
+}
+
+.cookie-consent-banner .btn-outline-secondary {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.cookie-consent-banner .btn-outline-secondary:hover {
+  color: var(--bg);
+  background-color: var(--accent);
+}
+
+.cookie-consent-banner .btn-outline-secondary:active {
+  color: var(--bg) !important;
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+.cookie-consent-banner .gap-2 {
+  gap: 0.5rem !important;
+}
+
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .cookie-consent-banner {
+    color: var(--text-contrast);
+    background: var(--checkout-header);
+    padding: 0.5rem;    
+    border-bottom: 1px ridge var(--attention-muted);
+    line-height: 1.5;
+  }
+
+  .cookie-consent-banner .alert {
+    font-size: 0.9rem;
+  }
+}
+
+/* Mobile, landscape */
+@media only screen and (max-height: 450px) and (orientation: landscape) {
+  .cookie-consent-banner .alert {
+    text-align: start;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .cookie-consent-banner {
+    max-height: 7.5rem;
+    padding: 1rem 2rem;
+    border-bottom: 2px ridge var(--attention-muted);
+  }
+}

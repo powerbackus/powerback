@@ -1,0 +1,28 @@
+.loading-headshots > h2 {
+  color: var(--text) !important;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .loading-headshots {
+    display: inline-block;
+    margin-top: 26vw; /* is this value responsive across similar screens? */
+  }
+
+  .loading-headshots > h2 {
+    font-size: 2rem;
+    height: 5rem;
+  }
+
+}
+
+/* Big Screen */
+@media only screen and (min-width: 1800px) and (orientation: landscape) {
+  .loading-headshots > h2 {
+    height: 5rem;
+    font-size: 2rem;
+  }
+
+}
+

@@ -1,0 +1,83 @@
+#forgot-pass-pop {
+  text-align: center;
+  border-radius: 0px;
+  border: 1px solid var(--btn);
+  box-shadow: -1px -1px 2px 1px var(--shadow);
+  width: 386px;
+}
+
+#forgot-pass-pop .popover-header {
+  color: #272828;
+  background-color: var(--text);
+  border-radius: 0px;
+  font-weight: 700;
+}
+
+#forgot-pass-pop .hstack {
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+#forgot-pass-pop .popover-body {
+  color: var(--text);
+  background-color: var(--shadow);
+  border-radius: 0px;
+}
+
+#forgot-pass-pop .input-icon {
+  display: none;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #forgot-pass-pop .popover-body {
+    padding-top: 0.75rem;
+  }
+
+  #forgot-pass-pop .form-prompt {
+    margin-bottom: -1.5vh !important;
+  }
+
+  #forgot-pass-pop button.btn-close {
+    font-size: x-small;
+  }
+
+  #forgot-pass-pop .submit-btn {
+    margin-top: 4vh;
+  }
+
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #forgot-pass-pop .popover-arrow {
+    display: none;
+  }
+
+}
+
+/* Desktop */
+@media only screen and (min-width: 1200px) {
+  #forgot-pass-pop {
+    min-width: 33vh;
+  }
+
+  #forgot-pass-pop button.btn-close {
+    font-size: small;
+  }
+
+  #forgot-pass-pop .submit-btn {
+    margin-top: 0.75rem;
+  }
+
+  #forgot-pass-pop .popover-body {
+    padding-top: 0.75rem;
+  }
+
+  #forgot-pass-pop .form-prompt {
+    margin-bottom: -8px !important;
+  }
+
+}
+

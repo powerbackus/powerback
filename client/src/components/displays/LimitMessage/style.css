@@ -1,0 +1,45 @@
+.limit-message {
+  width: 38%;
+  background: var(--donation-btn);
+  border: 1px solid #cc99ff80;
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin: 0.25rem 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+}
+
+.limit-content {
+  color: var(--text);
+  margin: 0.5rem 0;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .limit-message-container {
+    margin-top: -1.5rem !important;
+    padding-bottom: 0 !important;
+    height: clamp(12.5em, 206px, 30vh) !important;
+  }
+
+  .limit-message {
+    width: auto;
+    height: auto;
+    padding: 0.75rem;
+    margin: 0.25rem 0;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .limit-message-container {
+    align-items: center;
+  }
+
+  .limit-message {
+    padding: 0.8rem;
+    padding-bottom: 0;
+  }
+}

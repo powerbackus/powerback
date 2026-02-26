@@ -1,0 +1,127 @@
+p.tip-ask {
+  font-family: 'Inconsolata';
+  line-height: 1.5rem;
+}
+
+p.tip-ask .bi-info-circle {
+  color: var(--info);
+}
+
+.card-footer p {
+  text-align: center !important;
+}
+
+.tip-submit--btn-spinner button.button--continue.btn {
+  width: 100%;
+  border: none;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  box-sizing: border-box;
+  padding: inherit;
+}
+
+.tip-submit--btn-spinner button.button--continue.btn,
+.tip-submit--btn-spinner button.button--continue.btn:active,
+.tip-submit--btn-spinner button.button--continue.btn:focus,
+.tip-submit--btn-spinner button.button--continue.btn:focus-visible,
+.tip-submit--btn-spinner button.button--continue.btn:hover {
+  background: none;
+}
+
+.tip-submit--btn-spinner button.button--continue.btn:active {
+  color: var(--continue-btn-active) !important;
+  box-shadow: none !important;
+  transform: none;
+}
+
+/* modal footer simulates a button */
+#tip-ask .card-footer:hover {
+  background-color: var(--shadow-dark);
+}
+
+#tip-ask .card-footer:active {
+  background-color: var(--bg-fade);
+}
+
+.tip-ask-spinner {
+  color: var(--success-theme) !important;
+}
+
+.tip-submit--btn-spinner button.button--continue.btn:active {
+  color: var(--success-theme) !important;
+  box-shadow: none !important;
+  transform: none;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  p.tip-ask {
+    text-align: center;
+    line-height: 1.25rem !important;
+  }
+
+  #tip-ask.checkout-card {
+    min-height: 0 !important;
+  }
+
+  #tip-ask .card-footer {
+    background-color: transparent;
+  }
+
+  #tip-ask .card-footer:hover {
+    background-color: var(--bg-fade);
+  }
+
+  .tip-submit--btn-spinner {
+    height: 11vw;
+    margin-top: 0.75vh;
+  }
+
+  .tip-ask-spinner {
+    color: var(--secondary);
+    height: 8vw;
+    width: 8vw;
+    margin-top: 0.25vh;
+  }
+
+  #tip-ask .card-footer p {
+    font-size: 12px;
+  }
+}
+
+/* Mobile, portrait (wide) */
+/*** Strange border artifact on hover ***/
+@media only screen and (orientation: portrait) and (min-width: 400px) {
+  #tip-ask .card-footer:hover {
+    outline: var(--btn) solid 1px;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .tip-ask {
+    line-height: 1.5rem;
+  }
+
+  #tip-ask .card-footer p {
+    font-size: 0.75rem;
+  }
+
+  #tip-ask .card-footer {
+    min-height: 4.88vh;
+    background-color: transparent;
+  }
+
+  .tip-submit--btn-spinner {
+    margin-top: -0.2vh;
+  }
+
+  .tip-ask-spinner.spinner-border {
+    margin-top: calc((3vw - 2vh) / 6);
+  }
+
+  .tip-submit--btn-spinner button.button--continue.btn {
+    margin-top: 0.66vh;
+  }
+}

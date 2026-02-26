@@ -1,0 +1,18 @@
+.limit-reset-text {
+  color: var(--text);
+  font-size: 0.8125em;
+  text-align: left;
+}
+
+.limit-reset-info {
+  margin-top: 0.5rem;
+  border-top: 1px solid #cc99ff40;
+}
+
+.limit-reset-details {
+  color: var(--accent);
+  font-size: 0.625rem;
+  font-style: italic;
+  line-height: 1.1;
+}
+

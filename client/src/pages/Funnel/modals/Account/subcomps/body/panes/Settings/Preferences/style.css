@@ -1,0 +1,127 @@
+.donation-filter-switch.form-check.form-switch input.form-check-input {
+  background-color: var(--secondary);
+  border: 1px solid var(--primary);
+  cursor: pointer;
+}
+
+.donation-filter-switch.form-check.form-switch input.form-check-input:focus,
+.donation-filter-switch.form-check.form-switch input.form-check-input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--primary, #fc9);
+}
+
+.donation-filter-switch.form-check.form-switch input.form-check-input:checked {
+  background-color: var(--accent) !important;
+  border: none !important;
+}
+
+i.bi.bi-question-circle.settings-tooltip {
+  color: var(--text);
+}
+
+.modal-header-delete {
+  background-color: var(--delete-account-btn);
+}
+
+form#delete-modal-input .row,
+form#delete-modal-input p {
+  color: var(--attention);
+  font-family: 'Inter';
+}
+
+button.switch {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 70px !important;
+  height: 26px !important;
+  border: 2px solid black !important;
+  display: inline-block !important;
+  margin-right: 0.25em !important;
+  line-height: 20px !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  font: 12px 'Open Sans', 'Arial', serif;
+}
+
+button.switch span {
+  padding: 0 4px !important;
+  pointer-events: none;
+}
+
+[role='switch'][aria-checked='false'] :first-child,
+[role='switch'][aria-checked='true'] :last-child {
+  background: var(--switch-on) !important;
+  color: var(--text-switch-on) !important;
+}
+
+[role='switch'][aria-checked='false'] :last-child,
+[role='switch'][aria-checked='true'] :first-child {
+  color: var(--text-switch-off) !important;
+}
+
+label.switch {
+  font: 16px 'Open Sans', 'Arial', sans-serif;
+  line-height: 20px;
+  vertical-align: middle;
+  user-select: none;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .donation-filter-switch.form-check.form-switch input.form-check-input {
+    font-size: 1.25em;
+  }
+
+  .settings-pane label.form-check-label {
+    margin-top: 0.25em !important;
+  }
+
+  .reset-default {
+    margin-top: 1.6vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .reset-default-btn {
+    position: absolute;
+    text-align: center;
+    right: 6vw;
+    border-radius: 30%;
+    margin-top: -1vh;
+    margin-bottom: 1em;
+    border-width: 2px;
+    padding-top: 3vw;
+    padding-right: 1.5vw;
+    padding-bottom: 3vw;
+    padding-left: 1.5vw;
+  }
+
+  .reset-default-btn:active {
+    filter: brightness(80%) !important;
+  }
+
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+
+  .settings-pane label.form-check-label {
+    margin-top: 0.6vh;
+  }
+
+  .settings-pane i.bi.question-circle,
+  .settings-pane label.form-check-label {
+    font-size: 0.875rem !important;
+  }
+
+  .donation-filter-switch.form-check.form-switch input.form-check-input {
+    font-size: 2vmin !important;
+  }
+
+  .defaults-btn {
+    margin-top: 2vh;
+  }
+
+}

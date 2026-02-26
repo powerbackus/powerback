@@ -1,0 +1,13 @@
+.autosave-notice {
+  color: var(--primary);
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .autosave-notice {
+    font-size: calc(5.25vw - 1vh);
+  }
+
+}
+

@@ -1,0 +1,103 @@
+.offcanvas {
+  background-color: var(--surface);
+}
+
+.offcanvas-body {
+  overflow-y: clip !important;
+}
+
+.offcanvas a.nav-link {
+  display: flex;
+}
+
+.offcanvas a {
+  color: var(--link-hover);
+}
+
+.offcanvas a:focus {
+  color: var(--accent);
+}
+
+.offcanvas a:focus:hover {
+  color: var(--accent);
+}
+
+.offcanvas a:hover {
+  color: var(--btn);
+}
+
+.offcanvas p {
+  color: var(--text) !important;
+}
+
+.profile-contact.nav-tabs.nav-link.active {
+  background-color: #ffffdbb3;
+}
+
+.sidebar-hline {
+  color: var(--accent);
+}
+
+.offcanvas .sidenav-close--btn {
+  font-size: 0.75rem;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait (small) */
+@media only screen and (max-width: 379px) and (orientation: portrait) {
+  .offcanvas {
+    min-width: 46vw !important;
+    max-width: 46vw !important;
+  }
+}
+
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .offcanvas {
+    min-width: 45vw;
+    max-width: 45vw;
+  }
+
+  .offcanvas-body {
+    padding-top: 1.5rem !important;
+    padding-right: 0 !important;
+    padding-left: 0.125rem !important;
+    overflow-y: clip !important;
+  }
+
+  .offcanvas a {
+    font-size: 1.2rem;
+    padding-bottom: calc(1vw + 1vh);
+  }
+
+  [id^='side-nav-tabs-tab'] {
+    font-size: 1.0625rem !important;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .offcanvas {
+    width: 21vw; /* */
+    border-right: 1px solid var(--accent);
+  }
+
+  .offcanvas-body a.nav-link {
+    padding-top: 0.75rem;
+    padding-bottom: 1rem;
+  }
+
+  .offcanvas a {
+    font-size: 1.5rem;
+  }
+
+  .offcanvas p {
+    margin-top: 0.25rem;
+    margin-bottom: 0 !important;
+    font-size: 1.25rem;
+  }
+
+  .side-menu-profile-row h5.pb-2 {
+    font-size: 1.5rem;
+  }
+}

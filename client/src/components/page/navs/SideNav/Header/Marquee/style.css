@@ -1,0 +1,31 @@
+.congress-ordinal {
+  color: var(--primary);
+}
+
+#side-nav-marquee {
+  color: var(--accent);
+  font-size: 1em;
+  line-height: 1.5;
+}
+
+.day-counter {
+  color: var(--secondary);
+}
+
+#desktop-marquee {
+  color: var(--text);
+  top: 0.62em;
+  left: auto;
+  text-align: right;
+  font-size: 1.0125em;
+  font-family: 'Oswald', sans-serif;
+  line-height: 1.2;
+  position: fixed;
+}
+
+/* Tablet, portrait */
+@media only screen and (min-width: 600px) and (orientation: portrait) {
+  #desktop-marquee {
+    top: auto !important;
+  }
+}

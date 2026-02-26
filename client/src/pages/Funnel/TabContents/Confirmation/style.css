@@ -1,0 +1,415 @@
+.success-message {
+  text-align: left;
+  font-family: 'Inconsolata';
+  line-height: 1.2;
+}
+
+.success-message .card-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.confirmation .card-title,
+.confirmation .card-title {
+  color: var(--secondary);
+}
+
+.success-message span {
+  color: var(--info);
+}
+
+.success-message a {
+  color: var(--link) !important;
+  text-decoration: none;
+}
+
+.success-message a:hover {
+  color: var(--link-hover) !important;
+  text-decoration: underline;
+}
+
+.direct-support {
+  align-items: center;
+}
+
+.escrow-total {
+  color: var(--secondary);
+  font-family: 'Red Hat Text', sans-serif;
+}
+
+.btc {
+  color: var(--info) !important;
+  text-align: center;
+}
+
+.btc-address {
+  font-family: 'Inter' !important;
+  overflow-wrap: break-word;
+}
+
+.btc-qr {
+  background-color: var(--text);
+}
+
+/* 80x80 flex box for BTC QR placeholder (error and loading states).
+   Used by BtcQrPlaceholder (Support/BtcQrPlaceholder/). */
+.btc-qr-placeholder {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btc-qr-placeholder--error {
+  background-color: var(--bs-danger-bg-subtle);
+  border: 1px solid var(--bs-danger-border-subtle);
+}
+
+.btc-qr-placeholder--loading {
+  background-color: var(--text);
+}
+
+.success-message .card-footer {
+  background-color: var(--semi-dark);
+}
+
+/* Demo-only CTA: on-brand but clearly a "fourth wall" callout */
+.confirmation--demo-cta {
+  float: left !important;
+  font-family: 'Inconsolata', monospace;
+  padding: 1rem 1.25rem 1.25rem;
+  margin: 0;
+  border-left: 4px solid var(--accent);
+  background-color: var(--semi-dark);
+  color: var(--text);
+}
+
+.confirmation--demo-cta-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--contrast);
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.confirmation--demo-cta-body {
+  font-size: 0.9375rem;
+  margin-bottom: 0.5rem;
+  color: var(--text);
+}
+
+.confirmation--demo-cta-body a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+.confirmation--demo-cta-body a:hover {
+  color: var(--link-hover);
+  text-decoration: underline;
+}
+
+.confirmation--demo-cta-list {
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  padding-left: 1.25rem;
+  color: var(--text-contrast);
+}
+
+.confirmation--demo-cta-btn {
+  font-family: 'Inconsolata', monospace;
+  background-color: var(--accent) !important;
+  border-color: var(--contrast-black) !important;
+  color: var(--contrast-black) !important;
+}
+
+.confirmation--demo-cta-btn:hover {
+  background-color: var(--contrast) !important;
+  border-color: var(--contrast-black) !important;
+  color: var(--contrast-black) !important;
+}
+
+.pac-limit-info {
+  margin-bottom: 1rem;
+  border-left: 4px solid var(--info);
+}
+
+.pac-limit-info .bi-question-circle {
+  color: var(--info);
+}
+
+.reset-spinner {
+  color: var(--success-theme);
+}
+
+.confirmation .card-footer,
+.confirmation .card-footer {
+  text-align: center;
+}
+
+#restart-funnel-button {
+  color: var(--link) !important;
+  border-color: var(--link) !important;
+  font-family: 'Inter';
+}
+
+#restart-funnel-button:hover {
+  color: var(--mobile-bg) !important;
+  background-color: var(--link-hover) !important;
+}
+
+#restart-funnel-button:active {
+  color: var(--mobile-bg) !important;
+  background-color: var(--link-active) !important;
+  border-style: inset !important;
+}
+
+.copy-notification {
+  position: fixed !important;
+  top: 20px;
+  right: 20px;
+  z-index: 1050;
+  min-width: 250px;
+  animation: slideIn 0.3s ease-out;
+  pointer-events: auto;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .confirmation--demo-cta {
+    padding: 0.5rem 1rem 1rem !important;
+    margin: 0 !important;
+  }
+
+  .confirmation--demo-cta-title {
+    font-size: 1rem;
+  }
+
+  .confirmation--demo-cta-body {
+    font-size: 0.8em;
+
+    margin-bottom: 0.25rem;
+  }
+
+  .confirmation--demo-cta-list {
+    font-size: 0.75em;
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;
+  }
+
+  .btc-address {
+    font-size: 0.65em;
+    letter-spacing: 0.08em;
+    line-height: 1;
+  }
+  .celebration-announcement {
+    padding: 0 !important;
+    font-size: 0.85rem !important;
+  }
+
+  .confirmation .checkout-card.card,
+  .confirmation .checkout-card.card {
+    justify-content: center;
+    align-items: center;
+  }
+
+  .reset-spinner {
+    width: 28.7vh;
+    height: 28.7vh;
+  }
+
+  .success-message .card-header {
+    width: 99.3vw;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .success-message .card-body {
+    padding-bottom: 0 !important;
+    padding-top: 0.66rem;
+    font-size: 0.85rem;
+  }
+
+  .success-message span.powerback {
+    font-size: 1.1em !important;
+  }
+
+  .direct-support p {
+    padding-left: 0.25rem;
+    text-align: left !important;
+  }
+
+  #help-ask {
+    padding: 0;
+  }
+
+  #help-ask p {
+    font-size: 0.85rem;
+    padding-left: 0.25rem;
+    text-align: left !important;
+    line-height: 1.2;
+  }
+
+  .tip-title {
+    flex-wrap: wrap;
+    font-size: 0.8em !important;
+  }
+
+  .tip-title .powerback {
+    text-align: left;
+    font-size: 1rem !important;
+    white-space: nowrap;
+  }
+
+  .tip-title img {
+    margin-left: 0.25rem;
+  }
+
+  .bi-currency-bitcoin {
+    font-size: 2rem;
+  }
+
+  .btc-qr {
+    background-color: var(--text);
+    margin-bottom: 0;
+  }
+
+  .btc-address {
+    margin-top: 0.5vh;
+    max-width: 20vw;
+  }
+
+  #contact-us {
+    font-size: 0.75rem;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .btc-address {
+    font-family: 'Red Hat Text', sans-serif;
+    font-size: 0.79em;
+    width: clamp(4.2vw, 78px, 216px);
+    letter-spacing: 0.035em;
+    line-height: 1;
+    overflow-wrap: break-word;
+  }
+
+  #celebrate-tab-container-tabpane-confirmation {
+    padding-top: clamp(2vh, 20px, 1.25em);
+  }
+
+  .success-message .alert-success {
+    max-height: 3vh !important;
+  }
+
+  .success-message .btn-group {
+    display: flow-root;
+  }
+
+  .confirmation .checkout-card,
+  .confirmation .checkout-card {
+    width: clamp(39rem, 73.5vh, 48vw);
+  }
+
+  .tip-title {
+    text-align: left;
+  }
+
+  .confirmation .checkout-card.card,
+  .confirmation .checkout-card.card {
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    font-size: clamp(1.5vh, 1.7dvh, 1rem);
+  }
+
+  .confirmation .checkout-card.card .card-body,
+  .confirmation .checkout-card.card .card-body {
+    max-height: clamp(31vh, 17rem, 38vh) !important;
+    background-color: var(--elevated);
+  }
+
+  .direct-support p {
+    margin-top: clamp(1vh, 1rem, 1.5vh);
+  }
+
+  .reset-spinner {
+    width: 28.7vh;
+    height: 28.7vh;
+  }
+
+  .celebration-announcement {
+    padding: clamp(1rem, 24px, 1.5vw);
+    font-size: 1.125rem;
+  }
+
+  i.bi.bi-currency-bitcoin {
+    font-size: 2.125em;
+  }
+
+  #help-ask p,
+  #contact-us {
+    font-size: 1rem;
+    line-height: 1.15rem;
+    text-align: left !important;
+  }
+
+  #contact-us {
+    padding-right: 3em;
+    padding-left: 3em;
+    padding-bottom: 2em;
+    text-align: center !important;
+  }
+
+  #restart-funnel-button {
+    margin-bottom: 0.5em;
+  }
+}
+
+/* Desktop */
+@media only screen and (min-width: 1800px) and (orientation: landscape) {
+  .success-message .card-header {
+    padding: 0 !important;
+  }
+
+  .success-message .alert {
+    margin-bottom: 0;
+  }
+
+  .success-message span {
+    line-height: 1.6rem;
+  }
+
+  .success-message span.powerback {
+    font-size: 1.6rem;
+  }
+
+  .success-message .btn-group {
+    padding-bottom: 0;
+  }
+
+  .btc {
+    margin-top: clamp(-15vh, -5rem, -9vh);
+  }
+
+  .btc-address {
+    width: 4.5vw;
+  }
+}

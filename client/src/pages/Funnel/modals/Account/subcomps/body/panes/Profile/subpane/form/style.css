@@ -1,0 +1,154 @@
+#account-modal input.form-control,
+#account-modal select.form-select {
+  background-color: var(--contrast-black);
+  color: var(--input) !important;
+  border: 1px solid var(--contrast) !important;
+  font-family: 'Inconsolata';
+}
+
+#account-modal select.form-select:disabled {
+  color: var(--validation-error) !important;
+  background-color: var(--text);
+  border: 1px solid var(--border-disabled);
+  cursor: not-allowed;
+}
+
+.transition-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.account-profile-spinner {
+  color: var(--link);
+}
+
+div.profile-field {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0 !important;
+}
+
+.profile-form div.invalid-feedback,
+.profile-form small.form-text {
+  font-family: 'Oswald';
+  text-align: left;
+}
+
+.profile-form small.form-text {
+  line-height: 0.85rem;
+}
+
+.req-asterisk {
+  color: var(--primary);
+  font-size: large;
+}
+
+label.btn.btn-primary {
+  color: var(--surface) !important;
+  --bs-btn-bg: var(--form-label) !important;
+  --bs-btn-active-bg: var(--secondary);
+  --bs-btn-border-color: var(--slate);
+  --bs-btn-active-border-color: var(--slate);
+  font-family: 'Inter' !important;
+  font-weight: 600;
+}
+
+label.btn.btn-primary:hover {
+  --bs-btn-bg: var(--text) !important;
+}
+
+label.btn.btn-primary:active {
+  --bs-btn-bg: var(--form-btn) !important;
+  --bs-btn-border-color: var(--slate) !important;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #account-modal .profile-form {
+    min-height: 38.4vw;
+  }
+
+  #account-modal .form-and-fields {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+  }
+
+  #account-modal .btn-group {
+    margin-bottom: 1vw;
+  }
+
+  #account-modal label.btn.btn-primary {
+    font-size: calc(2vw + 1vh);
+  }
+
+  #account-modal div.profile-field {
+    min-height: 18vw;
+    height: 18vw;
+    padding-bottom: calc(1vh - 1vw) !important;
+    margin-bottom: calc(3vw - 1vh) !important;
+    margin-top: 0.5rem !important;
+  }
+
+  form.profile-form {
+    margin-left: -4px !important;
+    margin-right: -4px !important;
+  }
+
+  /** getting rid of bulky green checkmarks for form validation **/
+  .form-select.is-valid:not([multiple]):not([size]),
+  .form-select.is-valid:not([multiple])[size='1'],
+  .was-validated .form-select:valid:not([multiple]):not([size]),
+  .was-validated .form-select:valid:not([multiple])[size='1'] {
+    padding-right: 0% !important;
+  }
+
+  .account-profile-spinner {
+    height: 20vw;
+    width: 20vw;
+  }
+
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #account-modal .profile-form-ask {
+    height: 5vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 0.95rem;
+    line-height: 1.425rem;
+    margin-top: -0.33rem;
+    margin-bottom: 1.83rem;
+  }
+
+  #account-modal .profile-form-ask .cta-explainer {
+    width: clamp(20vw, 60%, 30rem);
+  }
+
+  form.profile-form {
+    height: 25vh;
+  }
+
+  .profile-form div.invalid-feedback,
+  .profile-form small.form-text {
+    display: inherit !important;
+    margin-top: -0.5rem;
+    padding-left: 0.125em;
+    font-size: 0.75rem;
+    font-family: 'Inter';
+  }
+
+  .transition-spinner {
+    height: 25vh;
+  }
+
+  .account-profile-spinner {
+    height: 5rem;
+    width: 5rem;
+  }
+
+}

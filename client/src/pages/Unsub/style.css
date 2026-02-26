@@ -1,0 +1,123 @@
+#unsubscribe-container .magic-user-interaction {
+  color: var(--accent);
+}
+
+#unsubscribe-container .magic-user-interaction .display-6 {
+  color: var(--contrast);
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+#unsubscribe-container .magic-user-interaction .card-body .card-text {
+  color: var(--text-contrast) !important;
+  text-align: left;
+  font-family: 'Inconsolata';
+}
+
+#unsubscribe-container .magic-user-interaction .card-body .card-text b {
+  color: var(--contrast);
+  font-weight: 700;
+}
+
+#unsubscribe-container .magic-user-interaction .cancel-btn {
+  color: var(--text-black);
+  background-color: var(--cancel-btn);
+  box-shadow: 1px 2px var(--info);
+}
+
+#unsubscribe-container .magic-user-interaction .cancel-btn:focus,
+#unsubscribe-container .magic-user-interaction .cancel-btn:hover,
+#unsubscribe-container .magic-user-interaction .cancel-btn:active {
+  background-color: var(--cancel-btn-hover) !important;
+}
+
+#unsubscribe-container .magic-user-interaction .cancel-btn:focus {
+  color: var(--contrast-black) !important;
+}
+
+#unsubscribe-container .magic-user-interaction .cancel-btn:hover {
+  color: var(--contrast-black) !important;
+  border-color: none;
+  box-shadow: 1px 2px transparent;
+}
+
+#unsubscribe-container .magic-user-interaction .cancel-btn:active {
+  color: var(--btn) !important;
+  border-color: none;
+  box-shadow: 1px 2px transparent !important;
+  background-color: var(--input-group) !important;
+  text-shadow: -2px -1px var(--info);
+}
+
+#unsubscribe-container .magic-user-interaction .cancel-btn:focus,
+#unsubscribe-container .magic-user-interaction .unsubscribe-btn:focus {
+  box-shadow: 0px 0px 2px 3px var(--info);
+  border: 0px inset var(--border-gray) !important;
+  /* transform: translate(0px, 0px) !important; */
+}
+
+#unsubscribe-container .magic-user-interaction .unsubscribe-btn {
+  color: var(--contrast);
+  background-color: var(--donation-btn);
+  box-shadow: 1px 2px var(--border-alert);
+}
+
+#unsubscribe-container .magic-user-interaction .unsubscribe-btn:focus,
+#unsubscribe-container .magic-user-interaction .unsubscribe-btn:hover,
+#unsubscribe-container .magic-user-interaction .unsubscribe-btn:active {
+  background-color: var(--input-group) !important;
+}
+
+#unsubscribe-container .magic-user-interaction .unsubscribe-btn:focus {
+  color: var(--text-contrast) !important;
+  box-shadow: 0px 0px 2px var(--border-alert);
+  border-color: none;
+}
+
+#unsubscribe-container .magic-user-interaction .unsubscribe-btn:hover {
+  color: var(--info) !important;
+  box-shadow: 0px 0px 2px var(--border-alert);
+  border-color: none;
+}
+
+#unsubscribe-container .magic-user-interaction .unsubscribe-btn:active {
+  color: var(--btn) !important;
+  border-color: none;
+  box-shadow: 1px 2px transparent;
+  text-shadow: 2px -1px var(--modal-blend);
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .magic-user-interaction .btn {
+    margin-top: 1.75rem;
+  }
+
+  .magic-user-interaction div.col-12.userpass--field {
+    height: 10vh !important;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #unsubscribe-container .magic-user-interaction {
+    height: clamp(50vh, 32rem, 62vh) !important;
+    padding: 0.5rem 1rem 1rem 1rem;
+    align-items: center;
+    box-shadow: 0.35vw 0.35vw 0.75px
+      rgb(from var(--text-placeholder) r g b / 10%);
+    text-shadow: 2px 2px var(--shadow-dark);
+    line-height: 1.2;
+  }
+
+  #unsubscribe-container .magic-user-interaction .display-6 {
+    padding-bottom: 0.5rem;
+    font-size: 3rem;
+    text-shadow: 3px 4px 0.5px rgb(from var(--secondary) r g b / 68%);
+  }
+
+  #unsubscribe-container .magic-user-interaction div.col-12.userpass--field {
+    height: 9vh !important;
+  }
+}

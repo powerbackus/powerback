@@ -1,0 +1,35 @@
+.limit-header i.bi.bi-info-circle {
+  color: var(--contrast);
+  font-size: 1.125rem;
+}
+
+.limit-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+}
+
+.limit-title {
+  color: var(--input-invalid);
+}
+
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .limit-message-container {
+    width: 105vw !important;
+  }
+  .limit-header {
+    font-size: 0.875rem;
+    height: 5px;
+  }
+  .limit-title {
+    font-size: 0.875rem;
+  }
+  .limit-header i.bi.bi-info-circle {
+    color: var(--contrast);
+    font-size: 0.875rem;
+  }
+}

@@ -1,0 +1,20 @@
+.nav-links {
+  justify-content: space-evenly;
+}
+
+.nav-links .nav-link {
+  color: var(--link) !important;
+  transition: color 0.25s, text-shadow 0.25s;
+}
+
+.nav-links .nav-link:hover {
+  color: var(--link-hover) !important;
+  text-shadow: 1px 1px 2px var(--shadow);
+}
+
+.nav-links .nav-link:active,
+.nav-links .nav-link:focus,
+.nav-links .nav-link:focus-visible {
+  color: var(--link-active) !important;
+  text-shadow: 1px 1px 2px var(--shadow);
+}

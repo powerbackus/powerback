@@ -1,0 +1,86 @@
+.settings-security .hstack {
+  justify-content: center;
+}
+
+.settings-security label.form-label {
+  color: var(--text);
+}
+
+button.option-btn-active.button--continue.btn {
+  color: var(--success-theme) !important;
+  border-color: var(--secondary) !important;
+  border-width: 2px !important;
+  border-style: solid !important;
+  margin-bottom: 0px;
+  text-decoration: none !important;
+  box-shadow: 0 0 0 0;
+  text-transform: uppercase;
+  font-family: 'Oswald';
+  cursor: default !important;
+  background-color: var(--shadow);
+}
+
+button.option-btn-active.button--continue.btn:hover {
+  line-height: 1.5;
+  text-indent: 0%;
+}
+
+.settings-security .button--continue.btn {
+  color: var(--btn) !important;
+  box-shadow: 1px 1px 0 0 var(--text);
+  border-color: var(--btn) !important;
+  font-family: 'Inconsolata';
+  text-decoration: underline;
+}
+
+.settings-security .button--continue.btn:hover {
+  transition-duration: 211ms;
+  text-decoration: none;
+}
+
+.settings-security .button--continue.btn:focus,
+.settings-security .button--continue.btn:focus-visible {
+  color: var(--bs-btn-hover-color);
+  border-color: var(--bs-btn-hover-border-color);
+  outline: 0;
+  box-shadow: 0 0 0 2px var(--primary, #fc9);
+}
+
+.settings-security .button--continue.btn:active {
+  color: inherit;
+  background-color: var(--bs-btn-hover-bg);
+  border-color: inherit;
+  box-shadow: var(--bs-btn-focus-box-shadow);
+  outline: 0;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .settings-security .button--continue.btn {
+    font-size: 0.8rem;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .settings-security {
+    max-height: 248px !important;
+  }
+
+  .security-buttons {
+    height: 37.4219px;
+    max-height: 37.4219px;
+    width: 298px;
+    max-width: 298px;
+  }
+
+  .settings-security .button--continue.btn {
+    font-size: 0.8em;
+    text-decoration: underline;
+  }
+
+  button.option-btn-active.button--continue.btn {
+    font-size: 0.86em;
+  }
+}

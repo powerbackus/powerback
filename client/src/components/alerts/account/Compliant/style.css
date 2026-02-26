@@ -1,0 +1,42 @@
+.updated-ok-alert {
+  position: fixed !important;
+  color: var(--text-switch-on) !important;
+  background-color: var(--switch-on) !important;
+  border: 1px solid var(--form-label) !important;
+  box-shadow: 0 0 7px rgba(153, 204, 255, 0.5);
+  text-align: start;
+  font-family: 'Inter';
+  line-height: 1.25;
+  z-index: 3000;
+}
+
+.updated-ok-alert .alert-heading {
+  color: var(--text-switch-on);
+  font-family: 'Red Hat Text';
+}
+
+.updated-ok-alert .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .updated-ok-alert {
+    top: 28vh;
+    width: 90vw;
+    left: 5%;
+  }
+
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .updated-ok-alert {
+    top: 39vh;
+    left: 33vw;
+    width: 35vw;
+  }
+
+}
+

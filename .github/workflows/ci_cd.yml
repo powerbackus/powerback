@@ -1,0 +1,205 @@
+name: CI + Deploy (production)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ['main']
+
+concurrency:
+  group: prod-deploy
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fail if merge conflict markers exist (any file)
+        run: |
+          set -euo pipefail
+          if grep -R --line-number -I -E '^(<<<<<<<|=======|>>>>>>>)' . \
+            --exclude-dir=node_modules \
+            --exclude-dir=client/node_modules \
+            --exclude-dir=client/build \
+            --exclude-dir=.git; then
+            echo "Merge conflict markers found."
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: npm ci
+      - run: cd client && npm ci
+      - run: cd client && npm run typecheck
+      - run: cd client && CI=false npm run build
+
+      # Smoke tests (pre-deploy)
+      - name: Smoke test - frontend artifacts exist
+        run: |
+          test -f client/build/index.html
+          test -d client/build/static/js
+          test -d client/build/static/css
+
+      - name: Smoke test - no CRA build failure markers
+        run: |
+          ! grep -R "Failed to compile" client/build || exit 1
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fail if merge conflict markers exist (any file)
+        run: |
+          set -euo pipefail
+          if grep -R --line-number -I -E '^(<<<<<<<|=======|>>>>>>>)' . \
+            --exclude-dir=node_modules \
+            --exclude-dir=client/node_modules \
+            --exclude-dir=client/build \
+            --exclude-dir=.git; then
+            echo "Merge conflict markers found."
+            exit 1
+          fi
+
+      # IMPORTANT: each job runs on a fresh runner.
+      # Since we're NOT using GitHub Actions artifacts (quota), we must build here too.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build frontend (deploy job)
+        run: |
+          npm ci
+          cd client
+          npm ci
+          CI=false npm run build
+
+      - name: Install rsync + ssh
+        run: sudo apt-get update && sudo apt-get install -y rsync openssh-client
+
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.PROD_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Who am I on the server?
+        run: |
+          ssh -p ${{ secrets.PROD_SSH_PORT }} -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
+            ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }} \
+            "pbwhoami"
+
+      - name: Sync to server
+        run: |
+          rsync -az --delete \
+            --exclude ".git/" \
+            --exclude "node_modules/" \
+            --exclude "client/node_modules/" \
+            --exclude "client/build/" \
+            --exclude ".env" \
+            --exclude "logs/" \
+            -e "ssh -p ${{ secrets.PROD_SSH_PORT }} -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes" \
+            ./ ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }}:${{ secrets.PROD_APP_PATH }}
+
+      - name: Write deploy stamp
+        run: |
+          cat > client/build/_deploy.txt <<EOF
+          sha=$GITHUB_SHA
+          ref=$GITHUB_REF_NAME
+          run_id=$GITHUB_RUN_ID
+          run_number=$GITHUB_RUN_NUMBER
+          built_utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          EOF
+
+      - name: Deploy frontend to public_html (no sudo)
+        run: |
+          rsync -az --delete \
+            --no-perms --no-owner --no-group \
+            --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r \
+            -e "ssh -p ${{ secrets.PROD_SSH_PORT }} -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes" \
+            ./client/build/ \
+            ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }}:${{ secrets.PROD_PUBLIC_HTML_PATH }}
+
+      - name: Install server deps (via SSH wrapper)
+        run: |
+          ssh -p ${{ secrets.PROD_SSH_PORT }} -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
+            ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }} \
+            pbnpminstall
+
+      - name: Restart services
+        run: |
+          ssh -p ${{ secrets.PROD_SSH_PORT }} -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
+            ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }} \
+            "pbrestart"
+
+          ssh -p ${{ secrets.PROD_SSH_PORT }} -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
+            ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }} \
+            "nginxreload"
+
+      - name: Check service status and security score
+        continue-on-error: true
+        run: |
+          echo "Checking service status and security score (requires wrapper commands)..."
+          ssh -p ${{ secrets.PROD_SSH_PORT }} -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
+            ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }} \
+            "pbstatus" || echo "::warning::pbstatus wrapper not available - add to ${{ secrets.PROD_WRAPPER_SCRIPT }}"
+          ssh -p ${{ secrets.PROD_SSH_PORT }} -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
+            ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }} \
+            "pbsecurity" || echo "::warning::pbsecurity wrapper not available - security score logged to ${{ secrets.PROD_DEPLOY_LOG_PATH }}"
+
+      - name: Wait for service startup
+        run: sleep 5
+
+      - name: Smoke test - HTTPS homepage returns 200
+        continue-on-error: true
+        run: |
+          if curl -fsS --retry 3 --retry-delay 2 --max-time 10 -o /dev/null ${{ secrets.PROD_URL }} 2>&1 | grep -q "Could not resolve host"; then
+            echo "::warning::DNS resolution failed for ${{ secrets.PROD_URL }} - likely DNS propagation issue. Skipping smoke test."
+            exit 0
+          elif ! curl -fsS --retry 10 --retry-delay 3 --max-time 15 -o /dev/null ${{ secrets.PROD_URL }}; then
+            echo "::error::Homepage test failed - service may not be running. Check if dependencies were installed in ${{ secrets.PROD_APP_PATH }}"
+            exit 1
+          fi
+
+      - name: Smoke test - API health returns 200
+        continue-on-error: true
+        run: |
+          if curl -fsS --retry 3 --retry-delay 2 --max-time 10 -o /dev/null ${{ secrets.PROD_URL }}/api/health 2>&1 | grep -q "Could not resolve host"; then
+            echo "::warning::DNS resolution failed for ${{ secrets.PROD_URL }} - likely DNS propagation issue. Skipping smoke test."
+            exit 0
+          elif ! curl -fsS --retry 10 --retry-delay 3 --max-time 15 -o /dev/null ${{ secrets.PROD_URL }}/api/health; then
+            echo "::error::API health test failed - service may not be running. Ensure pbnpminstall wrapper uses ${{ secrets.PROD_APP_PATH }} path"
+            exit 1
+          fi
+
+  announce_deploy:
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Notify Social (Bluesky + other)
+        run: |
+          SHORT_SHA="${GITHUB_SHA::7}"
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+          RUN_URL="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          DEDUPE_KEY="deploy:${GITHUB_RUN_ID}"
+
+          # first line of commit message only
+          COMMIT_ONELINE=$(printf "%s" "$COMMIT_MSG" | head -n 1)
+
+          TEXT="Deploy ${SHORT_SHA}: ${COMMIT_ONELINE} | ${RUN_URL}"
+          PAYLOAD=$(jq -n --arg t "$TEXT" --arg dk "$DEDUPE_KEY" '{event_type:"deploy", text:$t, dedupe_key:$dk}')
+
+          curl -sS -X POST \
+            -H "Content-Type: application/json" \
+            -H "x-make-apikey: ${{ secrets.SOCIAL_WEBHOOK_API_KEY }}" \
+            -d "$PAYLOAD" \
+            "${{ secrets.SOCIAL_WEBHOOK_URL }}"

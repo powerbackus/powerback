@@ -1,0 +1,64 @@
+.account-logio--row {
+  flex-wrap: nowrap;
+}
+
+.demo-label {
+  color: var(--input-invalid);
+  font-size: 20px;
+  font-family: 'Oswald';
+  font-weight: 600;
+}
+
+.navbar-logio:hover {
+  color: var(--link-active);
+  text-shadow: 0px 0px #cccccc21;
+}
+
+.nav-user-btn {
+  box-shadow: 15px 3px var(--text) !important;
+  transform: translate(0px, -2px) !important;
+  transition: all 0.1s ease-in !important;
+}
+
+.nav-user-btn:hover {
+  background-color: var(--bg) !important;
+  box-shadow: 4px 2px var(--accent) !important;
+  transform: translate(9px, -1px) !important;
+  transition: all 0.06s ease-out !important;
+  font-weight: 600;
+}
+
+.nav-user-btn:active {
+  color: var(--text) !important;
+  background-color: var(--bg) !important;
+  border: 1px outset var(--contrast-black) !important;
+  border-right: none !important;
+  box-shadow: 0px 0px 1px var(--text) !important;
+  transform: translate(10px, 1px) !important;
+  transition: all 0.06s ease-in-out !important;
+  font-weight: 100;
+}
+
+.nav-user-btn:focus,
+.nav-user-btn:focus-visible {
+  color: var(--contrast) !important;
+  background-color: var(--modal);
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .account-logio--row {
+    width: 9vw !important;
+  }
+  .account-logio--row-icon {
+    width: 16px !important;
+  }
+
+  .account-logio--row .nav-link {
+    margin-bottom: 0.2rem !important;
+  }
+
+  .account-logio--row .info-tooltip {
+    width: 1rem !important;
+  }
+}

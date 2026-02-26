@@ -1,0 +1,66 @@
+/* .limit-promotion {
+  background: var(--elevated);
+  border: 1px solid #cc99ff40;
+  border-radius: 6px;
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+} */
+
+.limit-promotion-text {
+  color: var(--contrast);
+  font-size: 0.8125rem !important;
+  line-height: 1.3;
+}
+
+.limit-upgrade-btn {
+  color: var(--btn);
+  background: var(--elevated);
+}
+
+
+.limit-upgrade-btn,
+.limit-upgrade-btn:hover {
+  padding: 0.25rem 0.625rem;
+  font-size: 0.8125rem;
+  border-color: var(--btn) !important;
+  box-shadow: 1px 2px var(--accent);
+}
+
+.limit-upgrade-btn:hover {
+  color: var(--btn-hover) !important;
+  background-color: var(--bg-fade) !important;
+  border-color: var(--btn) !important;
+  filter: hue-rotate(11deg);
+  box-shadow: 1px 2px var(--accent);
+  text-shadow: 0 0 1px var(--btn-border);
+  transform: translate(-1px, -2px);
+}
+
+.limit-upgrade-btn:active {
+  color: var(--btn-active) !important;
+  background: var(--elevated) !important;
+  border: 1px inset var(--border-gray) !important;
+  font-weight: 500 !important;
+}
+
+.limit-upgrade-btn:focus {
+  color: var(--btn-active) !important;
+  background-color: var(--modal) !important;
+  font-weight: 500 !important;
+}
+
+/* OLD
+.limit-upgrade-btn {
+  font-size: 0.8125rem;
+  padding: 0.25rem 0.625rem;
+  border-color: var(--btn);
+  color: var(--btn);
+  background-color: transparent;
+  transition: all 0.2s ease-in-out;
+}
+
+.limit-upgrade-btn:hover {
+  background-color: var(--btn);
+  border-color: var(--btn);
+  color: var(--elevated);
+} */

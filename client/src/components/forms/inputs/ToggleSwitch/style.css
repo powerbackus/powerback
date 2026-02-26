@@ -1,0 +1,32 @@
+#splash .form-toggle {
+  margin-top: 5px;
+}
+
+#splash .form-switch .form-check-input {
+  width: 40px;
+  background-color: var(--accent);
+  transform: rotate(90deg);
+  cursor: pointer;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #splash .form-switch .form-check-input {
+    transform: rotate(180deg);
+  }
+
+  #splash .select-join {
+    color: var(--secondary);
+  }
+
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #splash .form-toggle {
+    margin-top: 3.33rem;
+  }
+
+}
+

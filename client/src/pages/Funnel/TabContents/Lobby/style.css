@@ -1,0 +1,52 @@
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .lobby-top.third.col {
+    height: 10.5vh;
+  }
+
+  .lobby-middle.third.col {
+    height: 35vh;
+  }
+
+  .lobby-bottom.third.col {
+    height: 26vh;
+  }
+
+  .lobby {
+    height: 77vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+  }
+
+  .selected-candidate-row {
+    margin-top: 0.375rem;
+  }
+
+  .selected-candidate-wrapper {
+    gap: 0.75rem;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .lobby {
+    height: 77vh !important;
+  }
+}
+
+/* Big Screen */
+@media only screen and (min-width: 2000px) and (orientation: landscape) {
+  .lobby {
+    height: 69vh;
+  }
+
+  .lobby-top.third.col {
+    height: 13.75vh;
+  }
+
+  .lobby-middle.third.col {
+    height: calc(14vw + 16vh);
+  }
+}

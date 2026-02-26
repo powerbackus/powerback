@@ -1,0 +1,61 @@
+.choose-amount {
+  flex-direction: column;
+  align-items: center;
+}
+
+.choose-amount .show-cont--btn {
+  text-align: center !important;
+}
+
+.starting {
+  color: var(--secondary);
+  text-align: center;
+}
+
+.hide-cont--btn {
+  display: none;
+}
+
+.show-cont--btn {
+  display: block;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #donation-section {
+    justify-content: center;
+  }
+  .starting {
+    width: 100vw;
+    margin-top: 0.5rem !important;
+    font-size: 2.1em;
+    line-height: 1.5em;
+  }
+
+  .show-cont--btn.col {
+    margin-top: 0.125rem;
+    justify-content: space-around;
+    align-items: center;
+  }
+
+  .choose-amount {
+    text-align: start;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #donation-section.row {
+    justify-content: center;
+  }
+
+  .choose-amount {
+    width: 75%;
+  }
+
+  .starting {
+    font-size: 5.3rem;
+    line-height: 7rem;
+  }
+}

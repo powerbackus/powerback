@@ -1,0 +1,167 @@
+.selector-bar {
+  text-align: right;
+  font-family: 'Inconsolata' !important;
+  background-color: var(--bg-fade);
+}
+
+.selector-bar .form-check-input {
+  background-color: var(--btn) !important;
+  box-shadow: inset 0 0 5px var(--link);
+}
+
+.selector-bar .section-title {
+  padding-top: 1rem;
+}
+
+.selector-bar .section-title .hstack label.form-check-label {
+  color: var(--primary);
+}
+
+.selector-bar .list-group-item {
+  color: var(--accent);
+  background-color: transparent !important;
+  border-color: transparent;
+  text-align: center;
+  text-decoration: underline;
+  font-family: 'Oswald';
+  cursor: pointer;
+}
+
+.selector-bar .list-group-item:hover,
+.selector-bar .list-group-item:focus {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.pol-search-options {
+  color: var(--text);
+}
+
+.options-link-active {
+  color: var(--accent) !important;
+  text-decoration: none !important;
+  cursor: default !important;
+}
+
+/* Dim active search option when a pol is selected: same color as inactive link; hover/active unchanged */
+.pol-search-options
+  .list-group.search-has-selection
+  .list-group-item.options-link-active {
+  color: var(--accent) !important;
+}
+
+input[id^='downshift'][id$='-input'].pol-search {
+  background-color: var(--contrast-black);
+  border: 2px solid var(--border-gray);
+}
+
+input.pol-search.form-control::placeholder,
+input.pol-search.form-control::-webkit-input-placeholder {
+  color: var(--text-placeholder);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+input.pol-search.form-control:-ms-input-placeholder,
+input.pol-search.form-control::-webkit-input-placeholder {
+  color: var(--text-placeholder);
+  font-style: italic;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .selector-bar {
+    width: 90vw;
+    padding-top: calc(1vh - 1vw);
+    display: inline-flex;
+    justify-content: center;
+    background: transparent;
+  }
+
+  .selector-bar .form-switch {
+    padding-left: calc(3vw + 2vh);
+  }
+
+  .selector-bar .list-group-item {
+    font-size: 0.9rem;
+  }
+
+  .options-link-active {
+    color: var(--contrast) !important;
+  }
+
+  .selector-bar .section-title {
+    margin-right: -2vw;
+    margin-top: -2vw;
+    font-size: 1rem;
+  }
+
+  .selector-bar .section-title .hstack {
+    align-items: flex-end;
+  }
+
+  .selector-bar .section-title .hstack label.form-check-label.chamber {
+    color: var(--btn);
+  }
+
+  .pol-search-options.row .list-group.list-group-horizontal {
+    flex-direction: row;
+    margin-bottom: -4px;
+    padding-left: 0.25em;
+  }
+
+  .chamber {
+    color: var(--secondary);
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .selector-bar {
+    width: 100vw;
+    min-height: 11.5vh;
+    display: inline-flex;
+    justify-content: center;
+    padding: 0px !important;
+    border-bottom: 2px solid var(--border-gray);
+  }
+
+  .selector-bar .section-title {
+    width: auto;
+  }
+
+  .selector-bar .section-title .chamber {
+    color: var(--primary) !important;
+  }
+
+  .selector-bar .list-group {
+    padding-top: 0.25rem;
+  }
+
+  .options-link-active {
+    font-size: 1.15rem;
+    margin-top: -2px !important;
+    margin-bottom: -2px !important;
+    margin-left: -0.15em;
+  }
+
+  .selector-bar .form-select,
+  input.pol-search {
+    min-height: 4.6vh;
+  }
+
+  .pol-search-options.row {
+    display: flex !important;
+    margin-top: 0.75vh !important;
+    justify-content: space-between !important;
+  }
+}
+
+/* Big Screen */
+@media only screen and (min-width: 2000px) and (orientation: landscape) {
+  .selector-bar {
+    margin-left: -24.67vw !important;
+    margin-top: 2.33em !important;
+  }
+}

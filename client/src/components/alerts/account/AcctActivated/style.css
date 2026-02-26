@@ -1,0 +1,32 @@
+.alert-confirmed {
+  position: fixed;
+  text-align: left;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .alert-confirmed {
+    font-size: calc(4vw);
+    max-width: 95%;
+    min-width: 94%;
+    margin-left: calc(5vw - 1vh);
+    top: calc(30vw + 25vh);
+  }
+
+}
+
+/* Big Screen */
+@media only screen and (min-width: 1800px) and (orientation: landscape) {
+  .alert-confirmed {
+    width: 20vw;
+    margin: 0 auto;
+    padding-right: 1.5rem;
+    padding-bottom: 1rem;
+    line-height: 0.95rem;
+    top: 23%;
+    left: 44.25%;
+  }
+
+}
+

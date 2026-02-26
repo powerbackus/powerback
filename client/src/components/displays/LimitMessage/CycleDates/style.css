@@ -1,0 +1,34 @@
+.limit-election-dates {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  text-align: start;
+  padding: 0.5rem;
+  background: var(--bg);
+  border-radius: 4px;
+  border-left: 3px solid var(--btn);
+}
+
+.limit-date-item {
+  color: var(--text);
+  font-size: 0.875em;
+  margin-top: 0.125rem;
+  margin-bottom: 0.125rem;
+  line-height: 1.35;
+}
+
+.limit-date-item strong {
+  color: var(--contrast);
+  margin-right: 0.5rem;
+}
+
+/*m
+/*Mobile, portrait*/
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .limit-date-item {
+    font-size: 0.875rem !important;
+    line-height: 1.5;
+  }
+  .limit-date-item strong {
+    margin-right: 0.25rem;
+  }
+}

@@ -1,0 +1,150 @@
+#stripe-checkout > #root {
+  display: flex;
+  align-items: center;
+}
+
+#stripe-checkout.preserve-bg {
+  background: var(--input-group);
+}
+
+#stripe-checkout > body {
+  /* Bootstrap utilities: d-flex justify-content-center align-content-center */
+  font-size: 16px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#stripe-checkout > form {
+  width: 30vw;
+  align-self: center;
+  box-shadow:
+    0px 0px 0px 0.5px rgba(50, 50, 93, 0.1),
+    0px 2px 5px 0px rgba(50, 50, 93, 0.1),
+    0px 1px 1.5px 0px rgba(0, 0, 0, 0.07);
+  border-radius: 7px;
+  padding: 40px;
+}
+
+#stripe-checkout > input {
+  border-radius: 6px;
+  margin-bottom: 6px;
+  padding: 12px;
+  border: 1px solid rgba(50, 50, 93, 0.1);
+  max-height: 44px;
+  font-size: 16px;
+  width: 100%;
+  background: white;
+  box-sizing: border-box;
+}
+
+#stripe-checkout > .result-message {
+  line-height: 22px;
+  font-size: 16px;
+}
+
+#stripe-checkout > .result-message a {
+  color: var(--link-hover);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+#stripe-checkout > .hidden {
+  display: none;
+}
+
+#stripe-checkout > #card-error {
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.25rem;
+  margin-top: 0.75rem;
+  text-align: center;
+}
+
+#card-element {
+  border-radius: 4px 4px 0 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  padding: 12px;
+  border: 1px solid var(--accent) 1a;
+  max-height: 44px;
+  width: 100%;
+  background: var(--input-group);
+  box-sizing: border-box;
+}
+
+#stripe-checkout > #payment-request-button {
+  margin-bottom: 32px;
+}
+
+/* Buttons and links */
+#stripe-checkout > button {
+  background: var(--btn);
+  font-family: Arial, sans-serif;
+  color: #25213e;
+  border-radius: 0 0 4px 4px;
+  border: 0;
+  padding: min(1.33vh, 0.8rem) 1rem;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: block;
+  transition: all 0.2s ease;
+  box-shadow: 0px 4px 5.5px 0px rgba(0, 0, 0, 0.07);
+  width: 100%;
+}
+
+#stripe-checkout > button:hover,
+#stripe-checkout > button:focus-visible {
+  filter: contrast(115%);
+}
+
+#stripe-checkout > button:focus-visible,
+#stripe-checkout > button:focus {
+  outline: none;
+  box-shadow: 0 0 2px 2px #51a7e8;
+}
+
+#stripe-checkout > button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* spinner/processing state, errors */
+.checkout-spinner {
+  color: var(--secondary);
+  height: 3em;
+  width: 3em;
+}
+
+.dummy-cc-num {
+  font-size: 0.7rem;
+  color: var(--secondary);
+  font-family: 'Inconsolata';
+  font-weight: 600;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #stripe-checkout {
+    height: 5.5rem;
+  }
+  div#stripe-checkout > button.btn.btn-primary {
+    height: 2.8em;
+  }
+
+  .checkout-spinner {
+    margin-top: 1.25rem;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #stripe-checkout {
+    height: clamp(10vh, 90px, 6rem);
+  }
+
+  .checkout-spinner {
+    margin-top: 1.25em;
+  }
+}

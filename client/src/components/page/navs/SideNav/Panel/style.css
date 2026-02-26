@@ -1,0 +1,12 @@
+.side-menu-profile-row .signedin-info {
+  color: var(--contrast);
+  font-family: 'Inconsolata';
+  font-size: 0.8rem;
+  line-height: 1.25rem;
+  overflow-wrap: anywhere;
+}
+
+a.nav-link {
+  display: flex;
+  justify-content: space-between;
+}

@@ -1,0 +1,209 @@
+#account-modal .profile-form-ask>p,
+p.reminder {
+  color: var(--secondary) !important;
+  text-align: center;
+  font-family: 'Inconsolata';
+}
+
+#account-modal .profile-form-ask>p {
+  color: var(--positive-indicator);
+}
+
+.dollar-limit {
+  color: var(--success-theme) !important;
+  font-size: 1.06em;
+  font-family: 'Oswald';
+}
+
+.warning-limit {
+  color: var(--secondary) !important;
+  font-family: 'Oswald';
+}
+
+.profile-form-ask {
+  text-align: center;
+}
+
+/* Compliance Cap component styles */
+.compliance-table {
+  justify-content: center;
+}
+
+.compliance-table dl {
+  width: max-content !important;
+  margin: 0 !important;
+  font-family: 'Inconsolata';
+  width: 100%;
+}
+
+.compliance-table dt {
+  text-align: center;
+  font-size: 1.25rem !important;
+  height: 2rem !important;
+  color: var(--primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compliance-table dd {
+  text-align: center;
+  font-size: 1.25rem !important;
+  color: var(--primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.compliance-table dt:nth-child(3) {
+  color: var(--success);
+  font-weight: bold;
+  padding: 0.25rem 0.75rem;
+}
+
+.compliance-table dd:nth-child(3) {
+  color: var(--success);
+  font-weight: bold;
+  padding: 0.25rem 0.75rem;
+}
+
+.compliance-table dt:nth-child(2),
+.compliance-table dt:nth-child(5),
+.compliance-table dd:nth-child(2),
+.compliance-table dd:nth-child(5) {
+  font-family: 'Red Hat Text', 'Courier New', monospace;
+  font-weight: bold;
+  text-align: right;
+  padding-right: 0.75rem;
+}
+
+.compliance {
+  font-size: small;
+  font-family: 'Inter';
+  box-shadow: 6px 3px var(--accent) !important;
+  transition: all 0.1s ease-in !important;
+  cursor: pointer;
+  outline: 0;
+}
+
+.compliance:hover {
+  text-shadow: 0px 0px 0px !important;
+  box-shadow: 2px 2px var(--accent) !important;
+  transform: translate(3px, 1px) !important;
+  transition: all 0.06s ease-out !important;
+}
+
+.compliance:active,
+.compliance:focus,
+.compliance:focus-visible {
+  color: var(--primary) !important;
+  background-color: var(--bg) !important;
+  border: 1px inset var(--contrast-black) !important;
+  box-shadow: 0px 0px 1px var(--text) !important;
+  text-shadow: none !important;
+  transform: translate(5px, 2px) !important;
+  transition: all 0.1s ease-in-out !important;
+  outline: 2px solid var(--primary, #fc9);
+  outline-offset: 2px;
+}
+
+/* Promotion indicator styles */
+.promotion-indicator {
+  color: var(--success);
+  font-weight: bold;
+  font-size: 0.9em;
+  cursor: help;
+}
+
+.promotion-indicator:hover {
+  opacity: 0.8;
+}
+
+/* Call to action explainer text styles */
+.cta-explainer {
+  margin-top: 0.5rem !important;
+  font-size: 0.9rem;
+  line-height: 1 !important;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .profile-form-ask {
+    display: flex;
+    min-height: 23vw;
+    max-height: 23vw;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 0 !important;
+    margin-bottom: 3vh !important;
+  }
+
+  .profile-form-ask>p,
+  p.reminder {
+    font-size: 1rem;
+    line-height: 1.15rem !important;
+  }
+
+  span.meets-compliance {
+    color: var(--positive-indicator);
+  }
+
+  .dollar-limit {
+    color: var(--success);
+  }
+
+  .profile-form-ask .submit-btn.compliance {
+    margin-top: calc(2vw);
+  }
+
+  .compliance-table {
+    justify-content: space-evenly;
+  }
+
+  .compliance-table dt,
+  .compliance-table dd {
+    font-size: 0.95rem !important;
+  }
+
+  .compliance-table dl {
+    line-height: 1.2rem;
+  }
+
+  .compliance-table dt {
+    padding: 0.2rem 0.3rem;
+  }
+
+  .compliance-table dd {
+    padding: 0.2rem 0.3rem;
+  }
+
+  .compliance-table dt:nth-child(3) {
+    padding: 0.2rem 0.5rem;
+  }
+
+  .compliance-table dd:nth-child(3) {
+    padding: 0.2rem 0.5rem;
+  }
+
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  div.profile-form-ask p {
+    margin-top: 0.25rem !important;
+  }
+
+  #account-modal .profile-form-ask>p,
+  p.reminder {
+    color: var(--secondary) !important;
+    font-family: 'Inconsolata';
+    line-height: 1.25rem;
+  }
+
+  .compliance {
+    min-height: 3vh !important;
+    max-height: 3.5vh !important;
+  }
+
+}
