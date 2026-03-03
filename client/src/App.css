@@ -1,0 +1,355 @@
+/* Breakpoint tokens (generated from constants/breakpoints.js) */
+@import './breakpoints.css';
+
+:root {
+  /* Primary/Secondary Colors */
+  --primary: #ffcc99;
+  --secondary: #ff99cc;
+  --attention: #ffc107;
+  --contrast: #ccff99;
+
+  /* Background Colors */
+  --bg: #1b1b1b;
+  --mobile-bg: #171b1e;
+  --semi-dark: #2e2e2e;
+  --bg-fade: #1b1b1bdd;
+  --modal: #2a2b27;
+  --modal-blend: #252522;
+  --slate: #1f1f1f;
+  --surface: #1c1c1c;
+  --elevated: #1c1a21;
+  --contrast-black: #080808;
+  --checkout-header: #3e3e3e;
+
+  /* Text Colors */
+  --text: #cccccc;
+  --text-contrast: #dddddd;
+  --text-black: #171717;
+  --text-placeholder: #aba5a0;
+  --text-mission: #f1ecec;
+  --danger: #930000;
+  --alert: #6a2a83;
+  --alert-dark: #373833;
+  --info: #75e6c8;
+
+  /* Accent Colors */
+  --accent: #9bad97;
+  --attention-muted: #9f8879;
+  --positive-indicator: #adebcb;
+  --highlight: rgb(from var(--attention) r g b / 50%);
+  --highlight-muted: rgb(from var(--attention) r g b / 20%);
+
+  /* Status Colors */
+  --error: #ff9a98;
+  --success: #20cf9d;
+  --success-theme: #99ffcc;
+
+  /* Link Colors */
+  --link: #99ccff;
+  --link-hover: #6da7f9;
+  --link-active: #8bbbfd;
+  --link-sent: #525252;
+
+  /* Button Colors */
+  --btn: #cc99ff;
+  --btn-hover: #c48aff;
+  --btn-active: #d1a3ff;
+  --btn-border: #6f42c1;
+
+  --cancel-btn: #909c90;
+  --success-btn: #27ae60;
+  --submit-btn-label: #020061;
+  --cancel-btn-hover: #95a5a6;
+  --success-btn-hover: #229954;
+
+  --delete-account-btn: #b02a37;
+  --delete-account-btn-hover: #a51d2b;
+  --delete-account-btn-active: #a52834;
+  --delete-account-btn-gradient: #dc3545;
+
+  --continue-btn-hover: #181f23;
+  --continue-btn-active: #a9c9a2;
+  --continue-btn-active-border: #73578f80;
+
+  --donation-btn: #2d3e3c;
+  --donation-btn-active: #181f23;
+  --donation-btn-border: #cc99ff80;
+  --donation-btn-border-selected: #42545780;
+  --tour-btn: #001f3b;
+
+  /* Form Colors */
+  --form-btn: #beafa0;
+  --form-label: #a6a6a6;
+
+  --input: #00ff00;
+  --input-group: #99cc9927;
+  --input-valid: #00d300;
+  --input-disabled: #a9a9a9;
+  --input-secondary: #2e362ebb;
+  --input-invalid: #ff00ff;
+
+  --validation-feedback: #ff99b0;
+  --validation-error: #990000;
+
+  /* Shadow & Border Colors */
+  --shadow: #2b2b2b;
+  --shadow-dark: #1e1e1e;
+
+  --border: #222222;
+  --border-gray: #3c3c3b;
+  --border-alert: #087990;
+  --border-disabled: #330066;
+
+  /* Navigation Colors */
+  --nav-link-hover: #d9b3ff;
+  --nav-link-active: #bf80ff;
+
+  --side-pills-hover: #bddeff;
+  --side-pills-active: #80bfff;
+
+  /* Carousel Colors */
+  --scrollbar-thumb-hover: #86a789;
+  --escrow-badge: #36004b;
+
+  /* Searchbar Colors */
+  --odd: #201820;
+  --even: #182018;
+  --selected: #101010;
+
+  /* Switch Colors */
+  --switch-on: #226622;
+  --text-switch-on: #eeeeff;
+  --text-switch-off: #bbbbdd;
+}
+
+html {
+  height: 100%;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+  overflow-anchor: none !important;
+  --moz-osx-font-smoothing: grayscale;
+  --ms-font-smoothing: grayscale;
+  --o-font-smoothing: grayscale;
+  --webkit-font-smoothing: antialiased;
+  font-family: 'Oswald', 'Inconsolata', 'Century Gothic' !important;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 100%;
+}
+
+html.splash-scrollable,
+body.splash-scrollable {
+  position: relative;
+  height: auto;
+  min-height: 100%;
+  max-height: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+span,
+.list-group-item {
+  color: var(--text);
+}
+
+.App {
+  min-height: 100vh;
+  transform: translateZ(0);
+  --webkit-transform: translateZ(0);
+  --moz-transform: translateZ(0);
+  --o-transform: translateZ(0);
+  --ms-transform: translateZ(0);
+  overflow: initial !important;
+}
+
+/* brand styles */
+.powerback {
+  color: var(--primary) !important;
+  font-family: 'Oswald';
+}
+
+.positive-indicator {
+  color: var(--positive-indicator) !important;
+}
+
+.attention {
+  color: var(--attention) !important;
+}
+
+.tagline {
+  letter-spacing: -0.5px;
+}
+
+.valid-feedback,
+.invalid-feedback {
+  text-align: center;
+  font-size: small;
+  font-family: 'system-ui', '-apple-system';
+}
+
+.form-check-input {
+  background-color: var(--text);
+  box-shadow: inset 0 0 5px var(--contrast);
+  cursor: pointer;
+}
+
+.form-control {
+  color: var(--success) !important;
+}
+
+label {
+  font-family: 'Inconsolata' !important;
+  color: var(--text);
+}
+
+.to-clipboard {
+  color: var(--text-contrast);
+  cursor: copy;
+  user-select: all;
+}
+
+.to-clipboard:hover {
+  color: var(--attention-muted);
+}
+
+.inter {
+  font-family: 'Inter' !important;
+}
+
+.inconsolata {
+  font-family: 'Inconsolata' !important;
+}
+
+.form-control.is-valid,
+.was-validated .form-control:valid {
+  border-color: var(--btn-border);
+}
+
+.form-control.is-valid:focus,
+.was-validated .form-control:valid:focus {
+  border-color: var(--input-invalid);
+}
+
+input.form-check-input:checked {
+  background-color: var(--secondary) !important;
+  border: 1px solid var(--primary) !important;
+}
+
+input.btn-check:checked + .btn {
+  cursor: default !important;
+}
+
+.input-group-text {
+  color: var(--text);
+  background-color: var(--input-group);
+  border: 2px solid var(--border-gray);
+}
+
+span.nav-link {
+  cursor: pointer !important;
+}
+
+.nav-links .nav-link {
+  padding-top: 0.0625rem !important;
+  padding-bottom: 0.0625rem !important;
+}
+
+.nav-link:focus-visible {
+  box-shadow: 0 0 0 0.25rem rgb(from var(--primary) r g b / 25%) !important;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  z-index: 9999;
+  padding: 0.75rem 1rem;
+  background: var(--primary, #fc9);
+  color: var(--contrast-black, #080808);
+  font-weight: bold;
+  text-decoration: none;
+  border-radius: 4px;
+}
+
+.skip-link:focus {
+  left: 1rem;
+  top: 1rem;
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  html {
+    overflow: hidden;
+  }
+
+  .App {
+    position: relative !important;
+    background: var(--mobile-bg);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: 2vh calc(-28vw + 23vh);
+    text-align: center;
+  }
+
+  .form-group.input-group.has-validation {
+    height: 40px;
+  }
+}
+
+/* Mobile, landscape */
+@media only screen and (min-width: 600px) and (orientation: landscape) {
+  .App {
+    background: var(--mobile-bg);
+    background-image: url('/bg-1920x1280-mobile.webp');
+    background-position: 100% 25%;
+    background-size: 100% 100%;
+    text-align: center;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .App {
+    background: var(--bg) url('/bg-1920x1280.webp');
+    overflow: auto;
+    text-align: center;
+    background-repeat: no-repeat;
+  }
+
+  .form-group.input-group.has-validation {
+    max-height: 40px;
+  }
+}
+
+/* Desktop */
+@media only screen and (min-width: 1200px) {
+  html {
+    overflow: hidden;
+  }
+}
+
+/* Big Screen */
+@media only screen and (min-width: 2000px) and (orientation: landscape) {
+  .App {
+    background: var(--bg) url('/bg-2560x1440.webp');
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: 0px 100px;
+    text-align: center;
+  }
+}

@@ -1,0 +1,21 @@
+/* Auto-generated from client/src/constants/breakpoints.js. Do not edit. */
+/* In @media use these values as literal px (no var()); see docs/design-system.md. */
+:root {
+  /* Width (APP.BREAKPOINTS) */
+  --bp-xs: 379px;
+  --bp-sm: 599px;
+  --bp-md: 600px;
+  --bp-lg: 900px;
+  --bp-xl: 1200px;
+  --bp-xxl: 2000px;
+  --bp-wide: 1680px;
+  --bp-xwide: 1800px;
+  /* Height (APP.HEIGHT) */
+  --height-short-landscape: 450px;
+  --height-tall-portrait: 800px;
+  --height-tall-portrait-low: 740px;
+  --height-tall-portrait-high: 869px;
+  --height-landscape-short: 820px;
+  --height-payment-portrait: 936px;
+  --height-payment-landscape: 900px;
+}
