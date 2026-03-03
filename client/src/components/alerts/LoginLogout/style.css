@@ -1,0 +1,47 @@
+.loginlogout-ok-alert {
+  color: var(--alert-dark) !important;
+  position: fixed !important;
+  display: flex;
+  align-items: baseline;
+  font-size: small;
+  font-family: 'Inter';
+  z-index: 3000;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .loginlogout-ok-alert {
+    border: 1px solid var(--border-alert);
+  }
+
+  .loginlogout-ok-alert.in {
+    top: 6.8vh;
+    left: 26.5%;
+  }
+
+  .loginlogout-ok-alert.out {
+    top: 6.8vh;
+    left: 26.83%;
+  }
+
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .loginlogout-ok-alert {
+    top: 0.6vh;
+    left: 35%;
+  }
+
+}
+
+/* Desktop */
+@media only screen and (min-width: 1200px) {
+  .loginlogout-ok-alert {
+    min-width: auto;
+    border: none;
+  }
+
+}
+

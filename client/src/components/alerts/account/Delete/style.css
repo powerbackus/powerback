@@ -1,0 +1,28 @@
+.delete-ok-alert {
+  position: fixed !important;
+  color: var(--danger) !important;
+  text-align: left;
+  font-size: 0.85rem;
+  font-family: 'Inter';
+  z-index: 3000;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .delete-ok-alert {
+    top: 33%;
+    left: calc(-50vw + 60%);
+  }
+
+}
+
+/* Big Screen */
+@media only screen and (min-width: 1800px) and (orientation: landscape) {
+  .delete-ok-alert {
+    top: 4px;
+    left: 45%;
+  }
+
+}
+
