@@ -1,0 +1,112 @@
+#server-down {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+  flex-wrap: wrap;
+  text-shadow: 0 0 1px var(--bg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+#server-down h1,
+#server-down h2,
+#server-down h4,
+#server-down h6 {
+  line-height: 1.5em !important;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #server-down {
+    height: 77vh !important;
+    background-image: url('/bg-1920x1280-mobile.webp');
+    background-position: 100% 100%;
+    background-repeat: no-repeat;
+    padding-right: 2rem;
+    align-content: flex-end;
+    text-align: left;
+  }
+
+  .server-down-content {
+    padding-top: 11rem;
+    padding-right: 2rem;
+    margin-left: 1rem;
+  }
+
+  #server-down h1 {
+    font-size: 2rem;
+  }
+
+  #server-down h2 {
+    font-size: 1.5rem;
+    padding-bottom: 1rem;
+  }
+
+  #server-down h4 {
+    font-size: 1.75rem;
+    line-height: 1.75rem;
+    padding-bottom: 1.25rem;
+  }
+
+  #server-down h6 {
+    font-size: 1.33rem;
+  }
+}
+
+/* Mobile, landscape */
+@media only screen and (max-height: 450px) and (orientation: landscape) {
+  #server-down {
+    height: auto !important;
+    align-content: start;
+    text-align: left;
+  }
+
+  .server-down-content {
+    padding-top: 1rem;
+    padding-right: 2rem;
+    padding-bottom: 3rem;
+    margin-left: 1rem;
+  }
+
+  #server-down h1 {
+    font-size: 1.5rem;
+  }
+
+  #server-down h2 {
+    font-size: 1.125rem;
+    padding-bottom: 0.75rem;
+  }
+
+  #server-down h4 {
+    font-size: 1.33rem;
+    line-height: 1.33rem;
+    padding-bottom: 1rem;
+  }
+
+  #server-down h6 {
+    font-size: 1rem;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #server-down {
+    align-content: start;
+    text-align: start;
+  }
+
+  .server-down-content {
+    padding: 3rem 5rem 5rem 8rem;
+  }
+}
+
+/* Big Screen */
+@media only screen and (min-width: 2000px) and (orientation: landscape) {
+  #server-down {
+    background-image: url('/bg-2560x1440.webp');
+  }
+}

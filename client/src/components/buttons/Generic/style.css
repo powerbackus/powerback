@@ -1,0 +1,46 @@
+.generic-btn {
+  color: var(--bg);
+  background-color: var(--btn);
+  border-color: var(--border-gray);
+  box-shadow: 1px 2px var(--accent);
+  transform: translate(-1px, -2px);
+  transition: all 0.1s ease-in-out;
+}
+
+.generic-btn:hover {
+  color: var(--bg);
+  background-color: var(--btn-hover);
+  border-color: var(--border-gray) !important;
+  box-shadow: 0px 0px var(--accent);
+  transform: translate(1px, 0px);
+  transition: all 0.1s ease-in;
+}
+
+.generic-btn:active,
+.generic-btn:focus,
+.generic-btn:focus-visible {
+  color: var(--bg) !important;
+  font-weight: 800;
+  background-color: var(--btn-active) !important;
+  border-color: var(--border-gray) !important;
+  border-style: inset !important;
+  border-top-width: 2px;
+  border-left-width: 2px;
+  border-right-width: 0px;
+  border-bottom-width: 0px;
+  box-shadow: none;
+  transform: translate(0px, -1px);
+  transition: all 0.06s ease-in;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .generic-btn {
+    font-size: 0.75rem;
+    box-shadow: -1px 2px 0px var(--text);
+    transition: none;
+  }
+
+}
+

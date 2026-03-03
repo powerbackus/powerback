@@ -1,0 +1,14 @@
+#faq-modal div.modal-body {
+  background: var(--modal);
+  overflow-y: hidden;
+}
+
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #faq-modal .modal-body {
+    max-height: calc(-9vw + 87vh);
+    height: 81vh;
+    padding: 0;
+  }
+
+}

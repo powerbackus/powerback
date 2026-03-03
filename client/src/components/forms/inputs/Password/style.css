@@ -1,0 +1,20 @@
+.styled-modal div.modal-body .form-text {
+  color: var(--secondary) !important;
+  text-shadow: 1px 1px #cccccc38;
+}
+
+.styled-modal div.modal-body .userpass--field .form-text {
+  font-size: 0.8em !important;
+  font-family: 'Inter';
+}
+
+.password-field-icon:hover {
+  cursor: pointer;
+  color: var(--link);
+}
+
+.pw-strength-bar {
+  width: 75%;
+  margin: 0 auto;
+}
+

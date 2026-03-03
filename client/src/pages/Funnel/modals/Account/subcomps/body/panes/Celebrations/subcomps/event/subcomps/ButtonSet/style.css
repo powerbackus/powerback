@@ -1,0 +1,51 @@
+.msg-sent {
+  color: var(--accent);
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .donation-receipt-btn-group {
+    margin-top: -1vh;
+  }
+
+  .donation-receipt-btn-group button.generic-btn {
+    min-height: 4.5vh !important;
+    width: 25vw;
+
+  }
+
+  .receipt-tweet {
+    font-size: calc(4vw + 3vh);
+  }
+
+  .receipt-btn {
+    height: 5vh;
+    display: flex;
+    align-items: center;
+  }
+
+  .share-button-wrapper {
+    display: flex;
+    align-items: center;
+    height: 5.5vh;
+  }
+
+  .msg-sent {
+    height: 5vh;
+    width: 25vw;
+    padding-top: 1vh;
+    padding-left: 3vw;
+  }
+
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .msg-sent {
+    width: 5.67vw;
+    text-align: center;
+
+  }
+
+}

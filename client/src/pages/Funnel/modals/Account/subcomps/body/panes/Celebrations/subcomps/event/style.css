@@ -1,0 +1,264 @@
+.donation-counter {
+  color: var(--contrast);
+  font-family: 'Oswald';
+}
+
+.donation-amount {
+  color: var(--success);
+  font-family: 'Red Hat Text';
+  font-weight: 800;
+  float: right;
+}
+
+.tip-amount {
+  color: var(--primary);
+  font-family: 'Inter';
+  font-size: 0.9em;
+}
+
+.vertical-timeline-element {
+  font-family: 'Inconsolata';
+  position: relative;
+}
+
+.vertical-timeline-element.inactive .vertical-timeline-element-title,
+.vertical-timeline-element.inactive .vertical-timeline-element-subtitle,
+.vertical-timeline-element.inactive .donation-amount {
+  color: var(--text);
+}
+
+.vertical-timeline-element.inactive.resolved .vertical-timeline-element-title,
+.vertical-timeline-element.inactive.resolved
+  .vertical-timeline-element-subtitle {
+  color: var(--success);
+}
+
+.vertical-timeline-element.inactive.resolved .donation-amount {
+  color: var(--secondary);
+  text-decoration: line-through;
+}
+
+.vertical-timeline-element-content {
+  border-top-left-radius: 7%;
+}
+
+span.vertical-timeline-element-date {
+  width: 100%;
+}
+
+.event-description-set {
+  color: var(--contrast);
+  font-family: 'Red Hat Text';
+}
+
+.celebration-id-clickable:hover {
+  color: var(--info);
+  text-decoration: none;
+}
+
+.copy-notification {
+  position: fixed !important;
+  top: 20px;
+  right: 20px;
+  z-index: 1050;
+  min-width: 250px;
+  animation: slideIn 0.3s ease-out;
+  font-family: 'Red Hat Text';
+  pointer-events: auto;
+}
+
+.copy-notification i.bi-clipboard-check {
+  color: var(--text-black) !important;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+img.receipt-mark {
+  position: absolute;
+}
+
+.vertical-timeline-element.inactive {
+  position: relative;
+}
+
+.vertical-timeline-element.inactive .celebration-status {
+  position: absolute;
+  top: 90%;
+  left: 30%;
+  transform: translate(-50%, -50%);
+  font-size: 1.2em;
+  z-index: 1000;
+  text-align: center;
+  cursor: help;
+}
+
+.vertical-timeline-element.inactive.defunct .celebration-status span {
+  color: #f00;
+}
+
+.vertical-timeline-element.inactive.paused .celebration-status span {
+  color: #ff0;
+}
+
+.vertical-timeline-element.inactive.resolved .celebration-status span {
+  color: var(--success);
+}
+
+.vertical-timeline-element.inactive .vertical-timeline-element-title,
+.vertical-timeline-element.inactive .vertical-timeline-element-subtitle,
+.vertical-timeline-element.inactive .donation-amount {
+  color: var(--text);
+}
+
+.vertical-timeline-element-subtitle {
+  font-size: 0.8rem;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .vertical-timeline-element-content {
+    box-shadow: 0 2px 0 var(--primary);
+    border-left: var(--primary) solid 1px;
+  }
+
+  .event-donee {
+    font-size: clamp(0.85em, 3.5vw, 1.1em) !important;
+    line-height: 1.15;
+    word-break: break-word;
+    display: block;
+    margin-bottom: 0.1rem;
+  }
+
+  .vertical-timeline-element-subtitle {
+    font-size: 0.8rem;
+    line-height: 1.2;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .vertical-timeline-element-content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .vertical-timeline-element-content > .row:first-of-type {
+    flex: 1 1 auto;
+    margin-bottom: 0.25rem;
+    min-height: 0;
+  }
+
+  .vertical-timeline-element-content > .row:last-of-type {
+    flex: 0 0 auto;
+    margin-top: 0.25rem;
+    margin-bottom: 0;
+  }
+
+  .vertical-timeline-element-content > .row:first-of-type .col {
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .vertical-timeline-element-content > .row:first-of-type .col:first-child {
+    justify-content: flex-start;
+  }
+
+  .contingency-info {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding-top: 0;
+  }
+
+  .contingency-info > div {
+    width: 100%;
+  }
+
+  .contingency-info .stack {
+    gap: 0.15rem !important;
+  }
+
+  .donation-bill {
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  .donation-amount {
+    font-size: 1.4em;
+    line-height: 1.1;
+  }
+
+  .tip-amount {
+    font-size: 0.85em;
+    line-height: 1.1;
+  }
+
+  .donation-bill {
+    font-size: 0.85rem;
+    line-height: 1.2;
+  }
+
+  .donation-counter {
+    margin-bottom: calc(1vh - 1vw);
+  }
+
+  .event-description-set {
+    font-size: clamp(0.7em, 0.9vw, 0.9em) !important;
+    line-height: 1.15;
+  }
+
+  img.receipt-mark {
+    left: 82% !important;
+    top: 77%;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .donation-amount {
+    font-size: 1.5em;
+  }
+
+  .vertical-timeline-element {
+    height: clamp(11rem, 23vh, 13rem) !important;
+  }
+
+  .vertical-timeline-element-content {
+    height: clamp(12rem, 23vh, 16rem) !important;
+  }
+
+  .vertical-timeline-element-content.bounce-in {
+    width: min(22rem, 21.5vw);
+  }
+
+  img.receipt-mark {
+    left: clamp(10rem, 71%, 18rem);
+    top: 79%;
+  }
+}
+
+/* Big Screen */
+@media only screen and (min-width: 1800px) and (orientation: landscape) {
+  .vertical-timeline-element-content {
+    margin-right: calc(11vh) !important;
+    box-shadow: 0 3px 0 var(--primary);
+    border-left: var(--primary) solid 2px;
+  }
+
+  .vertical-timeline-element {
+    margin-top: calc(1vw - 1vh);
+    margin-right: calc(10vw - 17.2vh);
+    margin-bottom: calc(1vw + 1vh);
+  }
+}

@@ -1,0 +1,46 @@
+.donation-input {
+  width: calc(50% - 0.75rem);
+  margin-top: 0.5rem;
+  margin-right: 0.375rem;
+  margin-left: 0.37rem;
+}
+
+.donation-input-field.form-control {
+  background-color: var(--input-secondary);
+  font-size: x-large;
+  font-weight: 500;
+  border: 2px inset rgb(111, 111, 111);
+  border-top-left-radius: 0.25em !important;
+  border-top: none;
+  border-right: none;
+  text-shadow: 4px 3px 2px var(--bg-fade);
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .donation-input {
+    width: calc(20% + 2rem);
+    height: calc(5vw + 3vh) !important;
+  }
+
+  .donation-input span.input-group-text {
+    width: calc(50% - 1rem);
+    height: calc(5vw + 3vh + 0.125rem);
+    margin-bottom: -0.5rem;
+    border-top-left-radius: 0.25em !important;
+    border-bottom-left-radius: 0.25em !important;
+  }
+
+  .donation-input input.donation-input-field.form-control {
+    height: calc(5vw + 3vh + 0.125rem);
+    margin-bottom: -0.5rem;
+  }
+}
+
+/* Desktop */
+@media only screen and (min-width: 1200px) {
+  .donation-input-field.form-control {
+    min-height: 3.25rem;
+  }
+}

@@ -1,0 +1,75 @@
+.navbar-brand {
+  filter: brightness(0) saturate(100%) invert(97%) sepia(1%) hue-rotate(314deg)
+    contrast(89%);
+}
+
+.navbar-brand img {
+  transition:
+    filter 0.2s ease,
+    transform 0.2s ease;
+}
+
+/* Magic link page desktop hover effects only */
+body.magic-link-page .nav-right:hover {
+  transform: scale(1.01, 1.035);
+  filter: brightness(102%) saturate(110%) contrast(110%);
+  transition: transform 0.1s ease-in;
+}
+
+body.magic-link-page .nav-right:active {
+  transform: scale(0.99, 0.99);
+  filter: brightness(90%) saturate(100%) contrast(100%);
+  transition: transform 0.01s ease-out;
+}
+.navbar-text {
+  color: var(--text) !important;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(200deg);
+  }
+}
+
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .navbar-brand.spinning-logo img {
+    animation: spin 0.25s ease;
+  }
+}
+
+/* Desktop spinning animation */
+@media only screen and (min-width: 600px) {
+  .navbar-brand.spinning-logo img {
+    animation: spin 0.25s ease;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .navbar-text {
+    color: var(--accent) !important;
+    font-size: 1rem;
+    display: inline-block;
+    justify-content: center;
+  }
+
+  .navbar-brand {
+    margin-left: clamp(1.5rem, 1.5vw + 3vh, 5rem);
+  }
+}
+
+/* Tablet, portrait */
+@media only screen and (min-width: 600px) and (orientation: portrait) {
+  .navbar-text {
+    width: 90% !important;
+  }
+
+  .navbar-brand {
+    margin-left: -0.75rem;
+  }
+}

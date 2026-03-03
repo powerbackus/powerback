@@ -1,0 +1,178 @@
+#limit-modal .modal-content {
+  box-shadow: 0 0 7px var(--highlight-muted) !important;
+}
+
+#limit-modal .modal-header {
+  border: 3px var(--highlight) solid;
+  border-bottom: 1px var(--primary) solid;
+}
+
+#limit-modal .modal-title {
+  color: var(--primary) !important;
+  text-shadow: 0 0 1px var(--text);
+}
+
+#limit-modal div.modal-body {
+  background: var(--modal);
+  border: 3px var(--highlight) solid;
+  text-align: center;
+}
+
+#limit-modal div.modal-body .dollar-amount {
+  color: var(--primary);
+}
+
+#limit-modal sup.super a {
+  color: var(--link-active) !important;
+}
+
+#limit-modal div.list-group {
+  --bs-list-group-bg: var(--slate);
+}
+
+#limit-modal div.list-group-item {
+  font-family: 'Inconsolata';
+  color: var(--input-disabled) !important;
+}
+
+#limit-modal div.text-muted.citation.glow.list-group-item {
+  color: var(--link-active) !important;
+}
+
+#limit-modal div.text-muted.citation.list-group-item div.hstack {
+  text-align: left;
+  align-items: baseline;
+}
+
+#limit-modal p {
+  color: var(--text);
+  font-family: 'Inconsolata';
+  text-align: left;
+}
+
+#limit-modal span.pac-annual-limit {
+  color: var(--secondary) !important;
+}
+
+#limit-modal .list-group.footnotes {
+  min-width: 120% !important;
+}
+
+#limit-modal span.natural-link {
+  text-decoration: none;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #limit-modal {
+    margin: 0 auto;
+  }
+
+  #limit-modal div.modal-body {
+    height: auto;
+    padding-bottom: 0;
+    border-width: 1px;
+  }
+
+  #limit-modal div.modal-body {
+    overflow-x: hidden !important;
+  }
+
+  #limit-modal p {
+    font-size: calc(2.25vw + 1vh);
+    line-height: calc(2.25vw + 1vh);
+  }
+
+  #limit-modal sup.super a {
+    font-size: 0.5rem;
+  }
+
+  #limit-modal .text-muted.citation.list-group-item {
+    font-size: 0.75rem !important;
+    align-items: center;
+  }
+
+  #limit-modal .text-muted.citation.list-group-item em {
+    text-align: start;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #limit-modal {
+    min-width: 31vw;
+  }
+
+  #limit-modal div.modal-content {
+    font-size: 1.125rem;
+    line-height: 1.5rem;
+  }
+
+  #limit-modal div.modal-body {
+    overflow-x: hidden;
+  }
+
+  #limit-modal div.list-group {
+    font-size: x-small;
+  }
+
+  .close {
+    font-size: 2em;
+  }
+
+  .citation {
+    font-size: x-small;
+    text-align: start;
+    line-height: 1rem;
+  }
+
+  .citation-uri {
+    text-align: center;
+    word-break: normal;
+    padding-right: calc(1vw - 1vh);
+    max-width: 75%;
+    cursor: text;
+  }
+
+  .super {
+    font-size: x-small;
+  }
+}
+
+/* PAC Limit Button Styles */
+.pac-limit-buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.pac-limit-buttons .confirm-btn {
+  background-color: var(--success-btn);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.pac-limit-buttons .confirm-btn:hover {
+  background-color: var(--success-btn-hover);
+}
+
+.pac-limit-buttons .cancel-btn {
+  background-color: var(--cancel-btn-hover);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.pac-limit-buttons .cancel-btn:hover {
+  background-color: var(--cancel-btn);
+}

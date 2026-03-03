@@ -1,0 +1,53 @@
+button.react-share__ShareButton:hover {
+  filter: invert(1) !important;
+  filter: saturate(50%);
+}
+
+button.react-share__ShareButton:active {
+  filter: invert(1) brightness(90%) saturate(2) !important;
+}
+
+button.react-share__ShareButton:focus-visible {
+  outline: 1px solid var(--primary);
+}
+
+.social-btns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between !important;
+}
+
+.truth-social-share-button {
+  width: 39px !important;
+  height: 39px !important;
+  margin-left: clamp(0.4vw, 7px, 0.55rem) !important;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .social-btns {
+    justify-content: space-between !important;
+    vertical-align: baseline !important;
+  }
+}
+
+/* Mobile, landscape */
+@media only screen and (max-height: 450px) and (orientation: landscape) {
+}
+
+/* Tablet, portrait */
+@media only screen and (min-width: 600px) and (orientation: portrait) {
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+}
+
+/* Desktop */
+@media only screen and (min-width: 1200px) {
+}
+
+/* Big Screen */
+@media only screen and (min-width: 2000px) and (orientation: landscape) {
+}

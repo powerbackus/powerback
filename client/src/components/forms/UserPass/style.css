@@ -1,0 +1,14 @@
+.userpass-form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.pb-sm {
+  font-size: 0.8rem;
+}
+
+.special-invalid .valid-feedback {
+  margin-top: 0;
+  color: var(--validation-error) !important;
+}

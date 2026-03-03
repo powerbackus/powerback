@@ -1,0 +1,55 @@
+.selected-candidate-indicator {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+  margin-top: 0.5rem;
+}
+
+.selected-candidate-badge .selected-candidate-indicator {
+  padding: 0;
+  margin-top: 0;
+}
+
+.selected-candidate-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.selected-candidate-name {
+  color: var(--primary, #0d6efd);
+  font-weight: 500;
+}
+
+.selected-candidate-constituency {
+  color: var(--secondary, #6c757d);
+  font-size: 0.875rem;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .selected-candidate-indicator {
+    padding: 0.375rem 0;
+    margin-top: 0.375rem;
+  }
+
+  .selected-candidate-content {
+    gap: 0.125rem;
+  }
+
+  .selected-candidate-name {
+    font-size: 1rem;
+  }
+
+  .selected-candidate-constituency {
+    font-size: 0.75rem;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .selected-candidate-indicator {
+    padding: 0.5rem 0;
+  }
+}

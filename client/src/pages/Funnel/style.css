@@ -1,0 +1,136 @@
+.list-group-item {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 500;
+}
+
+.list-group-item.completed {
+  text-decoration: underline;
+  font-weight: 100 !important;
+}
+
+.list-group-item.completed:hover {
+  color: var(--bg) !important;
+  cursor: pointer;
+}
+
+.celebration-routing {
+  justify-content: space-evenly;
+}
+
+/* JOYRIDE TOUR */
+.react-joyride__tooltip {
+  font-family: 'Inter';
+}
+
+.react-joyride__tooltip > div > button {
+  font-family: 'Inconsolata';
+  color: var(--tour-btn) !important;
+}
+
+.react-joyride__tooltip > div > button:last-child {
+  background-color: var(--tour-btn) !important;
+  color: var(--text) !important;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #funnel--page {
+    --bs-gutter-x: 0;
+    min-height: 507px;
+    height: 76vh;
+    justify-content: center;
+  }
+
+  .controlled-tab > a {
+    width: 22vw;
+  }
+
+  /* JOYRIDE TOUR */
+  .__floater {
+    left: 2vw !important;
+  }
+
+  #react-joyride-step-4 .__floater {
+    margin-top: -5vw !important;
+  }
+
+  .react-joyride__tooltip {
+    max-width: 90vw !important;
+    width: auto !important;
+    font-size: 0.9rem !important;
+    font-weight: 800;
+  }
+
+  .react-joyride__tooltip > div > div {
+    margin-bottom: -10px !important;
+  }
+
+  .react-joyride__tooltip > div {
+    display: flex;
+    align-items: baseline !important;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #funnel--page {
+    height: 88vh;
+    justify-content: center;
+  }
+
+  .controlled-tab {
+    font-size: 0.87rem;
+  }
+
+  .valid-feedback,
+  .invalid-feedback {
+    margin-top: 0.125rem;
+  }
+
+  .alert-dismissible .btn-close {
+    padding-bottom: 0.5rem !important;
+  }
+
+  .list-group-tabs {
+    display: flex;
+    justify-content: center;
+  }
+
+  .controlled-tab > a {
+    width: 8vw;
+  }
+
+  /*** JOYRIDE TOUR ***/
+  .react-joyride__tooltip {
+    font-family: 'Inter';
+    font-size: 0.9rem !important;
+    font-weight: 800;
+    width: 18vmax !important;
+  }
+
+  .react-joyride__tooltip > div > div {
+    margin-bottom: -15px !important;
+  }
+
+  .react-joyride__tooltip > div {
+    display: flex;
+    align-items: flex-start !important;
+    padding-top: 5px !important;
+    padding-right: 10px !important;
+    padding-left: 10px !important;
+  }
+}
+
+/* Big Screen */
+@media only screen and (min-width: 1680px) and (orientation: landscape) {
+  body {
+    max-height: 100vh;
+  }
+
+  /* center the smaller "tip" card */
+  #celebrate-tab-container-tabpane-tips.fade.tab-pane.active.show {
+    display: inline-block;
+  }
+}

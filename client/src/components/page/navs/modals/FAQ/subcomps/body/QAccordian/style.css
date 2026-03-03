@@ -1,0 +1,95 @@
+#faq-modal .faq-answer {
+  color: var(--text-contrast);
+  background-color: var(--bg);
+  line-height: 1.5rem;
+  text-align: justify;
+  font-family: 'Inter';
+  cursor: default;
+}
+
+#faq-modal button.accordion-button.collapsed {
+  color: var(--primary);
+  font-family: 'Red Hat Text';
+}
+
+#faq-modal button.accordion-button::after {
+  background-image: var(--bs-accordion-btn-active-icon);
+  filter: brightness(0) saturate(100%) invert(91%) sepia(19%) saturate(812%) hue-rotate(37deg) brightness(102%) contrast(104%);
+}
+
+#faq-modal button.accordion-button.collapsed::after {
+  background-image: var(--bs-accordion-btn-icon);
+  filter: brightness(0) saturate(100%) invert(60%) sepia(98%) saturate(906%) hue-rotate(211deg) brightness(101%) contrast(102%);
+}
+
+#faq-modal button.accordion-button {
+  color: var(--contrast);
+  background-color: var(--modal) !important;
+  font-family: 'Red Hat Text';
+}
+
+#faq-modal .accordion-button:not(.collapsed) {
+  box-shadow: none;
+}
+
+#faq-modal .accordion-item {
+  background-color: var(--bg);
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #faq-modal div.modal-body .faq-answer.accordion-body {
+    text-align: left;
+    font-size: 0.85rem !important;
+    line-height: 1.3rem;
+  }
+
+  #faq-modal .accordion-header {
+    border-top: none !important;
+    line-height: 1.5rem;
+  }
+
+  #faq-modal .accordion-header .accordion-button {
+    padding-right: 3vw;
+    padding-left: 1rem;
+  }
+
+  #faq-modal .accordion-item,
+  #faq-modal .accordion-header .accordion-button,
+  #faq-modal .faq-answer:last-of-type:is(.collapsed) {
+    border-bottom: 1px var(--secondary) solid !important;
+  }
+
+  #faq-modal .faq-answer:not(.collapsed),
+  #faq-modal .accordion-item:last-of-type:not(.collapsed),
+  #faq-modal .accordion-item .accordion-button:is(.collapsed) {
+    border-bottom: none !important;
+  }
+
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #faq-modal div.modal-body {
+    height: 42vh !important;
+    padding-top: 0.25rem;
+  }
+
+  #faq-modal .accordion {
+    margin-left: -1rem !important;
+    margin-right: -1rem !important;
+  }
+
+  #faq-modal .accordion-item,
+  #faq-modal .accordion-header .accordion-button,
+  #faq-modal .accordion-header:is(.collapsed) .accordion-button:is(.collapsed),
+  #faq-modal .faq-answer:not(.collapsed) {
+    border-bottom: 1px var(--secondary) solid !important;
+  }
+
+  #faq-modal .accordion-item:last-of-type:not(.collapsed) {
+    border-bottom: none !important;
+  }
+
+}

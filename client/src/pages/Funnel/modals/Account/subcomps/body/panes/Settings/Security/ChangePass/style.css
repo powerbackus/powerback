@@ -1,0 +1,94 @@
+.change-password form {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.change-password form label.form-label,
+.change-password.spinner-border {
+  margin-bottom: 0;
+  color: var(--btn);
+}
+
+.password-changed {
+  color: var(--primary);
+}
+
+#set-new-password-btn {
+  background-color: var(--btn) !important;
+  border-color: var(--modal);
+  color: var(--modal) !important;
+}
+
+#set-new-password-btn:hover,
+#set-new-password-btn:focus,
+#set-new-password-btn:focus-visible {
+  color: var(--btn) !important;
+  border-color: var(--border-gray) !important;
+  background-color: #212529 !important;
+  outline: 0;
+  filter: hue-rotate(23deg);
+  border-width: 2px;
+  border-style: solid;
+  border-color: var(--btn);
+  box-shadow: 0 0 1px 1px var(--text), 0 0 0 2px var(--primary, #fc9);
+  transition: 21ms ease-in-out;
+}
+
+#set-new-password-btn:active {
+  color: var(--text) !important;
+  background-color: var(--bg) !important;
+  border: 1px inset var(--btn-border);
+  border-radius: 6px;
+  border-top-width: 2px;
+  border-left-width: 2px;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+  box-shadow: 0 0 0 0 !important;
+  text-shadow: none !important;
+  transition: 81ms ease-in;
+  outline: 0;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .change-password #set-new-password-btn {
+    font-size: 0.8rem;
+  }
+
+  .change-password .row:first-child {
+    margin-top: 0.25rem !important;
+    margin-bottom: -0.5rem !important;
+  }
+
+  .change-password.spinner-border {
+    height: calc(3.5vw + 3.5vh);
+    width: calc(3.5vw + 3.5vh);
+  }
+
+  .password-changed {
+    font-size: 1em;
+  }
+
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .change-password.spinner-border {
+    height: calc(1.75vw + 1.75vh);
+    width: calc(1.75vw + 1.75vh);
+  }
+
+  .password-changed {
+    font-size: 1.5em;
+  }
+
+  form.change-password .error-alert {
+    font-size: 0.9rem;
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+}
+

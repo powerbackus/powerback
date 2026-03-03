@@ -1,0 +1,63 @@
+.magic-user-interaction {
+  color: var(--text);
+  background-color: rgb(from var(--semi-dark) r g b / 80%);
+  border: 1px solid var(--btn);
+}
+
+.magic-user-interaction form {
+  display: block;
+}
+
+.magic-user-interaction .form-text {
+  color: var(--secondary) !important;
+  font-size: 0.85rem !important;
+  font-family: 'Inter';
+}
+
+#reset-container .magic-user-interaction .submit-btn {
+  color: black;
+  font-family: 'Inconsolata';
+  font-weight: 700;
+  border-color: var(--accent);
+}
+
+#reset-container .magic-user-interaction .submit-btn:focus,
+#reset-container .magic-user-interaction .submit-btn:hover,
+#reset-container .magic-user-interaction .submit-btn:active {
+  background-color: var(--btn);
+}
+
+#reset-container .magic-user-interaction .valid-feedback,
+#reset-container .magic-user-interaction .invalid-feedback {
+  color: var(--validation-feedback) !important;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .magic-user-interaction .btn {
+    margin-top: 1.75rem;
+  }
+
+  .magic-user-interaction div.col-12.userpass--field {
+    height: 10vh !important;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #reset-container .magic-user-interaction {
+    min-height: 100%;
+    height: clamp(39.9vh, 16rem, 32rem) !important;
+    align-items: center;
+  }
+
+  #reset-container .magic-user-interaction div.col-12.userpass--field {
+    width: 23vw;
+    height: min(90px, 11vh);
+    padding-bottom: 1rem;
+  }
+  #reset-container .magic-user-interaction .btn {
+    width: 20vw;
+  }
+}

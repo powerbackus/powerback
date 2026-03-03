@@ -1,0 +1,47 @@
+#privacy-modal span.display-6 {
+  font-family: 'Inter';
+}
+
+#privacy-modal div.modal-body {
+  background: var(--modal);
+  overflow-y: hidden;
+  color: var(--text);
+  font-family: 'Red Hat Text';
+  line-height: 1.5rem;
+  padding-left: 1rem;
+  padding-right: 2.25rem;
+  white-space: pre-line !important;
+}
+
+#privacy-modal div.modal-body ol {
+  list-style: decimal;
+}
+
+#privacy-modal .nav-link {
+  color: var(--btn);
+}
+
+#privacy-modal .nav-link.active {
+  background-color: var(--btn);
+  color: var(--modal);
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #privacy-modal div.modal-body {
+    height: calc(58vw + 47vh);
+    max-height: 90vh;
+    overflow-y: scroll;
+  }
+
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #privacy-modal div.modal-body {
+    max-height: 50vh !important;
+    overflow-y: scroll;
+  }
+
+}

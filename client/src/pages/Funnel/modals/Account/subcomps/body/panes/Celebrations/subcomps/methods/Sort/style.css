@@ -1,0 +1,26 @@
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .donation-subpane-filter-btns label.btn.btn-primary {
+    width: 16vw !important;
+    font-size: 0.86rem !important;
+    margin-top: -4px;
+  }
+
+}
+
+/* Desktop */
+@media only screen and (min-width: 1200px) {
+  .donation-subpane-filter-btns label.btn.btn-primary {
+    font-size: 1rem !important;
+    width: 80px;
+  }
+
+  .donation-subpane-filter-btns label.btn.btn-primary:focus,
+  .donation-subpane-filter-btns label.btn.btn-primary:focus-visible {
+    background-color: var(--btn-active) !important;
+    color: var(--bg) !important;
+  }
+
+}
+

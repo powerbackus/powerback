@@ -1,0 +1,37 @@
+/* Mobile */
+@media only screen and (max-height: 936px) and (orientation: portrait) {
+  .payment.row {
+    width: 99.6vw;
+    max-height: 66vh;
+  }
+
+  .payment.col .checkout-card {
+    min-height: 0;
+  }
+
+  .payment.col .card-img-top {
+    width: 100% !important;
+  }
+
+  #donate-tab-container-tabpane-tips .payment.row {
+    flex-direction: row;
+  }
+
+  div.contingencies-checkbox.form-check label.form-check-label {
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .payment {
+    width: clamp(32vw, 32rem, 36vw);
+  }
+}
+
+/* Big Screen */
+@media only screen and (min-width: 2000px) and (orientation: landscape) {
+  .payment .row {
+    padding-top: 0 !important;
+  }
+}

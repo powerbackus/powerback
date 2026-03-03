@@ -1,0 +1,156 @@
+#contributing-modal,
+#contributing-modal .modal-dialog {
+  max-width: 400px;
+  width: 100%;
+}
+
+#contributing-modal .modal-content {
+  background-color: var(--elevated);
+
+  border-radius: 5px;
+}
+
+#contributing-modal .modal-header .modal-title {
+  color: var(--primary) !important;
+}
+
+#contributing-modal .modal-header {
+  border: 1px outset var(--attention-muted);
+  border-bottom: 1px outset var(--border-gray);
+}
+
+#contributing-modal .modal-body {
+  color: var(--text);
+  padding: 1rem 1.25rem;
+}
+
+#contributing-modal .modal-body p.contributing-description {
+  color: var(--secondary) !important;
+  font-family: 'Inter', sans-serif;
+  line-height: 1.5;
+}
+
+#contributing-modal .contributing-form-control {
+  color: var(--input);
+  background-color: var(--contrast-black);
+  border: 1px solid var(--border-gray);
+  font-family: 'Inconsolata', sans-serif;
+}
+
+#contributing-modal .contributing-form-control:focus {
+  color: var(--input);
+  background-color: var(--slate);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+  outline: none;
+}
+
+#contributing-modal .contributing-form-control::placeholder {
+  color: var(--text-placeholder);
+}
+
+#contributing-modal .contributing-form .form-label {
+  color: var(--text);
+}
+
+#contributing-modal .contributing-submit-btn {
+  color: var(--text-black);
+  background-color: var(--btn);
+  border: 2px solid var(--btn-border);
+  font-family: 'Inconsolata', sans-serif;
+  font-weight: 700;
+}
+
+#contributing-modal .contributing-submit-btn:hover:not(:disabled) {
+  color: var(--text-black);
+  background-color: var(--btn-hover);
+  border-color: none !important;
+}
+
+#contributing-modal .contributing-submit-btn:active:not(:disabled) {
+  color: var(--text-black);
+  background-color: var(--btn-active) !important;
+  border: 2px inset var(--btn-border) !important;
+}
+
+#contributing-modal .btn-outline-light {
+  color: var(--text) !important;
+  border-color: var(--border-gray) !important;
+}
+
+#contributing-modal .btn-outline-light:hover,
+#contributing-modal .btn-outline-light:focus {
+  color: var(--text-contrast) !important;
+  background-color: var(--elevated) !important;
+  border: 1px outset var(--btn-border) !important;
+}
+
+#contributing-modal .btn-outline-light,
+#contributing-modal .btn-outline-light:active {
+  font-family: 'Inconsolata', sans-serif !important;
+  font-weight: 700;
+}
+
+#contributing-modal .btn-outline-light:active {
+  color: var(--text-contrast);
+  background-color: var(--shadow-dark) !important;
+  border: 1px solid var(--btn-border) !important;
+  font-family: 'Inconsolata', sans-serif !important;
+  font-weight: 700;
+}
+
+#contributing-modal .contributing-modal-success {
+  color: var(--success);
+  font-family: 'Inconsolata', sans-serif !important;
+}
+
+#contributing-modal .text-muted {
+  color: var(--text-placeholder) !important;
+}
+
+#contributing-modal .alert-danger {
+  color: var(--error);
+  background-color: var(--alert-dark);
+  border-color: var(--error);
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #contributing-modal .modal-content {
+    height: 72vh !important;
+    width: 97vw !important;
+  }
+
+  #contributing-modal,
+  #contributing-modal .modal-dialog {
+    max-width: 100%;
+    width: 100%;
+    margin: 0.5rem;
+  }
+
+  #contributing-modal .modal-body {
+    padding: 0.75rem 0.75rem 1rem;
+  }
+
+  #contributing-modal .modal-header .modal-title {
+    font-size: 1rem;
+  }
+
+  #contributing-modal .contributing-description {
+    font-size: 0.85rem;
+  }
+
+  #contributing-modal .contributing-form-control {
+    font-size: 0.9rem;
+  }
+
+  #contributing-modal .modal-body .d-flex.justify-content-end {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  #contributing-modal .modal-body .d-flex.justify-content-end > .btn {
+    width: 100%;
+  }
+}

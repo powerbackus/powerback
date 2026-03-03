@@ -1,0 +1,52 @@
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #splash .form-toggle {
+    margin-bottom: calc(-3vw - 1vh);
+  }
+
+  #splash label.form-check-label .left {
+    margin-right: 3em;
+  }
+
+  #splash label.form-check-label > span {
+    font-size: 15px !important;
+    text-shadow: 0px 0px 3px var(--bg);
+  }
+
+  .toc label.form-check-label {
+    font-size: 15px !important;
+  }
+
+}
+
+/* Desktop */
+@media only screen and (min-width: 1200px) {
+  #splash label.form-check-label {
+    display: flex;
+    flex-direction: column;
+    align-content: flex-end;
+    flex-wrap: wrap;
+    margin-top: -1.875em;
+  }
+
+  @-moz-document url-prefix() {
+    #splash label.form-check-label {
+      line-height: 20px;
+    }
+
+    #splash label.form-check-label > span {
+      margin-top: 8px !important;
+      padding-bottom: 8px;
+    }
+
+  }
+
+  #splash label.form-check-label > span {
+    margin-top: -5px;
+    margin-bottom: 15px;
+    margin-left: -5px;
+  }
+
+}
+

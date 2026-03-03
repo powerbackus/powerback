@@ -1,0 +1,191 @@
+.pol-row-placeholder .col {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pol-wrapper {
+  position: relative;
+}
+
+.skip-link {
+  position: absolute;
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
+  margin-left: 8px;
+  background: var(--primary, #000);
+  color: var(--dark, #000);
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  z-index: 1000;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 1rem;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  transition:
+    width 0.2s ease,
+    height 0.2s ease,
+    padding 0.2s ease,
+    clip-path 0.2s ease,
+    margin-left 0.2s ease;
+}
+
+.skip-link:focus {
+  width: auto;
+  height: auto;
+  padding: 8px 16px;
+  margin-left: 8px;
+  clip-path: none;
+  overflow: visible;
+  outline: 2px solid var(--info, #0dcaf0);
+  outline-offset: 2px;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  div#pol-carousel {
+    margin-left: -4vw;
+    width: 104%;
+    padding-left: 0;
+  }
+
+  .pol-carousel {
+    will-change: transform;
+    transform: translateZ(0);
+  }
+
+  /* Gap between cards; slot width set in JS (itemSize), card width + margin from vars */
+  .pol-w-card {
+    width: var(--pol-card-width) !important;
+    margin-right: var(--pol-gap) !important;
+  }
+
+  /* Fill column height so AutoSizer can measure; min-height keeps cards visible. */
+  .pol-row {
+    margin-top: 1vh;
+    height: 100%;
+    min-height: calc(25vh + 21vw);
+    overflow-x: hidden !important;
+    overflow-y: hidden !important;
+    padding-right: 8px;
+  }
+
+  .pol-row-placeholder {
+    position: relative;
+    padding-top: 1vh;
+    margin-left: 4vw;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar,
+  .hide-scrollbar::-moz-scrollbar,
+  .hide-scrollbar::-o-scrollbar,
+  .hide-scrollbar::-ms-scrollbar {
+    display: none;
+  }
+
+  .hide-scrollbar {
+    --ms-overflow-style: none;
+    --moz-overflow-style: none;
+    --moz-osx-overflow-style: none;
+    --webkit-overflow-style: none;
+    --o-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Wide layout (tablet landscape / desktop-style) */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #pol-carousel {
+    margin-left: calc(-50vw + 50%);
+  }
+
+  #pol-carousel img {
+    max-width: none;
+    display: inline-block;
+    min-height: clamp(13vw, 17rem, 30vh) !important;
+  }
+
+  .pol-row,
+  .pol-row-placeholder {
+    width: 100vw;
+    height: clamp(39vh, 21.25rem, 40.5vh) !important;
+    padding-top: clamp(1vh, 0.28rem, 1.66vh);
+    overflow-x: hidden;
+    overflow-y: hidden !important;
+    background-color: var(--bg);
+  }
+
+  .pol-carousel-placeholder {
+    min-width: 228vw;
+    margin-left: -0.75rem;
+    overflow-x: hidden !important;
+  }
+
+  .pol-carousel-placeholder img {
+    max-width: none;
+  }
+
+  ::-webkit-scrollbar {
+    width: auto;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    margin-right: 12px !important;
+    margin-left: 13px !important;
+    box-shadow: inset 0 0 5px var(--primary);
+    border-radius: 10px;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    width: 5px !important;
+    background: var(--accent);
+    border-radius: 10px;
+    cursor: pointer;
+  }
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
+}
+
+/* Big Screen */
+@media only screen and (min-width: 2000px) and (orientation: landscape) {
+  #pol-carousel {
+    height: 505px;
+    min-height: 525px;
+    margin-left: calc(-62vw + 50%);
+    width: 99%;
+  }
+
+  #pol-carousel img {
+    max-width: none;
+  }
+
+  .pol-carousel-placeholder {
+    margin-left: calc(-17.18vw + 50%);
+    height: 337px;
+    min-width: 228vw;
+    min-height: 337px;
+    overflow-x: hidden !important;
+  }
+
+  .pol-carousel-placeholder img {
+    max-width: none;
+  }
+
+  .pol-row {
+    width: 100vw;
+    height: 357px;
+  }
+}

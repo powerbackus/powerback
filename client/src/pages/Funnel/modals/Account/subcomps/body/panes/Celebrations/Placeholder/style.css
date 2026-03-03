@@ -1,0 +1,10 @@
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .placeholder-glow.vertical-timeline-element
+    .vertical-timeline-element-content.bounce-in {
+    height: 24.59vh;
+  }
+
+}
+

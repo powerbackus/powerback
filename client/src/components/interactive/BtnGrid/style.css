@@ -1,0 +1,81 @@
+.btn-container {
+  background: transparent;
+  border: none;
+}
+
+.btn-grid {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.tips-btn-grid {
+  flex-direction: row-reverse;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .btn-grid {
+    margin-top: -0.5vh !important;
+  }
+
+  .tips-btn-grid {
+    padding: 0 0.5rem;
+    display: grid;
+  }
+
+  .tips-btn-grid > *:nth-child(1) {
+    grid-area: 1 / 2;
+    min-width: 38vw;
+  } /* 20% top right */
+  .tips-btn-grid > *:nth-child(2) {
+    grid-area: 1 / 1;
+    min-width: 38vw;
+  } /* 10% top left */
+  .tips-btn-grid > *:nth-child(3) {
+    grid-area: 2 / 2;
+    min-width: 38vw;
+  } /* Zero bottom right */
+  .tips-btn-grid > *:nth-child(4) {
+    grid-area: 2 / 1;
+    min-width: 38vw;
+  }
+
+  p.tip-ask.form-info {
+    margin-bottom: -9px;
+    font-size: 0.66rem;
+  }
+
+  .btn-container {
+    margin-top: 0.5vh;
+    margin-bottom: 0.33vh;
+    padding-bottom: 0.5em;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .btn-container {
+    margin-top: 1vh;
+    margin-bottom: 1.25vh;
+  }
+
+  .tips-btn-grid {
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  p.tip-ask.form-info {
+    margin-bottom: -0.5em !important;
+    text-align: center;
+  }
+}
+
+/* Big Screen */
+@media only screen and (min-width: 1800px) and (orientation: landscape) {
+  .btn-container {
+    width: 100%;
+  }
+}

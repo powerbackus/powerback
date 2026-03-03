@@ -1,0 +1,26 @@
+.button--continue {
+  width: 60%;
+  color: var(--btn) !important;
+  border-color: var(--btn) !important;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .button--continue {
+    --bs-btn-padding-y: 0.33rem;
+  }
+}
+
+/* Desktop */
+@media only screen and (min-width: 1200px) {
+  .button--continue:hover {
+    color: var(--continue-btn-active) !important;
+    background-color: var(--continue-btn-hover);
+    border-color: var(--btn) !important;
+  }
+
+  .button--continue:active {
+    color: var(--continue-btn-active) !important;
+  }
+}

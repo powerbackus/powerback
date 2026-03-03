@@ -1,0 +1,97 @@
+#account-modal div.modal-body {
+  background: var(--modal);
+}
+
+#account-modal .nav-link {
+  color: var(--btn);
+}
+
+#account-modal .nav-link:hover {
+  color: var(--nav-link-hover);
+}
+
+#account-modal .nav-link:active {
+  color: var(--nav-link-active);
+}
+
+#account-modal .nav-link.active {
+  cursor: default !important;
+}
+
+#account-modal .side-pills .nav-link {
+  color: var(--link);
+}
+
+#account-modal .side-pills .nav-link:hover {
+  color: var(--side-pills-hover);
+}
+
+#account-modal .side-pills .nav-link:active {
+  color: var(--side-pills-active);
+}
+
+#account-modal .side-pills .nav-link.active {
+  color: var(--surface);
+  background-color: var(--link);
+}
+
+#account-modal .side-pills .nav-link.active:hover {
+  cursor: default !important;
+}
+
+#account-modal .nav-link.active {
+  background-color: var(--secondary);
+  color: var(--modal);
+}
+
+#account-modal div.profile-list-group.list-group {
+  --bs-list-group-bg: var(--slate);
+  border-radius: 0.5rem;
+}
+
+#account-modal div.list-group-item {
+  align-items: baseline;
+  font-family: 'Inconsolata';
+}
+
+#account-modal .modal-footer {
+  display: none !important;
+}
+
+#account-modal .side-pills.justify-content-end.nav.nav-pills {
+  justify-content: center !important;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #account-modal div.modal-header {
+    border-top-right-radius: 4px;
+    border-top-left-radius: 4px;
+  }
+
+  #account-modal div.modal-body {
+    height: 150vw;
+    touch-action: pinch-zoom;
+  }
+
+  #account-modal .side-pills .nav-link.active {
+    padding-bottom: 10px;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #account-modal div.modal-body {
+    height: 47vh !important;
+    overflow-x: hidden;
+  }
+
+  #account-modal .side-pills.nav.nav-pills {
+    font-size: 1.25rem !important;
+  }
+
+  #account-modal div.profile-list-group.list-group {
+    font-size: smaller;
+  }
+}

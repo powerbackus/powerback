@@ -1,0 +1,136 @@
+.footer {
+  position: fixed;
+  align-items: center;
+  font-size: small;
+  font-family: 'Inconsolata';
+  line-height: 1;
+}
+
+div.paid-for.mb-1.col {
+  border: 1px solid #9bad9780;
+  cursor: default;
+  user-select: none;
+}
+
+.link-appearance {
+  color: var(--link-hover) !important;
+}
+
+.paid-for > p {
+  font-family: 'Inter';
+}
+
+.footer-links {
+  display: block !important;
+}
+
+.gg:hover,
+.citations.hstack > img:hover {
+  cursor: pointer;
+}
+
+.footer,
+.footer a {
+  color: var(--text);
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .footer {
+    background-color: var(--mobile-bg) !important;
+  }
+
+  .citations.hstack {
+    justify-content: center;
+  }
+
+  .paid-for > p {
+    padding-bottom: 0.125rem;
+    font-size: calc(0.75vw + 0.5vh) !important;
+  }
+
+  .citation {
+    margin-top: 0.7vh;
+    margin-left: 1px;
+  }
+}
+
+/* Mobile, landscape */
+@media only screen and (max-height: 450px) and (orientation: landscape) {
+  .footer {
+    width: 100vw !important;
+    bottom: 6vh !important;
+  }
+
+  .paid-for > p {
+    padding-bottom: 0.125rem;
+    font-size: 0.6rem;
+  }
+
+  .citations.hstack {
+    display: flex;
+    justify-content: space-evenly;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .footer {
+    bottom: 1vh;
+  }
+
+  div.paid-for.mb-1.col {
+    width: 60vw;
+    margin-bottom: 0 !important;
+  }
+
+  .paid-for > p {
+    height: 4vh;
+    font-size: clamp(12px, 1.33vh, 18px);
+    line-height: 1.25vh;
+  }
+
+  .citations.hstack {
+    display: flex;
+    flex-direction: row;
+    align-self: stretch;
+    justify-content: space-evenly;
+    align-items: center;
+  }
+
+  .footer-links {
+    margin-top: 0.25rem;
+    padding-bottom: 0.55rem !important;
+  }
+}
+
+/* Tablet, portrait */
+@media only screen and (min-width: 600px) and (orientation: portrait) {
+  .footer {
+    bottom: 1vh;
+    text-align: center !important;
+  }
+
+  .citations.hstack {
+    justify-content: center;
+  }
+
+  .paid-for > p {
+    padding-bottom: 0.125rem;
+    font-size: calc(0.75vw + 0.5vh) !important;
+  }
+}
+
+/* Desktop */
+@media only screen and (min-width: 1200px) {
+  .footer {
+    max-height: 7rem;
+  }
+
+  div.paid-for.mb-1.col {
+    width: 100vw;
+    border-right: 0;
+    border-left: 0;
+  }
+}

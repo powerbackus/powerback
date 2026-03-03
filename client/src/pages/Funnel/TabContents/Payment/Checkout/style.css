@@ -1,0 +1,208 @@
+.checkout-card {
+  color: var(--text);
+  background-color: rgb(from var(--semi-dark) r g b / 80%);
+  border: 1px solid var(--btn);
+}
+
+.checkout-card .card-header {
+  color: var(--text-contrast);
+  background-color: var(--checkout-header);
+  text-align: left;
+  border-bottom: 1px dotted var(--attention-muted);
+}
+
+.checkout-card .card-title {
+  font-family: 'Oswald';
+}
+
+.checkout-card .card-text {
+  font-family: 'Inter';
+}
+
+.pending-choices {
+  flex-direction: column;
+  align-content: center;
+}
+
+.subtitle {
+  color: var(--secondary);
+  font-family: 'Inconsolata';
+}
+
+.checkout-card .card-title .row {
+  color: var(--positive-indicator);
+}
+
+.checkout-card.pending-card .card-body {
+  padding-top: 0.7em;
+  font-family: 'Inconsolata';
+}
+
+.checkout-card .list-group-item {
+  text-align: start;
+}
+
+span.celebration-condition {
+  color: var(--attention);
+}
+
+#checkout-total-amount {
+  color: var(--positive-indicator);
+}
+
+.checkout-headshot {
+  border-radius: 5px;
+}
+
+.checkout-pol-heading {
+  background-color: rgb(from var(--positive-indicator) r g b / 70%);
+  min-height: 41.08px;
+}
+
+.checkout-card .body-top img.card-img-top {
+  border: 1px solid var(--primary);
+}
+
+.checkout-card .list-group-item {
+  padding-right: 2vw;
+  background-color: transparent !important;
+}
+
+#checkout-total {
+  font-weight: 600;
+  color: var(--positive-indicator);
+}
+
+.card-footer button.button--continue.btn {
+  border-bottom: 3px solid var(--btn);
+}
+
+.card-footer:last-child {
+  padding: 0;
+}
+
+.checkout-card .card-footer .bi-question-circle {
+  color: var(--info);
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .body-top > div:nth-child(2) {
+    padding-left: 0;
+    padding-right: 0.125em;
+  }
+
+  .checkout-card .card-title .row {
+    margin-bottom: 0.5rem;
+    font-size: 1.2rem !important;
+  }
+
+  .pending-choices {
+    font-size: 1em;
+    padding-left: 0.5rem;
+    line-height: 1.3;
+  }
+
+  #celebrate-tab-container-tab-payment p#surcharge-info {
+    text-align: left;
+    font-size: clamp(0.875em, calc(1vw + 1vh), 1.125em);
+    min-height: 6.43vh;
+    max-height: 7.43vh;
+  }
+
+  .surcharge-list-group-item.d-inline-flex.align-items-center {
+    font-size: clamp(0.875em, calc(1vw + 1vh - 2px), 1.125em);
+  }
+
+  span.celebration-condition {
+    font-size: clamp(0.875em, calc(1vw + 1vh), 1.125em);
+    line-height: 1.2;
+  }
+
+  .checkout-card .list-group-flush.list-group.list-group-flush {
+    display: inline-flex;
+    width: 95%;
+  }
+
+  .checkout-card .list-group-item {
+    padding: 0.25rem 0rem;
+    font-size: 13px;
+
+    align-items: center;
+  }
+
+  .bill-of-sale {
+    padding: 0 !important;
+  }
+
+  .subtitle {
+    font-size: clamp(0.625em, calc(1vw + 1vh), 0.875em);
+  }
+
+  #surcharge-info {
+    font-size: 0.875em;
+  }
+
+  #surcharge-info .natural-link {
+    text-decoration: none;
+  }
+
+  #checkout-total {
+    padding-top: 0.75rem;
+  }
+
+  .what-happens-next-tip {
+    padding: 0.5rem;
+    line-height: 20px;
+    height: 20px;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .checkout-card .card-title .row {
+    font-size: 2rem !important;
+  }
+
+  .pending-choices {
+    line-height: 1.6rem;
+  }
+
+  .pending-choices.bill-of-sale {
+    font-family: 'Inconsolata';
+    font-weight: 600;
+    letter-spacing: 0.1em;
+  }
+
+  .subtitle {
+    font-size: 1.25rem !important;
+    font-weight: 300;
+    line-height: 2rem;
+    letter-spacing: initial;
+  }
+
+  .checkout-card .body-top {
+    align-items: center;
+  }
+
+  .checkout-headshot {
+    min-width: 25vh;
+  }
+
+  .checkout-card .body-top img.card-img-top {
+    width: 20.6vh;
+  }
+
+  span.celebration-condition {
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+    line-height: 1.2;
+  }
+
+  #surcharge-info {
+    margin-left: 0.25rem;
+    font-size: 0.75rem;
+    line-height: 1.1;
+  }
+}

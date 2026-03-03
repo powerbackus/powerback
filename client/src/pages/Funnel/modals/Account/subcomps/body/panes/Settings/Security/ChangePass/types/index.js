@@ -1,0 +1,1 @@
+export { ChangeProps } from './Props';

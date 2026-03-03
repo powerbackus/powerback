@@ -1,0 +1,13 @@
+#sidenav-header .powerback {
+  font-size: 1.35rem !important;
+}
+
+.p-currency {
+  color: var(--secondary);
+  font-size: x-large;
+}
+
+.sidenav-close--btn {
+  float: right;
+}
+

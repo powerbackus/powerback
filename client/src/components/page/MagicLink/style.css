@@ -1,0 +1,24 @@
+/*** SCREEN SIZES ***/
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .secureuserpass--row {
+    height: 77vh;
+  }
+
+  .secureuserpass--field {
+    height: 42vh;
+    width: 29vw;
+  }
+
+  .secureuserpass--row .userpass--field .form-group.input-group.has-validation {
+    flex-wrap: wrap !important;
+  }
+
+  .magic-user-interaction .btn {
+    width: 9vw;
+    margin: 0.25rem;
+    margin-top: 0.75rem;
+    font-family: 'Red Hat Text';
+    font-weight: 700;
+  }
+}

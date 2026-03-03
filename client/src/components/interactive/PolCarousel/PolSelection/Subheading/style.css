@@ -1,0 +1,44 @@
+.district {
+  font-family: 'Inter';
+  color: var(--text);
+}
+
+.district.highlight {
+  color: var(--primary) !important;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .district {
+    height: calc(3vw + 1vh);
+    margin-top: 0.125rem;
+    font-size: calc(2vw + 1vh);
+  }
+
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .district {
+    margin-top: 0.25rem;
+    font-size: 0.95rem;
+    /* make line-height any higher and it breaks smooth scroll ?! */
+    line-height: 1.11;
+    letter-spacing: -0.5px;
+  }
+
+}
+
+/* Big Screen */
+@media only screen and (min-width: 2000px) and (orientation: landscape) {
+  .district {
+    margin-top: 0.375em;
+    font-size: 1.425em;
+    /* make line-height any higher and it breaks smooth scroll ?! */
+    line-height: 1.11;
+    letter-spacing: -0.5px;
+  }
+
+}
+
