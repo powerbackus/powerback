@@ -1,0 +1,396 @@
+---
+description: API client patterns, route handlers, authentication, and rate limiting
+globs:
+  - 'routes/api/**/*'
+  - 'routes/api/**/*.js'
+  - 'client/src/api/**/*'
+  - 'client/src/api/**/*.ts'
+  - 'client/src/api/**/*.js'
+alwaysApply: false
+priority: 3
+---
+
+# API Patterns
+
+## Frontend API Client
+
+### API Client Structure (`/client/src/api/API.ts`)
+
+Centralized API client using axios with CSRF token handling.
+
+**CRITICAL**: All client HTTP calls MUST route through `client/src/api/API.ts` with interceptors. Never make direct axios calls from components or hooks.
+
+### Base Configuration
+
+```typescript
+axios.defaults.baseURL =
+  process.env.NODE_ENV === 'development' ? '/api/' : APP.API_URL;
+```
+
+### CSRF Token Handling
+
+```typescript
+function getCsrfTokenFromCookie(): string | null {
+  const name = 'us.powerback.csrf-token=';
+  const decoded = decodeURIComponent(document.cookie);
+  const parts = decoded.split(';');
+
+  for (let p of parts) {
+    p = p.trim();
+    if (p.startsWith(name)) {
+      return p.substring(name.length);
+    }
+  }
+
+  return null;
+}
+```
+
+### API Method Pattern
+
+```typescript
+interface PowerbackAPI {
+  methodName: (
+    param1: Type1,
+    param2: Type2
+  ) => Promise<AxiosResponse<ResponseType>>;
+}
+
+// Implementation
+updateUser: async (
+  userId: string,
+  userData: ContactInfo & {
+    resetPasswordHash: string;
+    resetPasswordHashExpires: Date;
+    resetPasswordHashIssueDate: Date;
+  }
+) => {
+  const csrfToken = getCsrfTokenFromCookie();
+  return axios.put(`/users/update/${userId}`, userData, {
+    headers: {
+      'X-CSRF-Token': csrfToken || '',
+    },
+  });
+},
+```
+
+## Backend API Routes
+
+### Route File Structure (`/routes/api`)
+
+Organized by resource: `users.js`, `celebrations.js`, `payments.js`, `congress.js`, etc.
+
+### Route Pattern
+
+```javascript
+const router = require('express').Router(),
+  Controller = require('../../controller/resource'),
+  tokenizer = require('../../auth/tokenizer'),
+  { validate } = require('../../validation'),
+  { rateLimiters } = require('../../services/utils');
+
+// Rate limiting
+const resourceLimiter = rateLimiters.resource;
+
+// Route handlers
+router.post(
+  '/endpoint',
+  resourceLimiter,
+  tokenizer.guard(),
+  async (req, res) => {
+    try {
+      // Validation
+      const validated = await validate(schema, req.body);
+
+      // Controller logic
+      const result = await Controller.action(validated, req.user);
+
+      // Response
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+module.exports = router;
+```
+
+## Authentication Patterns
+
+### JWT Token Guard
+
+```javascript
+// Protect routes with authentication
+router.get('/protected', tokenizer.guard(), async (req, res) => {
+  // req.user contains authenticated user data
+  const userId = req.user.id;
+  // ...
+});
+```
+
+### Ownership Guard
+
+```javascript
+const guardOwnership = require('./middleware/guardOwnership');
+
+// Ensure user owns the resource
+router.put(
+  '/users/:userId',
+  tokenizer.guard(),
+  guardOwnership,
+  async (req, res) => {
+    // req.user.id === req.params.userId
+    // ...
+  }
+);
+```
+
+## Rate Limiting
+
+### Rate Limiter Pattern
+
+```javascript
+const { rateLimiters } = require('../../services/utils');
+
+const loginLimiter = rateLimiters.login;
+const createAccountLimiter = rateLimiters.createAccount;
+const passwordResetLimiter = rateLimiters.passwordReset;
+
+router.post('/login', loginLimiter, async (req, res) => {
+  // ...
+});
+```
+
+### Localhost Exemption
+
+Rate limiters exempt localhost requests in development mode.
+
+## Request Validation
+
+### Joi Schema Validation
+
+```javascript
+const { validate } = require('../../validation');
+const schemas = require('../../validation');
+
+router.post('/endpoint', async (req, res, next) => {
+  try {
+    const validated = await validate(schemas.resourceSchema, req.body);
+    // Use validated data
+  } catch (error) {
+    next(error);
+  }
+});
+```
+
+### Validation Error Handling
+
+Validation errors are caught and passed to error handler middleware.
+
+## Error Handling
+
+### Error Handler Middleware (`/routes/api/middleware/errorHandler.js`)
+
+```javascript
+const errorHandler = (err, req, res, next) => {
+  logger.error(err.stack);
+  res.status(err.status || 500).json({
+    error: {
+      message: err.message || 'Internal Server Error',
+      status: err.status || 500,
+    },
+  });
+};
+```
+
+### Error Response Format
+
+```json
+{
+  "error": {
+    "message": "Error message",
+    "status": 400
+  }
+}
+```
+
+### Error Status Codes
+
+- `400` - Bad Request
+- `401` - Unauthorized
+- `403` - Forbidden
+- `404` - Not Found
+- `409` - Conflict
+- `422` - Unprocessable Entity
+- `500` - Internal Server Error
+
+## Response Patterns
+
+### Success Response
+
+```javascript
+res.status(200).json({
+  data: result,
+  message: 'Success message',
+});
+```
+
+### Error Response
+
+```javascript
+res.status(400).json({
+  error: {
+    message: 'Error message',
+    status: 400,
+  },
+});
+```
+
+### Pagination Response
+
+```javascript
+res.status(200).json({
+  data: items,
+  pagination: {
+    page: 1,
+    limit: 10,
+    total: 100,
+    pages: 10,
+  },
+});
+```
+
+## API Endpoint Patterns
+
+### User Management Endpoints
+
+```
+POST   /api/users/              - Create user account
+POST   /api/users/login         - User login
+GET    /api/users/logout        - User logout
+POST   /api/users/refresh       - Refresh JWT token
+GET    /api/users/data/:userId  - Get user data
+PUT    /api/users/update/:userId - Update user profile
+DELETE /api/users/delete/:userId - Delete user account
+PUT    /api/users/change/:userId - Change password
+PUT    /api/users/forgot         - Forgot password
+GET    /api/users/reset/:hash    - Validate reset hash
+PUT    /api/users/reset          - Reset password
+GET    /api/users/activate/:hash - Activate account
+```
+
+### Celebration Endpoints
+
+```
+POST   /api/celebrations/              - Create celebration
+GET    /api/celebrations/user/:userId   - Get user celebrations
+GET    /api/celebrations/:celebrationId - Get celebration
+PATCH  /api/celebrations/:celebrationId/resolve - Resolve celebration
+POST   /api/celebrations/:celebrationId/receipt - Send receipt
+```
+
+### Payment Endpoints
+
+```
+POST   /api/payments/setup      - Setup Stripe payment intent
+POST   /api/payments/process    - Process payment
+POST   /api/payments/method     - Set payment method
+```
+
+### Congress Endpoints
+
+```
+GET    /api/congress/pols       - Get politicians
+GET    /api/congress/pol/:id    - Get politician
+GET    /api/congress/bill/:id   - Get bill
+GET    /api/congress/election-dates - Get election dates
+```
+
+## Request/Response Types
+
+### TypeScript Interfaces
+
+```typescript
+interface AuthResponse extends UserData {
+  accessToken: string;
+}
+
+interface StripePaymentResponse {
+  paymentIntent: string;
+  clientSecret: string;
+}
+
+interface PaymentValidationResponse {
+  donation: number;
+  complies: boolean;
+  has_stakes: boolean;
+  understands: boolean;
+  tip?: number;
+  tipComplies?: boolean;
+  pacLimitInfo?: {
+    currentPACTotal: number;
+    pacLimit: number;
+    remainingPACLimit: number;
+    message: string;
+  };
+}
+```
+
+## Async/Await Pattern
+
+### Controller Pattern
+
+```javascript
+router.post('/endpoint', async (req, res, next) => {
+  try {
+    const result = await Controller.action(req.body, req.user);
+    res.status(200).json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+```
+
+### Error Propagation
+
+Errors are caught and passed to `next()` for error handler middleware.
+
+## Logging Patterns
+
+### Request Logging
+
+```javascript
+const { requireLogger } = require('../../services/logger');
+const logger = requireLogger(__filename);
+
+logger.info('Request received', {
+  method: req.method,
+  path: req.path,
+  userId: req.user?.id,
+});
+```
+
+### Error Logging
+
+```javascript
+logger.error('Error processing request', {
+  error: error.message,
+  stack: error.stack,
+  userId: req.user?.id,
+  path: req.path,
+});
+```
+
+## Best Practices
+
+1. **Centralized API Client**: Use single API client file for all requests
+2. **CSRF Protection**: Include CSRF tokens in requests
+3. **Authentication**: Protect routes with `tokenizer.guard()`
+4. **Validation**: Validate all inputs with Joi schemas
+5. **Rate Limiting**: Apply rate limits to prevent abuse
+6. **Error Handling**: Use consistent error response format
+7. **Logging**: Log requests and errors for debugging
+8. **Type Safety**: Define TypeScript interfaces for requests/responses
+9. **Async/Await**: Use async/await for asynchronous operations
+10. **Error Propagation**: Pass errors to error handler middleware

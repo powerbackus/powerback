@@ -1,0 +1,405 @@
+---
+description: CSS styling patterns, design system, Bootstrap integration, and responsive design
+globs:
+  - "client/src/**/*.css"
+  - "client/src/**/*.module.css"
+  - "**/*.css"
+excludeGlobs:
+  - "node_modules/**/*"
+  - "client/build/**/*"
+  - "client/dist/**/*"
+alwaysApply: false
+priority: 3
+---
+
+# CSS Styling Patterns
+
+## Design System
+
+### Color Palette
+- **Primary Orange**: `#fc9` - Main brand color
+- **Secondary Pink**: `#f9c` - Complementary brand color
+- **Accent Green**: `#9bad97` - Borders and navigation
+- **Main Background**: `#1b1b1b` - Primary dark background
+- **Shoe Black**: `#080808` - Deepest black for contrast
+- **Primary Text**: `#ccc` - Light gray for main text
+- **Form Text**: `#20cf9d` - Bright green for form input text
+- **Link Blue**: `#6da7f9` - Primary link color
+- **Button Purple**: `#c9f` - Primary button background
+- **Success Green**: `#20cf9d` - Success states
+- **Error Red**: `#ff4444` - Error states
+
+### Typography
+- **Oswald** - Brand font for headings and POWERBACK branding
+- **Inconsolata** - Monospace for forms, technical content, UI elements
+- **Inter** - Modern sans-serif for specific UI components
+- **Red Hat Text** - Secondary sans-serif for terms and legal content
+
+### Border Radius
+- Small elements: `4px` (buttons, inputs)
+- Medium elements: `5px` (cards, modals)
+- Large elements: `8px` (sections, containers)
+- Circular elements: `50%` (avatars, icons)
+
+### Box Shadows
+- Subtle shadows: `0 0 7px rgba(153, 204, 255, 0.5)` (modals)
+- Button shadows: `-1px 2px 0px #ccc` (default), `0px 1px 1px #ccc` (hover)
+- Email shadows: `4px 6px 0px #080808` (3D button effect)
+- Inset shadows: `inset 0 0 5px #cf9` (form inputs)
+
+### Border Patterns
+- Primary borders: `2px solid #9bad97` (navigation, sections)
+- Form borders: `1px solid #c9f` (inputs), `2px solid #3c3c3b` (search)
+- Modal borders: `3px solid #ccccccaf` (headers), `1px solid #9bad97` (body)
+- Button borders: `2px solid #080808` (default), `1px solid #fc9` (checked states)
+
+## CSS File Organization
+
+### Co-location Pattern
+Keep CSS files co-located with components:
+
+```
+components/
+  alerts/
+    StyledAlert/
+      StyledAlert.tsx
+      style.css
+```
+
+### CSS Modules (for new components)
+**REQUIRED for new work**: Use CSS Modules (`Component.module.css`) for new components to prevent selector leakage. Migrate legacy files opportunistically.
+
+```typescript
+import styles from './style.module.css';
+
+<div className={styles.container}>
+```
+
+**Key Rules**:
+- Keep only design tokens, resets, and utility classes in global CSS
+- Everything else should be local (module-scoped)
+- Use CSS variables for theme tokens at `:root`
+- Maintain one stylesheet per component
+- Avoid deep shared files except for tokens/utilities
+- For conditional styling, keep logic in TSX and toggle module classes (no CSS-in-JS)
+
+### Global Styles
+- Use global CSS only for design tokens, resets, and utilities
+- Keep component-specific styles in co-located CSS files
+- Use CSS custom properties for theme values
+- Respect `prefers-color-scheme` for theme tokens
+
+## Bootstrap + Custom CSS Blending
+
+### Core Principle
+Use Bootstrap for structure and utilities, custom CSS for branding and interactions.
+
+### Bootstrap Usage
+- Layout: `row`, `col`, `d-flex`, `container`
+- Spacing: `p-*`, `m-*`, `px-*`, `py-*`
+- Responsive utilities: `d-none`, `d-lg-block`, `d-md-flex`
+- Component classes: `btn`, `form-control`, `modal-*`, `alert-*`
+
+### Custom CSS Usage
+- Brand colors and gradients
+- Custom interactions and animations
+- Component-specific styling
+- Typography customization
+- Responsive design beyond Bootstrap breakpoints
+
+### Implementation Pattern
+```html
+<!-- Combine Bootstrap classes with custom CSS -->
+<button className="btn btn-primary custom-button">
+  Click Me
+</button>
+```
+
+```css
+/* Custom CSS for branding */
+.custom-button {
+  background: #c9f;
+  border: 2px solid #080808;
+  box-shadow: -1px 2px 0px #ccc;
+}
+
+.custom-button:hover {
+  background: hsl(270, 100%, 77%);
+  box-shadow: 0px 1px 1px #ccc;
+}
+```
+
+## CSS Property Ordering
+
+### Standard 9-Category Hierarchy
+1. **Layout**: `display`, `position`, `top`, `right`, `bottom`, `left`, `z-index`
+2. **Flex/Grid**: `flex`, `flex-direction`, `flex-wrap`, `align-items`, `justify-content`, `grid-*`
+3. **Spacing**: `margin`, `padding`, `width`, `height`, `max-width`, `max-height`
+4. **Visual**: `background`, `border`, `border-radius`, `box-shadow`, `opacity`
+5. **Typography**: `font-family`, `font-size`, `font-weight`, `line-height`, `text-align`, `color`
+6. **Colors**: `color`, `background-color`, `border-color`
+7. **Transforms**: `transform`, `transition`, `animation`
+8. **Interactive**: `cursor`, `pointer-events`, `user-select`
+9. **Media**: `@media` queries
+
+### Example
+```css
+.component {
+  /* Layout */
+  display: flex;
+  position: relative;
+  z-index: 1;
+  
+  /* Flex */
+  flex-direction: column;
+  align-items: center;
+  
+  /* Spacing */
+  margin: 1rem;
+  padding: 1.5rem;
+  width: 100%;
+  
+  /* Visual */
+  background: #1b1b1b;
+  border: 2px solid #9bad97;
+  border-radius: 5px;
+  box-shadow: 0 0 7px rgba(153, 204, 255, 0.5);
+  
+  /* Typography */
+  font-family: 'Inconsolata', monospace;
+  font-size: 1rem;
+  color: #ccc;
+  
+  /* Transforms */
+  transition: all 0.15s ease-in;
+  
+  /* Interactive */
+  cursor: pointer;
+}
+```
+
+## Responsive Design
+
+### Breakpoint System
+- **Mobile Portrait (Small)**: `max-width: 379px`
+- **Mobile Portrait**: `max-width: 599px`
+- **Mobile Landscape**: `min-width: 600px`
+- **Tablet Landscape**: `min-width: 900px`
+- **Desktop**: `min-width: 1200px`
+- **Big Screen**: `min-width: 2000px`
+
+### Mobile-First Approach
+```css
+/* Base styles (mobile) */
+.component {
+  padding: 1rem;
+  font-size: 0.875rem;
+}
+
+/* Tablet and up */
+@media (min-width: 900px) {
+  .component {
+    padding: 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+/* Desktop and up */
+@media (min-width: 1200px) {
+  .component {
+    padding: 2rem;
+    font-size: 1.125rem;
+  }
+}
+```
+
+## Component-Specific Patterns
+
+### Button Styling
+```css
+.button {
+  /* Layout */
+  display: inline-block;
+  
+  /* Spacing */
+  padding: 0.5rem 1rem;
+  
+  /* Visual */
+  background: #c9f;
+  border: 2px solid #080808;
+  border-radius: 4px;
+  box-shadow: -1px 2px 0px #ccc;
+  
+  /* Typography */
+  font-family: 'Inconsolata', monospace;
+  font-size: 1rem;
+  color: #000000;
+  
+  /* Transforms */
+  transition: all 0.15s ease-in;
+  
+  /* Interactive */
+  cursor: pointer;
+}
+
+.button:hover {
+  background: hsl(270, 100%, 77%);
+  box-shadow: 0px 1px 1px #ccc;
+}
+
+.button:active {
+  background: hsl(270, 100%, 82%);
+  border-style: inset;
+}
+
+.button:focus {
+  box-shadow: 0 0 0 0.25rem #ffcc9940;
+}
+```
+
+### Form Input Styling
+```css
+.form-input {
+  /* Layout */
+  display: block;
+  width: 100%;
+  
+  /* Spacing */
+  padding: 0.5rem;
+  
+  /* Visual */
+  background: #080808;
+  border: 1px solid #c9f;
+  border-radius: 4px;
+  
+  /* Typography */
+  font-family: 'Inconsolata', monospace;
+  font-size: 1rem;
+  color: #20cf9d;
+}
+
+.form-input:focus {
+  background: #0a0a0a;
+  border-color: #fc9;
+  box-shadow: inset 1px 1px 2px 1px #cc99ff26;
+  outline: none;
+}
+
+.form-input:invalid {
+  border-color: #ff4444;
+  color: #ff4444;
+}
+```
+
+### Modal Styling
+```css
+.modal {
+  /* Layout */
+  position: fixed;
+  z-index: 1050;
+  
+  /* Spacing */
+  padding: 0;
+  
+  /* Visual */
+  background: #1b1b1b;
+  border: 3px solid #ccccccaf;
+  border-radius: 5px;
+  box-shadow: 0 0 7px rgba(153, 204, 255, 0.5);
+}
+
+.modal-header {
+  border-bottom: 1px solid #9bad97;
+  padding: 1rem;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+```
+
+## Interactive States
+
+### Hover Effects
+```css
+.link:hover {
+  color: #8bbbfd;
+  text-decoration: none;
+}
+
+.button:hover {
+  background: hsl(270, 100%, 77%);
+  box-shadow: 0px 1px 1px #ccc;
+}
+
+.image:hover {
+  filter: brightness(90%) contrast(106%);
+  transition: filter 0.15s ease-in;
+}
+```
+
+### Focus States
+```css
+.form-input:focus {
+  box-shadow: inset 1px 1px 2px 1px #cc99ff26;
+}
+
+.navigation-link:focus {
+  box-shadow: 0 0 0 0.25rem #ffcc9940;
+}
+```
+
+### Active States
+```css
+.button:active {
+  border-style: inset;
+  transition: border-style 0s;
+}
+
+.image:active {
+  padding: 2px;
+}
+```
+
+## CSS Custom Properties
+
+### Root Variables
+```css
+:root {
+  --primary-color: #fc9;
+  --secondary-color: #f9c;
+  --background-color: #1b1b1b;
+  --shoe-black: #080808;
+  --text-color: #ccc;
+  --accent-color: #9bad97;
+  --error-color: #ff4444;
+  --success-color: #20cf9d;
+  --link-color: #6da7f9;
+  --link-hover-color: #8bbbfd;
+  --button-color: #c9f;
+  --button-hover-color: #c48aff;
+  --button-active-color: #d1a3ff;
+}
+```
+
+### Usage
+```css
+.component {
+  background: var(--background-color);
+  color: var(--text-color);
+  border-color: var(--accent-color);
+}
+```
+
+## Best Practices
+
+1. **Co-location**: Keep CSS files with components
+2. **CSS Modules**: Use for new components to avoid conflicts
+3. **Bootstrap + Custom**: Combine Bootstrap utilities with custom CSS
+4. **Property Ordering**: Follow 9-category hierarchy
+5. **Mobile-First**: Start with mobile styles, enhance for larger screens
+6. **Custom Properties**: Use CSS variables for theme values
+7. **Consistent Colors**: Use design system color palette
+8. **Accessibility**: Ensure sufficient color contrast
+9. **Performance**: Minimize CSS, use efficient selectors
+10. **Documentation**: Document complex styles and patterns

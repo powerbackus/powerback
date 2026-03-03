@@ -1,0 +1,319 @@
+---
+description: React component patterns, composition, lazy loading, and performance optimization
+globs:
+  - "client/src/components/**/*"
+  - "client/src/pages/**/*"
+  - "client/src/components/**/*.tsx"
+  - "client/src/components/**/*.jsx"
+  - "client/src/pages/**/*.tsx"
+  - "client/src/pages/**/*.jsx"
+alwaysApply: false
+priority: 3
+---
+
+# React Component Patterns
+
+## Component Structure
+
+### Component File Template
+```typescript
+import React, { useState, useCallback, useMemo } from 'react';
+import { ComponentProps } from '@Interfaces';
+import './style.css';
+
+interface ComponentNameProps {
+  // Props interface
+}
+
+const ComponentName: React.FC<ComponentNameProps> = ({
+  prop1,
+  prop2,
+}) => {
+  // Hooks
+  // State
+  // Effects
+  // Handlers
+  // Render
+
+  return (
+    <div className="component-name">
+      {/* JSX */}
+    </div>
+  );
+};
+
+export default React.memo(ComponentName);
+```
+
+## Component Categories
+
+### Alert Components (`/components/alerts`)
+- Purpose: User notifications and feedback
+- Pattern: Use `StyledAlert` wrapper component
+- Props: `show`, `type`, `message`, `heading`, `variant`, `dismissible`
+- State: Managed via `DialogueContext.showAlert`
+
+### Button Components (`/components/buttons`)
+- Purpose: Interactive button elements
+- Pattern: Bootstrap button classes + custom CSS for branding
+- States: Default, hover, active, focus, disabled
+- Accessibility: Keyboard navigation, ARIA labels
+
+### Display Components (`/components/displays`)
+- Purpose: Information presentation
+- Pattern: Read-only data display
+- Styling: Custom CSS with Bootstrap utilities
+
+### Form Components (`/components/forms`)
+- Purpose: User input and validation
+- Pattern: Controlled components with validation
+- State: Managed via custom hooks (`useFormValidation`, `useFormCompliance`)
+- Validation: HTML5 validation + custom validation hooks
+
+### Interactive Components (`/components/interactive`)
+- Purpose: Complex interactions (carousels, navigation, search)
+- Pattern: Stateful components with complex logic
+- Examples: `PolCarousel`, `TabFlow`, `SideNav`
+
+### Modal Components (`/components/modals`)
+- Purpose: Overlay dialogs
+- Pattern: Bootstrap modal + custom styling
+- State: Managed via `DialogueContext.showModal`
+- Lazy loading: Use React.lazy for rarely-used modals
+
+### Page Components (`/components/page`)
+- Purpose: Page-level layout components
+- Pattern: Wrapper components for page structure
+- Examples: `Footer`, `Navigation`, `Wrapper`
+
+## Component Patterns
+
+### Pure Function Extraction
+Extract business logic to pure functions outside components:
+
+```typescript
+// Pure function - only cares about display logic
+const shouldShowDonationPrompt = (
+  isTip: boolean | undefined, 
+  polData: PolData | null
+): boolean => {
+  return !isTip && !!polData?.id;
+};
+
+// Component uses the function
+const Component = () => {
+  const handleUse = useCallback(
+    () => shouldShowDonationPrompt(isTip, polData) ? <DonationPrompt /> : null,
+    [isTip, polData]
+  );
+  
+  return <>{handleUse()}</>;
+};
+```
+
+### Conditional Rendering
+Use safe conditional rendering with guards:
+
+```typescript
+// Safe conditional rendering
+{shouldShowDonationPrompt(isTip, polData) && polData?.id && (
+  <DonationPrompt description={polData} />
+)}
+
+// Guard against undefined
+{userData?.celebrations && userData.celebrations.length > 0 && (
+  <CelebrationsList celebrations={userData.celebrations} />
+)}
+```
+
+### Lazy Loading Strategy
+- **Route-level**: Lazy load major pages (Celebrate, Account, Splash)
+- **Modal-level**: Lazy load rarely-used modals (Eligibility, Terms, FAQ, ForgotPassword)
+- **Avoid**: Lazy loading tab content, core functionality, search components
+
+```typescript
+// Route-level lazy loading
+const Celebrate = React.lazy(() => import('./pages/Celebrate'));
+
+// Modal lazy loading
+const Eligibility = React.lazy(() => import('./components/modals/Eligibility'));
+
+// Wrap with Suspense
+<Suspense fallback={<Loading />}>
+  <Celebrate />
+</Suspense>
+```
+
+## Component Composition
+
+### Sub-components Pattern
+For complex components, use sub-components:
+
+```
+ComponentName/
+  ComponentName.tsx
+  index.js
+  style.css
+  subcomps/
+    Header/
+      Header.tsx
+      index.js
+      style.css
+    Body/
+      Body.tsx
+      index.js
+      style.css
+```
+
+### Props Interface Pattern
+Define props interfaces in `/interfaces` or co-located:
+
+```typescript
+// Co-located interface
+interface ComponentProps {
+  required: string;
+  optional?: number;
+  handler: (value: string) => void;
+}
+
+// Or import from interfaces
+import { AlertProps } from './props';
+```
+
+## State Management
+
+### Local State
+Use `useState` for component-specific state:
+
+```typescript
+const [isOpen, setIsOpen] = useState(false);
+const [value, setValue] = useState('');
+```
+
+### Context State
+Use React Context for shared state:
+
+```typescript
+const { userData, isLoggedIn } = useAuth();
+const { showModal, setShowModal } = useDialogue();
+const { donation, setDonation } = useDonationState();
+```
+
+### Form State
+Use custom hooks for form state:
+
+```typescript
+const [userEntry, { setUserEntryForm }] = useEntryForm();
+const [validatingFields, { validateField }] = useFormValidation();
+const [contactInfo, { setContactInfo }] = useContactInfo(userData);
+```
+
+## Performance Optimization
+
+### React.memo
+**Always use `React.memo()` for TSX component exports.** This prevents unnecessary re-renders when props haven't changed:
+
+```typescript
+export default React.memo(ComponentName);
+```
+
+This applies to all TSX component files in `/components` and `/pages` directories.
+
+### useMemo
+Memoize expensive calculations:
+
+```typescript
+const expensiveValue = useMemo(
+  () => computeExpensiveValue(deps),
+  [deps]
+);
+```
+
+### useCallback
+Memoize callback functions:
+
+```typescript
+const handleClick = useCallback(
+  () => {
+    // handler logic
+  },
+  [dependencies]
+);
+```
+
+## Event Handlers
+
+### Handler Naming
+- Prefix with `handle`: `handleClick`, `handleSubmit`, `handleChange`
+- Use descriptive names: `handlePaymentSubmit`, `handleDonationChange`
+
+### Handler Pattern
+```typescript
+const handleSubmit = useCallback(
+  (e: React.FormEvent) => {
+    e.preventDefault();
+    // handler logic
+  },
+  [dependencies]
+);
+```
+
+## Accessibility
+
+### Keyboard Navigation
+- All interactive elements must be keyboard accessible
+- Use proper focus management
+- Support Enter/Space for buttons
+
+### ARIA Labels
+- Use ARIA labels for screen readers
+- Provide descriptive labels for form inputs
+- Use `aria-describedby` for error messages
+
+### Focus Management
+- Visible focus indicators
+- Proper focus order
+- Focus trap in modals
+
+## CSS Integration
+
+### Co-located CSS
+- Keep CSS files co-located with components
+- Use `style.css` for component-specific styles
+- Use CSS Modules (`style.module.css`) for new components
+
+### Bootstrap Integration
+- Use Bootstrap for structure and utilities
+- Use custom CSS for branding and interactions
+- Combine Bootstrap classes with custom CSS
+
+## Error Boundaries
+
+### Error Boundary Pattern
+Use error boundaries for component tree isolation:
+
+```typescript
+<ErrorBoundary>
+  <ComponentTree />
+</ErrorBoundary>
+```
+
+## Testing Patterns
+
+### Component Testing
+- Test component rendering
+- Test user interactions
+- Test state changes
+- Test error states
+
+## Best Practices
+
+1. **Single Responsibility**: Each component should have one clear purpose
+2. **Composition over Inheritance**: Build complex UIs from simple components
+3. **Props Interface**: Always define TypeScript interfaces for props
+4. **React.memo**: Always export TSX components with `React.memo()` to prevent unnecessary re-renders
+5. **Memoization**: Use useMemo and useCallback appropriately for expensive calculations and callbacks
+6. **Accessibility**: Ensure keyboard navigation and screen reader support
+7. **Performance**: Lazy load when appropriate, optimize re-renders
+8. **Error Handling**: Handle errors gracefully with error boundaries
+9. **Documentation**: Document complex components and their props

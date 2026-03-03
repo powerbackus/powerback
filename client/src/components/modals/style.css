@@ -1,0 +1,114 @@
+.modal,
+.modal.show {
+  --bs-modal-bg: var(--bg);
+  overflow-y: hidden;
+}
+
+.modal-content {
+  box-shadow: 0 0 7px rgb(from var(--link) r g b / 50%);
+}
+
+.modal-header {
+  border: 2px var(--attention-muted) solid;
+  border-bottom: 1px var(--attention-muted) solid;
+}
+
+.styled-modal .modal-title,
+.styled-modal .modal-title.h4 span {
+  color: var(--accent);
+}
+
+.modal-body {
+  text-align: left;
+  border: 1px var(--attention-muted) solid;
+  border-top: none;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  overflow-y: hidden;
+}
+
+.modal-footer {
+  border-top: none;
+  cursor: default;
+  justify-content: center;
+  color: var(--border-gray);
+}
+
+.natural-link {
+  color: var(--link);
+  cursor: pointer;
+  transition-property: color transform;
+  transition-timing-function: ease-in-out;
+  text-decoration: underline;
+}
+
+.natural-link:hover {
+  color: var(--link-hover);
+}
+
+.natural-link:active,
+.natural-link:focus,
+.natural-link:focus-visible {
+  color: var(--link-active);
+}
+
+.natural-link:hover,
+.natural-link:active,
+.natural-link:focus,
+.natural-link:focus-visible {
+  transition-duration: 211ms;
+  text-decoration: none;
+}
+
+.styled-modal .form-input-wfeedback .invalid-feedback {
+  color: var(--input-invalid);
+}
+
+.login-join .form-label {
+  text-align: left;
+}
+
+/*** SCREEN SIZES ***/
+/* Mobile, portrait */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .modal-content {
+    box-shadow: 0 0 7px rgb(from var(--contrast) r g b / 50%) !important;
+  }
+
+  .modal-header {
+    border: 1px var(--accent) solid;
+  }
+
+  .modal-body {
+    border-top: none;
+    border: 1px var(--accent) solid;
+    height: 43vh;
+  }
+}
+
+/* Mobile, landscape */
+@media only screen and (max-height: 450px) and (orientation: landscape) {
+  .modal-content {
+    box-shadow: 0 0 7px rgb(from var(--contrast) r g b / 50%) !important;
+  }
+
+  .modal-header {
+    border: 2px var(--attention-muted) solid;
+    border-bottom: 1px var(--attention-muted) solid;
+  }
+
+  .modal-body {
+    border-top: none;
+    border: 1px var(--attention-muted) solid;
+  }
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .login-join .form-label {
+    padding-bottom: 0.25rem;
+  }
+  .styled-modal .form-input-wfeedback .invalid-feedback {
+    padding-top: 2px;
+  }
+}

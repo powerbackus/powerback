@@ -1,0 +1,102 @@
+---
+description: Index and quick reference guide for POWERBACK cursor rules
+alwaysApply: false
+priority: 5
+---
+
+# POWERBACK Cursor Rules Index
+
+This directory contains comprehensive cursor rules for the POWERBACK project. These rules guide AI assistants in understanding project patterns, conventions, and best practices.
+
+## Rule Categories
+
+### Architecture & Structure
+- **01-project-structure.mdc** - Project organization, directory structure, file naming, module exports
+- **02-react-components.mdc** - React component patterns, composition, lazy loading, performance
+- **03-custom-hooks.mdc** - Custom hook patterns, state management, memoization
+- **10-react-contexts.mdc** - React Context patterns, provider composition, dependency injection
+
+### Styling & UI
+- **04-css-styling.mdc** - CSS patterns, design system, Bootstrap integration, responsive design
+- **24-css-class-naming.mdc** - CSS class/id naming: block--part-or-variant (BEM-like, single separator)
+- **28-css-property-ordering.mdc** - CSS property ordering standard (referenced in specs)
+- **29-bootstrap-css-blending.mdc** - Bootstrap + custom CSS blending patterns (referenced in specs)
+
+### Backend Patterns
+- **05-api-patterns.mdc** - API client patterns, route handlers, authentication, rate limiting
+- **06-backend-services.mdc** - Service layer patterns, logging, database operations
+- **12-models.mdc** - Mongoose model patterns, schemas, queries, indexes
+- **13-controllers.mdc** - Controller patterns, error handling, logging, composition
+- **14-authentication.mdc** - JWT authentication, token management, password handling
+
+### Data & Validation
+- **07-error-handling.mdc** - Error handling patterns, error types, error boundaries
+- **08-validation.mdc** - Validation patterns, Joi schemas, form validation, compliance
+
+### TypeScript & Types
+- **09-typescript-patterns.mdc** - TypeScript patterns, interfaces, type guards, generics
+
+### Quality & Testing
+- **11-testing.mdc** - Testing patterns, Jest, React Testing Library, E2E tests
+
+### Code Style & Conventions
+- **15-naming-conventions.mdc** - Naming conventions for files, variables, functions, CSS
+- **16-documentation.mdc** - Documentation patterns, JSDoc, comments, README structure
+- **17-code-style.mdc** - Code style guidelines, formatting, best practices
+- **23-commit-messages.mdc** - Commit message format: no double-quotes in title or body
+
+### Specialized Rules
+- **18-ai-assistant-guidelines.mdc** - AI assistant autonomy, permissions, and workflow
+- **19-compliance-system.mdc** - FEC compliance system, tiers, limits, backend authority
+- **20-client-storage.mdc** - Client storage policy, what can/cannot be stored
+- **21-election-dates.mdc** - Election dates handling, snapshots, fallbacks
+- **22-logging-telemetry.mdc** - Logging patterns, PII handling, central logger
+- **26-copy-registry.mdc** - Copy text registry patterns (referenced in specs)
+
+## How to Use These Rules
+
+1. **Read Relevant Rules**: Review rules relevant to your task
+2. **Follow Patterns**: Apply established patterns from the rules
+3. **Maintain Consistency**: Keep code consistent with project conventions
+4. **Update Rules**: Update rules when patterns evolve
+
+## Rule Dependencies
+
+Some rules reference others:
+- `specs/frontend-ui.md` references `28-css-property-ordering.mdc` and `29-bootstrap-css-blending.mdc`
+- `specs/escrow-and-aggregate-limits.md` references `26-copy-registry.mdc`
+
+## Rule Maintenance
+
+- Update rules when patterns change
+- Add new rules for new patterns
+- Keep rules synchronized with codebase
+- Document rule changes in commit messages
+
+## Quick Reference
+
+### Common Patterns
+- **Component**: See `02-react-components.mdc`
+- **Hook**: See `03-custom-hooks.mdc`
+- **API Route**: See `05-api-patterns.mdc`
+- **Service**: See `06-backend-services.mdc`
+- **Model**: See `12-models.mdc`
+- **Controller**: See `13-controllers.mdc`
+- **CSS**: See `04-css-styling.mdc`
+- **TypeScript**: See `09-typescript-patterns.mdc`
+- **Testing**: See `11-testing.mdc`
+- **AI Guidelines**: See `18-ai-assistant-guidelines.mdc`
+- **Compliance**: See `19-compliance-system.mdc`
+- **Client Storage**: See `20-client-storage.mdc`
+- **Election Dates**: See `21-election-dates.mdc`
+- **Logging**: See `22-logging-telemetry.mdc`
+
+### Naming Conventions
+- See `15-naming-conventions.mdc` for all naming patterns
+- See `24-css-class-naming.mdc` for CSS class/id block--part-or-variant convention
+
+### Code Style
+- See `17-code-style.mdc` for formatting and style guidelines
+
+### Documentation
+- See `16-documentation.mdc` for documentation patterns

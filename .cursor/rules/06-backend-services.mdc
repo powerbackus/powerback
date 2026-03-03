@@ -1,0 +1,396 @@
+---
+description: Backend service layer patterns, logging, and database operations
+globs:
+  - 'services/**/*'
+  - 'services/**/*.js'
+alwaysApply: false
+priority: 3
+---
+
+# Backend Service Patterns
+
+## Service Layer Architecture
+
+### Service Organization (`/services`)
+
+Services organized by domain:
+
+- `/celebration` - Celebration business logic
+- `/congress` - Congressional data services
+- `/user` - User management services
+- `/utils` - Utility services (logger, cookies, CSRF, rate limiting, etc.)
+
+### Service File Structure
+
+```
+services/
+  celebration/
+    dataService.js
+    defunctService.js
+    emailService.js
+    notificationService.js
+    orchestrationService.js
+    statusService.js
+    validationService.js
+    index.js
+  congress/
+    electionCycleService.js
+    electionDateNotificationService.js
+    sessionService.js
+    index.js
+  user/
+    donorValidation.js
+    promoteUser.js
+    userDistrict.js
+    index.js
+  utils/
+    auditLogger.js
+    cookies.js
+    csrf.js
+    db.js
+    dockingManager.js
+    fixPolName.js
+    rateLimitHelpers.js
+    sendSMS.js
+    index.js
+```
+
+## Service Pattern
+
+### Basic Service Function
+
+```javascript
+const { requireLogger } = require('../logger');
+
+const logger = requireLogger(__filename);
+
+/**
+ * Service function description
+ * @param {Type1} param1 - Parameter description
+ * @param {Type2} param2 - Parameter description
+ * @returns {Promise<ReturnType>} Return description
+ */
+async function serviceFunction(param1, param2) {
+  try {
+    logger.debug('Service function called', { param1, param2 });
+
+    // Business logic
+    const result = await performOperation(param1, param2);
+
+    logger.info('Service function completed', { result });
+    return result;
+  } catch (error) {
+    logger.error('Service function error', {
+      error: error.message,
+      stack: error.stack,
+      param1,
+      param2,
+    });
+    throw error;
+  }
+}
+
+module.exports = {
+  serviceFunction,
+};
+```
+
+## Logging Pattern
+
+### Logger Setup
+
+```javascript
+const { requireLogger } = require('../logger');
+
+const logger = requireLogger(__filename);
+```
+
+**CRITICAL**: Always use the central logger (`services/logger`). Never log PII (names, emails, addresses, phone, last4). Check existing code for PII in logs.
+
+### Logging Levels
+
+- `logger.debug()` - Detailed debugging information
+- `logger.info()` - General informational messages
+- `logger.warn()` - Warning messages
+- `logger.error()` - Error messages
+
+### Logging Context
+
+Include relevant context in log messages:
+
+```javascript
+logger.info('User created', {
+  userId: user.id,
+  username: user.username,
+  timestamp: new Date().toISOString(),
+});
+```
+
+## Database Operations
+
+### Mongoose Query Pattern
+
+```javascript
+const { User, Celebration, Pol } = require('../../models');
+
+// Find one
+const user = await User.findOne({ username }).exec();
+
+// Find many
+const celebrations = await Celebration.find({
+  donatedBy: userId,
+  resolved: false,
+}).exec();
+
+// Create
+const newUser = await User.create(userData);
+
+// Update
+const updated = await User.findByIdAndUpdate(
+  userId,
+  { $set: updateData },
+  { new: true }
+).exec();
+
+// Delete
+await User.findByIdAndDelete(userId).exec();
+```
+
+### Atomic Operations
+
+Use atomic operations for critical updates:
+
+```javascript
+// Atomic update with aggregation pipeline
+const result = await Pol.updateMany(
+  {
+    'roles.0.fec_candidate_id': { $in: finalIds },
+    has_stakes: { $ne: true },
+  },
+  { $set: { has_stakes: true } }
+);
+```
+
+## Error Handling
+
+### Service Error Pattern
+
+```javascript
+async function serviceFunction(param) {
+  try {
+    // Operation
+    const result = await performOperation(param);
+    return result;
+  } catch (error) {
+    logger.error('Service function error', {
+      error: error.message,
+      stack: error.stack,
+      param,
+    });
+    throw error; // Re-throw for controller to handle
+  }
+}
+```
+
+### Custom Error Types
+
+```javascript
+class ServiceError extends Error {
+  constructor(message, statusCode = 500) {
+    super(message);
+    this.statusCode = statusCode;
+    this.name = 'ServiceError';
+  }
+}
+
+throw new ServiceError('Service error message', 400);
+```
+
+## Service Composition
+
+### Service Index Pattern
+
+```javascript
+// services/celebration/index.js
+const dataService = require('./dataService');
+const defunctService = require('./defunctService');
+const emailService = require('./emailService');
+const notificationService = require('./notificationService');
+const orchestrationService = require('./orchestrationService');
+const statusService = require('./statusService');
+const validationService = require('./validationService');
+
+module.exports = {
+  ...dataService,
+  ...defunctService,
+  ...emailService,
+  ...notificationService,
+  ...orchestrationService,
+  ...statusService,
+  ...validationService,
+};
+```
+
+### Service Dependencies
+
+```javascript
+// services/celebration/orchestrationService.js
+const dataService = require('./dataService');
+const validationService = require('./validationService');
+const emailService = require('./emailService');
+
+async function createCelebration(req, res) {
+  // Use other services
+  const isValid = await validationService.validate(data);
+  const created = await dataService.create(data);
+  await emailService.sendNotification(created);
+}
+```
+
+## Utility Services
+
+### Logger Service (`/services/logger.js`)
+
+Centralized logging with Winston.
+
+### Cookie Service (`/services/utils/cookies.js`)
+
+```javascript
+const { setRefreshCookie, clearRefreshCookie } = require('./utils/cookies');
+
+// Set cookie
+setRefreshCookie(res, token);
+
+// Clear cookie
+clearRefreshCookie(res);
+```
+
+### CSRF Service (`/services/utils/csrf.js`)
+
+```javascript
+const { generateCsrfToken, csrfTokenValidator } = require('./utils/csrf');
+
+// Generate token
+const token = generateCsrfToken();
+
+// Validate token
+csrfTokenValidator(req, res, next);
+```
+
+### Rate Limiting (`/services/utils/rateLimitHelpers.js`)
+
+```javascript
+const { rateLimiters } = require('./utils/rateLimitHelpers');
+
+const loginLimiter = rateLimiters.login;
+const createAccountLimiter = rateLimiters.createAccount;
+```
+
+## External API Integration
+
+### API Client Pattern
+
+```javascript
+const axios = require('axios');
+
+async function fetchExternalData(params) {
+  try {
+    const response = await axios.get(API_URL, {
+      params,
+      headers: {
+        'X-API-Key': process.env.API_KEY,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    logger.error('External API error', {
+      error: error.message,
+      params,
+    });
+    throw error;
+  }
+}
+```
+
+### Retry Logic
+
+```javascript
+async function fetchWithRetry(url, maxRetries = 3) {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const response = await axios.get(url);
+      return response.data;
+    } catch (error) {
+      if (i === maxRetries - 1) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 1000 * (i + 1)));
+    }
+  }
+}
+```
+
+## Background Jobs
+
+### Job Pattern (`/jobs`)
+
+```javascript
+const cron = require('node-cron');
+
+// Schedule job
+cron.schedule('0 0 * * *', async () => {
+  try {
+    logger.info('Running scheduled job');
+    await performJob();
+    logger.info('Job completed');
+  } catch (error) {
+    logger.error('Job error', { error: error.message });
+  }
+});
+```
+
+### Watcher Pattern
+
+```javascript
+async function watchForChanges() {
+  try {
+    const current = await fetchCurrentData();
+    const previous = await loadSnapshot();
+
+    if (hasChanges(current, previous)) {
+      await processChanges(current, previous);
+      await saveSnapshot(current);
+    }
+  } catch (error) {
+    logger.error('Watcher error', { error: error.message });
+  }
+}
+```
+
+## Service Testing
+
+### Service Test Pattern
+
+```javascript
+describe('Service Function', () => {
+  it('should perform operation', async () => {
+    const result = await serviceFunction(param);
+    expect(result).toBeDefined();
+  });
+
+  it('should handle errors', async () => {
+    await expect(serviceFunction(invalidParam)).rejects.toThrow();
+  });
+});
+```
+
+## Best Practices
+
+1. **Single Responsibility**: Each service function should have one clear purpose
+2. **Error Handling**: Catch and log errors, re-throw for controller handling
+3. **Logging**: Log important operations and errors with context
+4. **Database Operations**: Use Mongoose for database operations
+5. **Atomic Operations**: Use atomic operations for critical updates
+6. **Service Composition**: Compose services from smaller service functions
+7. **External APIs**: Handle external API errors gracefully
+8. **Background Jobs**: Use cron for scheduled jobs
+9. **Testing**: Write tests for service functions
+10. **Documentation**: Document service functions with JSDoc comments

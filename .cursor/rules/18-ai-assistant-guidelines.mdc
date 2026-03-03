@@ -1,0 +1,106 @@
+---
+description: AI assistant guidelines - autonomy, permissions, and workflow - always active
+alwaysApply: true
+priority: 1
+---
+
+# AI Assistant Guidelines
+
+## General Principles
+
+### Code vs Documentation
+- **Defer to code over docs**: Treat documentation as background context only
+- **Code is source of truth**: When docs and code conflict, follow the code
+- **Update docs at end**: Update documentation after confirming timing with user, at the end of refactors
+
+### Git Usage
+- **Read-only access only**: Use Git to retrieve information (diff, history, etc.)
+- **Never modify repo**: Do NOT commit, push, merge, checkout, stash, or make any changes to Git
+- **No PRs or branches**: Never create pull requests or work with branches
+
+## Autonomy and Commands
+
+### Scripts and Jobs
+- **Never run without permission**: Do not run local scripts, jobs, migrations, or install packages without explicit permission
+- **Ask first**: Always explain what you want to run and ask before executing
+- **Dev scripts**: Can add scripts to `/dev` directory, but never run them without asking
+
+### Package Management
+- **Prefer npm**: Use npm as package manager
+- **No package management**: Do not manage packages unless explicitly asked
+- **No installs**: Do not install packages without explicit permission
+
+### Third-Party APIs
+- **Respect rate limits**: APIs are free (government/Google Civics) but don't abuse them
+- **Constraints are lax**: Basic rate limiting expected, but don't go crazy unnecessarily
+
+## Priorities
+
+### Focus Areas
+1. **Compliance tier logic**: Donation gates and compliance validation
+2. **Native browser navigation**: Stateful navigation with preserved history on page refresh
+
+### Performance and Testing
+- **Performance checks**: Ad hoc only; add timing only when requested
+- **Testing**: Minimal, only to log results for complex changes
+- **No coverage targets**: No formal test coverage requirements
+- **Hot paths**: Add timing logs for I/O and loops when changing limit calc, watchers, diffs, cycle/cutoff
+
+## Linting and TypeScript
+
+### ESLint
+- **Apply fixes**: Apply ESLint fixes when certain they're correct
+- **Auto-fix on edit**: Yes, as long as you're certain about the fixes
+
+### TypeScript
+- **Be strict**: Use strict TypeScript practices
+- **No linter flags**: If there are no linter flags, it's acceptable
+- **No `any`**: Avoid `any` type unless necessary
+
+## Comments and Documentation
+
+### Code Comments
+- **Short "why" comments**: Add brief comments above non-obvious logic explaining "why" (policy/constraint) not "what"
+- **Non-obvious logic**: Code whose intent or constraints aren't immediately clear from implementation alone
+- **Examples of non-obvious logic**:
+  - Election cycle math and cutoff logic
+  - Compliance tier aggregation and EST-based resets
+  - Snapshot diff logic
+  - Watcher paging/filtering criteria
+  - Name normalization edge cases
+  - Email transport/auth config
+  - Cookie security and route scoping
+
+### Documentation Updates
+- **Update relevant docs**: When changing behavior, update all relevant docs (API, HOOKS, CONTEXTS, DONATION_LIMITS, ELECTION_DATE_NOTIFICATIONS)
+- **Timing**: Update docs at the "end" of a refactor (ask user if it's the right time)
+- **Link to docs**: Keep long process/flow explanations in docs/ and link from code comments
+
+## Refactoring Approach
+
+### Large Refactors
+- **Case-by-case**: Decide approach on case-by-case basis
+- **Provide recommendations**: Give recommendations for which method to use
+- **Incremental preferred**: Incremental, test-backed edits merged frequently preferred
+
+## Environment and Configuration
+
+### Environment Files
+- **`.env` exists**: Assume real `.env` file exists locally
+- **Constants exist**: Assume `/constants` directory exists in project root
+- **Don't scaffold**: Don't create environment files unless explicitly asked
+
+### API Keys
+- **Safe to use**: All keys currently in-place are safe to use in dev
+- **Test keys**: OpenFEC, Congress.gov, Stripe test keys are safe
+
+## Best Practices Summary
+
+1. **Never modify Git**: Read-only access only
+2. **Ask before running**: Never run scripts, jobs, migrations, or installs without permission
+3. **Code over docs**: Defer to code as source of truth
+4. **Minimal testing**: Only test complex changes, no coverage targets
+5. **Update docs at end**: Update documentation after refactors, confirm timing
+6. **Comment non-obvious logic**: Add "why" comments for policy/constraints
+7. **Be strict with TypeScript**: But acceptable if no linter flags
+8. **Apply ESLint fixes**: When certain they're correct

@@ -1,0 +1,379 @@
+{
+  "rules": [
+    {
+      "id": "foundation-core",
+      "description": "Core foundational patterns - always active",
+      "files": [
+        ".cursor/rules/01-project-structure.mdc",
+        ".cursor/rules/15-naming-conventions.mdc",
+        ".cursor/rules/17-code-style.mdc"
+      ],
+      "alwaysApply": true,
+      "priority": 1
+    },
+    {
+      "id": "foundation-docs",
+      "description": "Documentation patterns - always active",
+      "files": [".cursor/rules/16-documentation.mdc"],
+      "alwaysApply": true,
+      "priority": 1
+    },
+    {
+      "id": "error-handling",
+      "description": "Error handling patterns - apply to all code",
+      "files": [".cursor/rules/07-error-handling.mdc"],
+      "alwaysApply": true,
+      "priority": 2
+    },
+    {
+      "id": "typescript-frontend",
+      "description": "TypeScript patterns for frontend TypeScript files",
+      "files": [".cursor/rules/09-typescript-patterns.mdc"],
+      "globs": [
+        "client/src/**/*.ts",
+        "client/src/**/*.tsx"
+      ],
+      "excludeGlobs": [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts"
+      ],
+      "alwaysApply": false,
+      "priority": 2
+    },
+    {
+      "id": "react-components",
+      "description": "React component patterns",
+      "files": [".cursor/rules/02-react-components.mdc"],
+      "globs": [
+        "client/src/components/**/*",
+        "client/src/pages/**/*",
+        "client/src/components/**/*.tsx",
+        "client/src/components/**/*.jsx",
+        "client/src/pages/**/*.tsx",
+        "client/src/pages/**/*.jsx"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "react-hooks",
+      "description": "Custom React hooks patterns",
+      "files": [".cursor/rules/03-custom-hooks.mdc"],
+      "globs": [
+        "client/src/hooks/**/*",
+        "client/src/hooks/**/*.ts",
+        "client/src/hooks/**/*.js"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "react-contexts",
+      "description": "React Context patterns",
+      "files": [".cursor/rules/10-react-contexts.mdc"],
+      "globs": [
+        "client/src/contexts/**/*",
+        "client/src/contexts/**/*.tsx",
+        "client/src/contexts/**/*.ts"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "css-styling",
+      "description": "CSS styling and design system patterns",
+      "files": [".cursor/rules/04-css-styling.mdc"],
+      "globs": [
+        "client/src/**/*.css",
+        "client/src/**/*.module.css",
+        "**/*.css"
+      ],
+      "excludeGlobs": [
+        "node_modules/**/*",
+        "client/build/**/*",
+        "client/dist/**/*"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "api-client",
+      "description": "API client patterns for frontend",
+      "files": [".cursor/rules/05-api-patterns.mdc"],
+      "globs": [
+        "client/src/api/**/*",
+        "client/src/api/**/*.ts",
+        "client/src/api/**/*.js"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "api-routes",
+      "description": "API route patterns for backend",
+      "files": [".cursor/rules/05-api-patterns.mdc"],
+      "globs": [
+        "routes/api/**/*",
+        "routes/api/**/*.js"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "backend-services",
+      "description": "Backend service layer patterns",
+      "files": [".cursor/rules/06-backend-services.mdc"],
+      "globs": [
+        "services/**/*",
+        "services/**/*.js"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "controllers",
+      "description": "Controller patterns",
+      "files": [".cursor/rules/13-controllers.mdc"],
+      "globs": [
+        "controller/**/*",
+        "controller/**/*.js"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "models",
+      "description": "Mongoose model patterns",
+      "files": [".cursor/rules/12-models.mdc"],
+      "globs": [
+        "models/**/*",
+        "models/**/*.js"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "validation-backend",
+      "description": "Backend validation patterns",
+      "files": [".cursor/rules/08-validation.mdc"],
+      "globs": [
+        "validation/**/*",
+        "validation/**/*.js",
+        "validation/joi/**/*"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "validation-frontend",
+      "description": "Frontend form validation patterns",
+      "files": [".cursor/rules/08-validation.mdc"],
+      "globs": [
+        "client/src/hooks/forms/**/*",
+        "client/src/components/forms/**/*",
+        "client/src/pages/**/Account/**/*"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "authentication-backend",
+      "description": "Authentication patterns for backend",
+      "files": [".cursor/rules/14-authentication.mdc"],
+      "globs": [
+        "auth/**/*",
+        "auth/**/*.js",
+        "routes/api/users.js",
+        "controller/users/**/*",
+        "controller/users/account/**/*"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "authentication-frontend",
+      "description": "Authentication patterns for frontend",
+      "files": [".cursor/rules/14-authentication.mdc"],
+      "globs": [
+        "client/src/contexts/AuthContext.tsx",
+        "client/src/pages/Login/**/*",
+        "client/src/pages/Reset/**/*",
+        "client/src/components/modals/Credentials/**/*"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "testing-backend",
+      "description": "Backend testing patterns",
+      "files": [".cursor/rules/11-testing.mdc"],
+      "globs": [
+        "__tests__/**/*",
+        "__tests__/**/*.test.js",
+        "__tests__/**/*.spec.js",
+        "dev/tests/**/*.js"
+      ],
+      "alwaysApply": false,
+      "priority": 4
+    },
+    {
+      "id": "testing-frontend",
+      "description": "Frontend testing patterns",
+      "files": [".cursor/rules/11-testing.mdc"],
+      "globs": [
+        "client/src/__tests__/**/*",
+        "client/src/**/*.test.ts",
+        "client/src/**/*.test.tsx",
+        "client/src/**/*.test.js",
+        "client/src/**/*.test.jsx"
+      ],
+      "alwaysApply": false,
+      "priority": 4
+    },
+    {
+      "id": "testing-e2e",
+      "description": "E2E testing patterns",
+      "files": [".cursor/rules/11-testing.mdc"],
+      "globs": [
+        "tests/**/*.spec.ts",
+        "tests/**/*.spec.js"
+      ],
+      "alwaysApply": false,
+      "priority": 4
+    },
+    {
+      "id": "domain-payments",
+      "description": "Payment domain - apply multiple related rules",
+      "files": [
+        ".cursor/rules/05-api-patterns.mdc",
+        ".cursor/rules/06-backend-services.mdc",
+        ".cursor/rules/13-controllers.mdc",
+        ".cursor/rules/07-error-handling.mdc"
+      ],
+      "globs": [
+        "routes/api/payments.js",
+        "controller/payments/**/*",
+        "services/**/payment/**/*",
+        "client/src/hooks/usePaymentProcessing.ts",
+        "client/src/pages/**/Payment/**/*",
+        "client/src/pages/**/TipAsk/**/*"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "domain-celebrations",
+      "description": "Celebration domain - apply multiple related rules",
+      "files": [
+        ".cursor/rules/05-api-patterns.mdc",
+        ".cursor/rules/06-backend-services.mdc",
+        ".cursor/rules/13-controllers.mdc",
+        ".cursor/rules/12-models.mdc",
+        ".cursor/rules/08-validation.mdc"
+      ],
+      "globs": [
+        "routes/api/celebrations.js",
+        "controller/celebrations/**/*",
+        "services/celebration/**/*",
+        "models/Celebration.js",
+        "client/src/pages/**/Celebrate/**/*",
+        "client/src/pages/**/Lobby/**/*"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "domain-congress",
+      "description": "Congress domain - apply multiple related rules",
+      "files": [
+        ".cursor/rules/05-api-patterns.mdc",
+        ".cursor/rules/06-backend-services.mdc",
+        ".cursor/rules/13-controllers.mdc",
+        ".cursor/rules/12-models.mdc"
+      ],
+      "globs": [
+        "routes/api/congress.js",
+        "routes/api/civics.js",
+        "controller/congress/**/*",
+        "controller/civics/**/*",
+        "services/congress/**/*",
+        "models/Pol.js",
+        "models/Bill.js",
+        "client/src/components/search/**/*",
+        "client/src/components/interactive/PolCarousel/**/*"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "domain-users",
+      "description": "User management domain - apply multiple related rules",
+      "files": [
+        ".cursor/rules/05-api-patterns.mdc",
+        ".cursor/rules/13-controllers.mdc",
+        ".cursor/rules/12-models.mdc",
+        ".cursor/rules/14-authentication.mdc",
+        ".cursor/rules/08-validation.mdc"
+      ],
+      "globs": [
+        "routes/api/users.js",
+        "controller/users/**/*",
+        "models/User.js",
+        "models/Applicant.js",
+        "models/ExUser.js",
+        "client/src/pages/**/Account/**/*",
+        "client/src/components/modals/Account/**/*",
+        "client/src/hooks/forms/**/*"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "domain-comms",
+      "description": "Communication domain - email and notifications",
+      "files": [
+        ".cursor/rules/06-backend-services.mdc",
+        ".cursor/rules/13-controllers.mdc"
+      ],
+      "globs": [
+        "controller/comms/**/*",
+        "services/**/email/**/*",
+        "services/**/notification/**/*",
+        "jobs/**/*"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "config-files",
+      "description": "Configuration files - apply structure and style rules",
+      "files": [
+        ".cursor/rules/01-project-structure.mdc",
+        ".cursor/rules/17-code-style.mdc"
+      ],
+      "globs": [
+        "*.json",
+        "*.js",
+        "*.config.js",
+        "*.config.ts",
+        ".eslintrc.js",
+        "tsconfig.json",
+        "package.json",
+        "webpack.config.js"
+      ],
+      "excludeGlobs": [
+        "node_modules/**/*",
+        "package-lock.json"
+      ],
+      "alwaysApply": false,
+      "priority": 2
+    }
+  ],
+  "settings": {
+    "maxRulesPerContext": 10,
+    "ruleCacheTimeout": 300,
+    "enableRuleDeduplication": true,
+    "prioritizeAlwaysApply": true
+  }
+}

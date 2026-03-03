@@ -1,0 +1,71 @@
+# Copy to /etc/systemd/system/powerback.service and replace placeholders.
+# Ensure /etc/powerback/public.env and /etc/powerback/powerback.env exist.
+# Then: sudo systemctl daemon-reload && sudo systemctl enable powerback.service
+#
+# Placeholders: {{USER}} {{GROUP}} {{NODE_BIN}} {{APP_SERVER_PATH}}
+#   {{SERVER_NAME}} {{STATIC_PUBLIC_DIR}}
+# Optional: set START_WATCHERS, API_TEST_POL, etc. for testing; remove ExecStartPost if powerback-security-score is not installed.
+
+[Unit]
+Description=Powerback Application
+Wants=network-online.target
+After=network.target
+
+[Service]
+Type=simple
+PrivateTmp=yes
+
+User={{USER}}
+Group={{GROUP}}
+
+PrivateDevices=yes
+ProtectSystem=full
+StandardError=syslog
+StandardOutput=syslog
+
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+LogsDirectory=powerback
+StateDirectory=powerback
+ExecStart=
+ExecStart={{NODE_BIN}} {{APP_SERVER_PATH}}
+ExecStartPost=/usr/local/bin/powerback-security-score powerback.service
+ReadWritePaths=/var/lib/powerback /var/log/powerback
+
+# [Env vars]
+Environment=NODE_ENV=production
+Environment=LOG_LEVEL=info
+Environment=LOG_DIR=/var/log/powerback
+Environment=SERVER_NAME={{SERVER_NAME}}
+Environment=STATIC_PUBLIC_DIR={{STATIC_PUBLIC_DIR}}
+
+# Optional: testing / dev diagnostics (leave empty or omit in production)
+Environment=START_WATCHERS=1
+Environment=START_API_TESTS=
+Environment=START_EMAIL_VAR_LOGGING=
+Environment=VERBOSE_ROUTE_TESTER=
+Environment=DEBUG_ROUTE_DISCOVERY=
+Environment=API_TEST_POL=
+
+# Source secure secrets and public config from disk
+Environment=SECRETS_PATH=/etc/powerback/powerback.env
+EnvironmentFile=/etc/powerback/powerback.env
+EnvironmentFile=/etc/powerback/public.env
+
+Restart=always
+RestartSec=10
+TimeoutStopSec=30
+
+# Hardening (Node-safe)
+NoNewPrivileges=yes
+RestrictRealtime=yes
+LockPersonality=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

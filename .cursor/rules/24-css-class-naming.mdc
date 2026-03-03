@@ -1,0 +1,61 @@
+---
+description: CSS class and id naming convention - block--part-or-variant (BEM-like, single separator)
+globs:
+  - "client/src/**/*.tsx"
+  - "client/src/**/*.jsx"
+  - "client/src/**/*.css"
+  - "client/src/**/*.module.css"
+alwaysApply: false
+priority: 2
+---
+
+# CSS Class and ID Naming
+
+## Project Convention: block--part-or-variant
+
+POWERBACK uses a **BEM-like** convention with a **single separator** (`--`) for both component parts and variants. This is not strict BEM (which uses `__` for elements and `--` for modifiers).
+
+### Pattern
+
+- **Format**: `block-name--part-or-variant`
+- **Block**: kebab-case name for the component or context (e.g. `account-logio`, `userpass`, `find-location`, `footer`, `pitch-info-item`).
+- **After `--`**: Either a **part** of the component (e.g. `row`, `field`, `btn`, `btn-spinner`) or a **variant/modifier** (e.g. `featured`, `flexible`, `translucent`).
+
+### Examples
+
+**Part (element-like):**
+- `account-logio--row` – row within the account logio area
+- `userpass--field` – field in the user/password form
+- `secureuserpass--row`, `secureuserpass--field`
+- `find-location--btn` – button in the find-location UI
+- `sidenav-close--btn` – close button in the side nav header
+- `tip-submit--btn-spinner` – spinner for the tip submit button
+- `show-cont--btn`, `hide-cont--btn` – continue buttons (visibility variants)
+
+**Variant (modifier-like):**
+- `pitch-info-item--featured` – featured variant of a pitch item
+- `footer--flexible` – flexible layout variant of the footer
+- `input--translucent` – translucent variant of an input
+
+### Rules
+
+1. **One separator**: Use only `--` between block and part/variant. Do not use `__` for elements.
+2. **Kebab-case**: Block and the part/variant are both kebab-case: `block-name--part-name`.
+3. **Combine with utilities**: These classes are often used alongside Bootstrap or utility classes, e.g. `className='account-logio--row row'` or `className='secureuserpass--row d-flex justify-content-center'`.
+4. **Consistency**: When adding new component-specific classes, use this same pattern so naming is predictable.
+
+### Relation to BEM
+
+- **BEM** uses: `block__element`, `block--modifier`, `block__element--modifier`.
+- **This project** uses: `block--part-or-variant` for both “element” and “modifier” roles.
+- Existing code is inconsistent; going forward, apply this convention for new or touched code. No requirement to refactor existing class names to strict BEM.
+
+## IDs
+
+Use kebab-case for IDs. Prefer classes over IDs for styling; reserve IDs for fragment links, ARIA, or one-off JS hooks when necessary.
+
+## See Also
+
+- **15-naming-conventions.mdc** – General naming (files, variables, CSS)
+- **04-css-styling.mdc** – CSS organization, design system, Bootstrap
+- **docs/coding-idiosyncrasies.md** – CSS class naming (idiosyncrasy doc)

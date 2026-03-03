@@ -1,0 +1,264 @@
+---
+description: Controller patterns, error handling, logging, and composition
+globs:
+  - 'controller/**/*'
+  - 'controller/**/*.js'
+alwaysApply: false
+priority: 3
+---
+
+# Controller Patterns
+
+## Controller Structure
+
+### Controller Organization (`/controller`)
+
+Organized by domain:
+
+- `/users` - User account management
+- `/celebrations` - Celebration/donation processing
+- `/payments` - Payment processing
+- `/congress` - Congressional data
+- `/comms` - Email and notifications
+- `/sys` - System operations
+
+### Controller File Pattern
+
+```javascript
+/**
+ * Controller module description
+ * @module controller/domain/action
+ */
+
+const { requireLogger } = require('../../services/logger');
+const logger = requireLogger(__filename);
+
+module.exports = {
+  /**
+   * Action description
+   * @param {Object} data - Request data
+   * @param {Object} user - Authenticated user
+   * @returns {Promise<Object>} Result
+   */
+  action: async (data, user) => {
+    try {
+      logger.debug('Action called', { data, userId: user?.id });
+
+      // Business logic
+      const result = await performOperation(data, user);
+
+      logger.info('Action completed', { result });
+      return result;
+    } catch (error) {
+      logger.error('Action error', {
+        error: error.message,
+        stack: error.stack,
+        data,
+        userId: user?.id,
+      });
+      throw error;
+    }
+  },
+};
+```
+
+## Controller Patterns
+
+### User Account Controller (`/controller/users/account`)
+
+```javascript
+const { generate } = require('../account/utils/hash');
+const { emails } = require('../../comms/emails');
+const { sendEmail } = require('../../comms');
+
+module.exports = {
+  create: async (newPowerbacker, model) => {
+    const hashObj = await generate('join');
+    try {
+      const created = await model.create({
+        ...newPowerbacker,
+        settings: APP.SETTINGS,
+        joinHash: hashObj.hash,
+        joinHashExpires: hashObj.expires,
+        joinHashIssueDate: hashObj.issueDate,
+      });
+
+      if (created) {
+        logger.debug(`New user account created: ${created.id}`);
+        await sendEmail(
+          newPowerbacker.username,
+          emails.JoiningUp,
+          hashObj.hash,
+          null,
+          URL_ROOT
+        );
+        return created;
+      }
+    } catch (error) {
+      logger.error('Error creating account', { error: error.message });
+      throw error;
+    }
+  },
+};
+```
+
+### Celebration Controller (`/controller/celebrations`)
+
+```javascript
+const { Celebration, User, Pol } = require('../../models');
+
+module.exports = {
+  create: async (celebrationData, userId) => {
+    try {
+      const celebration = await Celebration.create({
+        ...celebrationData,
+        donatedBy: userId,
+      });
+
+      // Update related data
+      await updatePolStakes(celebration.FEC_id);
+
+      return celebration;
+    } catch (error) {
+      logger.error('Error creating celebration', { error: error.message });
+      throw error;
+    }
+  },
+
+  findByUserId: async (userId) => {
+    return Celebration.find({ donatedBy: userId }).exec();
+  },
+};
+```
+
+### Payment Controller (`/controller/payments`)
+
+```javascript
+const stripe = require('stripe')(process.env.STRIPE_SK);
+
+module.exports = {
+  createPaymentIntent: async (amount, currency = 'usd') => {
+    try {
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount * 100, // Convert to cents
+        currency,
+      });
+
+      return {
+        clientSecret: paymentIntent.client_secret,
+        paymentIntent: paymentIntent.id,
+      };
+    } catch (error) {
+      logger.error('Error creating payment intent', { error: error.message });
+      throw error;
+    }
+  },
+};
+```
+
+## Controller Index Pattern
+
+### Controller Index (`/controller/domain/index.js`)
+
+```javascript
+const create = require('./create');
+const update = require('./update');
+const find = require('./find');
+const remove = require('./remove');
+
+module.exports = {
+  ...create,
+  ...update,
+  ...find,
+  ...remove,
+};
+```
+
+## Error Handling
+
+### Controller Error Pattern
+
+```javascript
+module.exports = {
+  action: async (data, user) => {
+    try {
+      // Operation
+      const result = await performOperation(data);
+      return result;
+    } catch (error) {
+      logger.error('Controller error', {
+        error: error.message,
+        stack: error.stack,
+        data,
+        userId: user?.id,
+      });
+      throw error; // Let route handler handle response
+    }
+  },
+};
+```
+
+## Logging
+
+### Controller Logging Pattern
+
+```javascript
+const { requireLogger } = require('../../services/logger');
+const logger = requireLogger(__filename);
+
+logger.debug('Action called', { data, userId: user?.id });
+logger.info('Action completed', { result });
+logger.error('Action error', { error: error.message, data });
+```
+
+## Controller Composition
+
+### Using Services
+
+```javascript
+const dataService = require('../../services/domain/dataService');
+const validationService = require('../../services/domain/validationService');
+
+module.exports = {
+  action: async (data, user) => {
+    // Validate
+    const validated = await validationService.validate(data);
+
+    // Process
+    const result = await dataService.process(validated, user);
+
+    return result;
+  },
+};
+```
+
+### Using Models
+
+```javascript
+const { User, Celebration } = require('../../models');
+
+module.exports = {
+  action: async (data, userId) => {
+    const user = await User.findById(userId).exec();
+    const celebration = await Celebration.create({
+      ...data,
+      donatedBy: userId,
+    });
+
+    return { user, celebration };
+  },
+};
+```
+
+## Controller Best Practices
+
+1. **Single Responsibility**: Each controller function should have one clear purpose
+2. **Error Handling**: Catch and log errors, re-throw for route handler
+3. **Logging**: Log important operations with context
+4. **Service Layer**: Use services for business logic, not controllers
+5. **Model Access**: Access models through controller, not routes
+6. **Validation**: Validate data before processing
+7. **Async/Await**: Use async/await for asynchronous operations
+8. **Documentation**: Document controller functions with JSDoc
+9. **Error Propagation**: Let route handler format error responses
+10. **Context Logging**: Include user ID and request context in logs

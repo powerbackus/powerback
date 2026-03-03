@@ -1,0 +1,123 @@
+---
+description: Naming conventions for files, variables, functions, and CSS - always active
+alwaysApply: true
+priority: 1
+---
+
+# Naming Conventions
+
+## File Naming
+
+### Frontend Files
+- **Components**: PascalCase (`StyledAlert.tsx`, `DonationPrompt.tsx`)
+- **Hooks**: camelCase starting with `use` (`useFormValidation.ts`, `usePaymentProcessing.ts`)
+- **Utilities**: camelCase (`normalize.js`, `donationFailure.ts`)
+- **Types/Interfaces**: PascalCase (`UserData.ts`, `ContactInfo.ts`)
+- **Constants**: UPPER_SNAKE_CASE files, camelCase exports (`copy.ts`, `errors.js`)
+- **CSS**: `style.css` or `style.module.css` (co-located with components)
+- **Index files**: `index.js` or `index.ts`
+
+### Backend Files
+- **Routes**: camelCase (`users.js`, `celebrations.js`)
+- **Controllers**: camelCase (`create.js`, `update.js`)
+- **Services**: camelCase (`dataService.js`, `emailService.js`)
+- **Models**: PascalCase (`User.js`, `Celebration.js`)
+- **Validation**: camelCase (`userEntryForm.js`, `celebration.js`)
+- **Utilities**: camelCase (`logger.js`, `cookies.js`)
+
+## Variable Naming
+
+### JavaScript/TypeScript
+- **Variables**: camelCase (`userData`, `donationAmount`)
+- **Constants**: UPPER_SNAKE_CASE (`MAX_DONATION`, `API_URL`)
+- **Functions**: camelCase (`getUserData`, `processPayment`)
+- **Classes**: PascalCase (`Tokenizer`, `AuthBase`)
+- **Interfaces/Types**: PascalCase (`UserData`, `ContactInfo`)
+- **Enums**: PascalCase (`ComplianceTier`, `SearchOption`)
+
+### React Components
+- **Components**: PascalCase (`StyledAlert`, `DonationPrompt`)
+- **Props**: camelCase (`userData`, `onClick`)
+- **State**: camelCase (`isLoading`, `userData`)
+- **Handlers**: camelCase starting with `handle` (`handleClick`, `handleSubmit`)
+
+## Function Naming
+
+### Action Functions
+- Prefix with action verb: `get`, `set`, `create`, `update`, `delete`, `find`
+- Examples: `getUserData`, `setUserData`, `createCelebration`, `updateUser`
+
+### Handler Functions
+- Prefix with `handle`: `handleClick`, `handleSubmit`, `handleChange`
+- Examples: `handlePaymentSubmit`, `handleDonationChange`
+
+### Validation Functions
+- Prefix with `validate` or `is`: `validateEmail`, `isValidPassword`
+- Examples: `validateForm`, `isValidEmail`
+
+### Utility Functions
+- Descriptive names: `normalize`, `prune`, `formatCurrency`
+- Examples: `normalizePhoneNumber`, `pruneUserData`
+
+## Database Naming
+
+### Collection Names
+- Singular, PascalCase: `User`, `Celebration`, `Pol`
+
+### Field Names
+- camelCase: `firstName`, `lastName`, `phoneNumber`
+- Boolean fields: `isActive`, `hasStakes`, `tipLimitReached`
+- Date fields: `createdAt`, `updatedAt`, `joinHashExpires`
+
+### Index Names
+- Descriptive: `username_1`, `donatedBy_1_resolved_1`
+
+## API Naming
+
+### Endpoints
+- RESTful: `/api/users`, `/api/users/:userId`, `/api/celebrations`
+- Actions: `POST /api/users`, `GET /api/users/:userId`, `PUT /api/users/:userId`
+
+### Request/Response Properties
+- camelCase: `userId`, `donationAmount`, `accessToken`
+
+## CSS Naming
+
+### Class Names
+- kebab-case: `.styled-alert`, `.donation-prompt`, `.form-input`
+- Component-specific: `block-name--part-or-variant` (one separator `--` for both parts and variants; see **24-css-class-naming.mdc** for full convention)
+
+### CSS Variables
+- kebab-case with `--`: `--primary-color`, `--background-color`
+
+## Constants Naming
+
+### Backend Constants
+- UPPER_SNAKE_CASE: `MAX_DONATION`, `API_URL`, `JWT_SECRET`
+
+### Frontend Constants
+- camelCase exports: `APP`, `API`, `FEC`
+- UPPER_SNAKE_CASE for values: `MAX_DONATION = 10000`
+
+## Type/Interface Naming
+
+### TypeScript Types
+- PascalCase: `UserData`, `ContactInfo`, `Celebration`
+- Suffix with type: `UserData`, `ContactInfo`, `PaymentResponse`
+
+### Generic Types
+- Single letter: `T`, `K`, `V`
+- Descriptive: `TData`, `TResponse`
+
+## Best Practices
+
+1. **Consistency**: Use consistent naming throughout the codebase
+2. **Descriptive**: Names should clearly describe their purpose
+3. **Avoid Abbreviations**: Use full words unless abbreviation is standard
+4. **Boolean Prefixes**: Use `is`, `has`, `can` for boolean variables
+5. **Action Prefixes**: Use action verbs for functions (`get`, `set`, `create`)
+6. **Plural Forms**: Use plural for arrays (`users`, `celebrations`)
+7. **Singular Forms**: Use singular for single items (`user`, `celebration`)
+8. **File Names Match**: File names should match exported names
+9. **Constants**: Use UPPER_SNAKE_CASE for constants
+10. **Private Members**: Prefix with underscore if truly private (rare in JS/TS)

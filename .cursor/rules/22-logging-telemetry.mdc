@@ -1,0 +1,129 @@
+---
+description: Logging patterns, telemetry, PII handling, and central logger usage
+globs:
+  - 'services/logger.js'
+  - '**/*.js'
+alwaysApply: false
+priority: 2
+---
+
+# Logging and Telemetry
+
+## Central Logger
+
+### Logger Service
+
+- **Single logger**: Use the central logger (`services/logger`)
+- **Import pattern**: `const { requireLogger } = require('../services/logger'); const logger = requireLogger(__filename);`
+- **Path-based naming**: Logger name derived from file path via `requireLogger(__filename)`
+- **Consistent usage**: Use logger for all server-side logging
+
+### Logger Setup Pattern
+
+```javascript
+const { requireLogger } = require('../../services/logger');
+const logger = requireLogger(__filename);
+```
+
+## PII Handling
+
+### Never Log PII
+
+Do NOT log or store any PII (Personally Identifiable Information):
+
+- **Names**: First name, last name, middle name
+- **Email addresses**: Any email addresses
+- **Addresses**: Physical addresses, street addresses
+- **Phone numbers**: Any phone numbers
+- **Last4**: Last 4 digits of credit cards
+- **Location IDs**: `ocd_id` or similar location identifiers
+- **Employment**: Employer, occupation
+
+### Check Existing Code
+
+- **Audit for PII**: Check that we are not already logging PII anywhere in the app
+- **Remove if found**: If PII is found in logs, remove it
+- **Review error messages**: Ensure error messages don't contain PII
+
+## Logging Levels
+
+### Standard Levels
+
+- **debug**: Detailed debugging information
+- **info**: General informational messages
+- **warn**: Warning messages (fallbacks, non-critical issues)
+- **error**: Error messages with stack traces
+
+### When to Use Each Level
+
+- **debug**: Development debugging, detailed flow information
+- **info**: Normal operations, successful completions, fallback usage
+- **warn**: Non-critical issues, fallbacks, validation warnings
+- **error**: Errors, exceptions, failures
+
+## Email Logging
+
+### Single Gateway
+
+- **Central gateway**: `controller/comms/sendEmail.js` is the only email gateway
+- **Log through gateway**: Email logging happens through the single gateway
+- **Avoid scattered transport**: Do not create email transports elsewhere
+- **Centralize templates**: All email templates centralized in gateway
+
+### Email Retry/Backoff
+
+- **Standard retry**: Follow generic standard for email retries
+- **Queue for bulk**: Use queue (e.g., BullMQ/Redis) for bulk sends and retries
+- **sendEmail as façade**: Keep sendEmail as façade into queue
+- **Promise-based**: Don't pass callback if awaiting; return promise directly
+
+## Election Date Notifications
+
+### Logging Criteria
+
+- **Log on diff only**: Log only when diffs exist (state/date changes)
+- **Include counts**: Log counts of changed states/dates
+- **Info/warn level**: Use info/warn level for notifications
+
+### What to Log
+
+- **State changes**: Which states had election date changes
+- **Date changes**: What specific dates changed
+- **Counts**: Number of states/dates changed
+- **Success/fail**: Whether update succeeded or failed
+
+## Logging Structure
+
+### Context Fields
+
+Include relevant context in log messages:
+
+- **User ID**: Include userId when relevant (but not PII)
+- **Request path**: Include request path
+- **Request method**: Include HTTP method
+- **Timestamp**: Logger adds timestamp automatically
+- **Environment**: Include environment (development/production)
+
+### Error Logging
+
+```javascript
+logger.error('Operation failed', {
+  error: error.message,
+  stack: error.stack,
+  userId: req.user?.id, // OK - not PII
+  path: req.path,
+  method: req.method,
+  timestamp: new Date().toISOString(),
+});
+```
+
+## Best Practices
+
+1. **Use central logger**: Always use `services/logger`
+2. **Never log PII**: Check and remove any PII from logs
+3. **Path-based naming**: Use file path for logger name
+4. **Appropriate levels**: Use correct log level for message type
+5. **Include context**: Add relevant context (userId, path, etc.) but not PII
+6. **Email through gateway**: All email logging through single gateway
+7. **Log on diff only**: Election date logs only when changes detected
+8. **Audit for PII**: Check existing code for PII in logs

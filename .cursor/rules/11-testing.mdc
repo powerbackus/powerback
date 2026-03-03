@@ -1,0 +1,307 @@
+---
+description: Testing patterns for Jest, React Testing Library, and E2E tests
+globs:
+  - '__tests__/**/*'
+  - '__tests__/**/*.test.js'
+  - '__tests__/**/*.spec.js'
+  - 'scripts/tests/**/*.js'
+  - 'client/src/__tests__/**/*'
+  - 'client/src/**/*.test.ts'
+  - 'client/src/**/*.test.tsx'
+  - 'client/src/**/*.test.js'
+  - 'client/src/**/*.test.jsx'
+  - 'tests/**/*.spec.ts'
+  - 'tests/**/*.spec.js'
+alwaysApply: false
+priority: 4
+---
+
+# Testing Patterns
+
+## Testing Strategy
+
+### Test Organization
+
+- **`/__tests__`** – Backend tests (root level). Run with `npm test`.
+- **`/client/src/__tests__`** – Frontend component tests. Run with `npm run test:client` or included in root `npm test`.
+- **`/tests`** – E2E tests (Playwright), if used.
+- **`/scripts/tests`** – Development utility test scripts (manual runs). Not part of the Jest suite. Examples: `test-stripe-api.js`, `test-donation-limits.js`, `test-hjres54-email.js`, `socialTest.js`. Run from project root: `node scripts/tests/<name>.js`. See [scripts/README.md](../../scripts/README.md#tests).
+
+### Test File Naming
+
+- Backend: `*.test.js` (e.g., `auth.test.js`, `election-dates.test.js`)
+- Frontend: `*.test.tsx` or `*.test.ts` (e.g., `LimitModal.test.tsx`)
+- E2E: `*.spec.ts` (e.g., `createAccount.spec.ts`, `login.spec.ts`)
+
+## Backend Testing
+
+### App and Jest Config
+
+- Use `require('../../server')` for the Express app in API tests (root has no `app.js`).
+- Root `jest.config.js` applies to all tests: `testPathIgnorePatterns` excludes `/tests-examples/` and `client/src/App.test.js`; `moduleNameMapper` maps `@scure/bip32` to `__mocks__/scureBip32.js`.
+- Global setup: `test/setup.js` (in-memory MongoDB, env vars, clear collections afterEach). Do not use deprecated Mongoose options (`useFindAndModify`, `useUnifiedTopology`, `useNewUrlParser`).
+
+### API Test Mocks
+
+When tests load the full server, mock to avoid ESM or real I/O:
+
+- **Hash generation**: Mock `controller/users/account/utils/hash/generate` (it uses dynamic `import('crypto')`) with a resolved value `{ hash, expires, issueDate }` (e.g. 18-char hex for hash).
+- **sendEmail**: Mock `controller/comms/sendEmail` in auth and password-reset API tests.
+- **@scure/bip32**: Handled by `jest.config.js` `moduleNameMapper`; no per-file mock needed.
+
+### API Contract Conventions (tests must match API)
+
+- **POST /api/users**: Body `username`, `password`, `err`. Success 200; validation 403 with `body.message`.
+- **POST /api/users/login**: Body `username`, `password`. Success 200 with `accessToken` and user fields.
+- **Password reset**: `hash` exactly 18 hex chars; invalid format → 403. Lock response body `'This account has been locked.'`.
+- **Unsubscribe**: Hash 18 hex chars; topic camelCase: `electionUpdates`, `districtUpdates`, `celebrationUpdates`. Invalid/missing → 403.
+- **Celebration fixtures**: Use `donatedBy` (not `userId`), `donorInfo: { compliance: 'compliant' }`. Cancelled state: `defunct: true`; assert with `defunct: false` for active count after cancel.
+
+### Jest Test Pattern
+
+```javascript
+const request = require('supertest');
+const app = require('../../server');
+
+describe('API Endpoint', () => {
+  it('should return 200 on success', async () => {
+    const response = await request(app)
+      .post('/api/endpoint')
+      .send({ data: 'test' })
+      .expect(200);
+
+    expect(response.body).toHaveProperty('data');
+  });
+
+  it('should return 400 on validation error', async () => {
+    const response = await request(app)
+      .post('/api/endpoint')
+      .send({ invalid: 'data' })
+      .expect(400);
+
+    expect(response.body.error).toBeDefined();
+  });
+});
+```
+
+### Service Test Pattern
+
+```javascript
+const service = require('../services/service');
+
+describe('Service Function', () => {
+  it('should perform operation', async () => {
+    const result = await service.function(param);
+    expect(result).toBeDefined();
+    expect(result).toHaveProperty('expectedProperty');
+  });
+
+  it('should handle errors', async () => {
+    await expect(service.function(invalidParam)).rejects.toThrow();
+  });
+});
+```
+
+### Model Test Pattern
+
+```javascript
+const { User } = require('../models');
+
+describe('User Model', () => {
+  it('should create user', async () => {
+    const user = await User.create({
+      username: 'test@example.com',
+      password: 'hashedPassword',
+    });
+
+    expect(user).toBeDefined();
+    expect(user.username).toBe('test@example.com');
+  });
+
+  it('should validate required fields', async () => {
+    await expect(User.create({})).rejects.toThrow();
+  });
+});
+```
+
+## Frontend Testing
+
+### Component Test Pattern (React Testing Library)
+
+```typescript
+import { render, screen, fireEvent } from '@testing-library/react';
+import Component from './Component';
+
+describe('Component', () => {
+  it('should render', () => {
+    render(<Component prop="value" />);
+    expect(screen.getByText('Expected Text')).toBeInTheDocument();
+  });
+
+  it('should handle user interaction', () => {
+    const handleClick = jest.fn();
+    render(<Component onClick={handleClick} />);
+
+    fireEvent.click(screen.getByRole('button'));
+    expect(handleClick).toHaveBeenCalled();
+  });
+});
+```
+
+### Hook Test Pattern
+
+```typescript
+import { renderHook, act } from '@testing-library/react';
+import useHook from './useHook';
+
+describe('useHook', () => {
+  it('should return initial state', () => {
+    const { result } = renderHook(() => useHook());
+    expect(result.current[0]).toEqual(initialState);
+  });
+
+  it('should update state on action', () => {
+    const { result } = renderHook(() => useHook());
+
+    act(() => {
+      result.current[1].action();
+    });
+
+    expect(result.current[0]).toEqual(expectedState);
+  });
+});
+```
+
+### Context Test Pattern
+
+```typescript
+import { render } from '@testing-library/react';
+import { ContextProvider } from './ContextProvider';
+
+const MockContextProvider: React.FC<{ value: ContextType; children: React.ReactNode }> = ({
+  value,
+  children,
+}) => (
+  <Context.Provider value={value}>
+    {children}
+  </Context.Provider>
+);
+
+describe('Component with Context', () => {
+  it('should use context value', () => {
+    const mockValue = { /* mock context value */ };
+    render(
+      <MockContextProvider value={mockValue}>
+        <Component />
+      </MockContextProvider>
+    );
+    // Assertions
+  });
+});
+```
+
+## E2E Testing (Playwright)
+
+### E2E Test Pattern
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test('user can create account', async ({ page }) => {
+  await page.goto('/');
+  await page.click('text=Join Now');
+  await page.fill('input[name="username"]', 'test@example.com');
+  await page.fill('input[name="password"]', 'password123');
+  await page.click('button[type="submit"]');
+
+  await expect(page).toHaveURL(/.*celebrate/);
+});
+```
+
+### Test Setup (`/tests/auth.setup.ts`)
+
+```typescript
+import { test as setup } from '@playwright/test';
+
+setup('authenticate', async ({ page }) => {
+  // Perform authentication
+  await page.goto('/');
+  await page.fill('input[name="username"]', process.env.TEST_USERNAME!);
+  await page.fill('input[name="password"]', process.env.TEST_PASSWORD!);
+  await page.click('button[type="submit"]');
+
+  // Save authentication state
+  await page.context().storageState({ path: 'tests/auth.json' });
+});
+```
+
+## Test Utilities
+
+### Mock Data
+
+```typescript
+// __mocks__/axios.js
+module.exports = {
+  get: jest.fn(() => Promise.resolve({ data: {} })),
+  post: jest.fn(() => Promise.resolve({ data: {} })),
+  put: jest.fn(() => Promise.resolve({ data: {} })),
+  delete: jest.fn(() => Promise.resolve({ data: {} })),
+};
+```
+
+### Test Helpers
+
+```typescript
+// helpers/testHelpers.ts
+export const createMockUser = (overrides?: Partial<UserData>): UserData => ({
+  id: 'test-id',
+  username: 'test@example.com',
+  email: 'test@example.com',
+  ...overrides,
+});
+```
+
+## Test Coverage
+
+### Coverage Targets
+
+- Critical paths: 80%+ coverage
+- Business logic: 80%+ coverage
+- Utilities: 90%+ coverage
+- Components: 70%+ coverage
+
+### Running Tests
+
+Root `npm test` runs the full Jest suite (backend `__tests__/` and client `client/src/__tests__/` in one run, Node environment). Playwright specs in `tests-examples/` are excluded and run separately.
+
+```bash
+# Full suite (backend + client __tests__)
+npm test
+
+# Watch mode
+npm run test:watch
+
+# Client tests only (from client package)
+npm run test:client
+
+# Backend + client
+npm run test:all
+
+# Coverage
+npm run test:coverage
+```
+
+See `specs/testing-strategy.md` for Jest config, `test/setup.js`, and API test mocks/conventions.
+
+## Testing Best Practices
+
+1. **Test Structure**: Use describe/it blocks for organization
+2. **Test Names**: Use descriptive test names
+3. **Arrange-Act-Assert**: Follow AAA pattern
+4. **Mock External Dependencies**: Mock API calls, external services
+5. **Test Isolation**: Each test should be independent
+6. **Test Data**: Use factories/helpers for test data
+7. **Error Cases**: Test error handling and edge cases
+8. **Accessibility**: Test keyboard navigation and screen readers
+9. **E2E Coverage**: Test critical user flows end-to-end
+10. **Coverage Goals**: Aim for 80%+ coverage on critical paths

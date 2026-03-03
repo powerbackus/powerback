@@ -1,0 +1,182 @@
+---
+description: Core project structure and architecture patterns - always active
+alwaysApply: true
+priority: 1
+---
+
+# Project Structure and Organization
+
+## Overview
+POWERBACK is a MERN stack application with clear separation between frontend (React/TypeScript) and backend (Node.js/Express). The project follows a feature-based organization pattern with domain-driven design principles.
+
+## Directory Structure
+
+### Root Level
+- `/client` - React frontend application
+- `/routes` - Express API route handlers
+- `/controller` - Business logic controllers (organized by domain)
+- `/services` - Service layer (organized by domain)
+- `/models` - Mongoose schemas and models
+- `/auth` - Authentication system (JWT, token management)
+- `/validation` - Joi validation schemas
+- `/jobs` - Background jobs and watchers
+- `/docs` - Project documentation
+- `/specs` - Domain specifications and requirements
+- `/dev` - Development utilities and scripts
+- `/snapshots` - Data snapshots for external APIs
+- `/constants` - Application constants
+
+### Frontend Structure (`/client/src`)
+- `/components` - Reusable UI components (organized by category: alerts, buttons, displays, forms, interactive, modals, page, search)
+- `/pages` - Page-level components (Splash, Celebrate, Account, etc.)
+- `/contexts` - React Context providers
+- `/hooks` - Custom React hooks (organized by domain: compliance, data, forms, fn, ui)
+- `/api` - API client and request functions
+- `/constants` - Frontend constants and copy text
+- `/interfaces` - TypeScript interfaces
+- `/types` - TypeScript type definitions
+- `/tuples` - Fixed datasets (states, countries, etc.)
+- `/utils` - Utility functions
+- `/img` - Image assets
+
+### Backend Structure
+- `/routes/api` - API endpoints (organized by resource: users, celebrations, payments, congress, etc.)
+- `/controller` - Request handlers organized by domain (users, celebrations, payments, congress, comms, sys)
+- `/services` - Business logic services (organized by domain: celebration, congress, user, utils)
+- `/models` - Mongoose schemas (User, Celebration, Pol, Bill, Applicant, ExUser, Key)
+
+## File Naming Conventions
+
+### Frontend Files
+- **Components**: PascalCase (`StyledAlert.tsx`, `DonationPrompt.tsx`)
+- **Hooks**: camelCase starting with `use` (`useFormValidation.ts`, `usePaymentProcessing.ts`)
+- **Utilities**: camelCase (`normalize.js`, `donationFailure.ts`)
+- **Types/Interfaces**: PascalCase (`UserData.ts`, `ContactInfo.ts`)
+- **Constants**: UPPER_SNAKE_CASE files, camelCase exports (`copy.ts`, `errors.js`)
+- **CSS**: `style.css` or `style.module.css` (co-located with components)
+
+### Backend Files
+- **Routes**: camelCase (`users.js`, `celebrations.js`)
+- **Controllers**: camelCase (`create.js`, `update.js`)
+- **Services**: camelCase (`dataService.js`, `emailService.js`)
+- **Models**: PascalCase (`User.js`, `Celebration.js`)
+- **Validation**: camelCase (`userEntryForm.js`, `celebration.js`)
+
+## Component Organization Patterns
+
+### Component Categories
+1. **Alerts** (`/components/alerts`) - User notifications and feedback
+2. **Buttons** (`/components/buttons`) - Interactive button elements
+3. **Displays** (`/components/displays`) - Information presentation components
+4. **Forms** (`/components/forms`) - Form input components
+5. **Interactive** (`/components/interactive`) - Complex interactive components (carousels, navigation)
+6. **Modals** (`/components/modals`) - Overlay dialogs
+7. **Page** (`/components/page`) - Page-level components (footer, navigation, wrapper)
+8. **Search** (`/components/search`) - Search functionality components
+
+### Component File Structure
+Each component directory should contain:
+- `ComponentName.tsx` or `ComponentName.js` - Main component file
+- `index.js` - Export file for clean imports
+- `style.css` - Component-specific styles (co-located)
+- `/subcomps` - Sub-components (if complex component)
+- `/fn` - Pure functions used by component (if needed)
+
+Example:
+```
+components/
+  alerts/
+    StyledAlert/
+      StyledAlert.tsx
+      index.js
+      style.css
+```
+
+## Import Organization
+
+### Import Order (enforced by ESLint)
+1. Node built-in modules
+2. External npm packages
+3. Internal absolute imports (`@/**`)
+4. Parent directory imports (`../`)
+5. Sibling imports (`./`)
+6. Index imports (`./index`)
+
+### Import Patterns
+```typescript
+// External dependencies
+import React, { useState, useCallback } from 'react';
+import axios from 'axios';
+
+// Internal absolute imports
+import { useAuth } from '@Contexts';
+import { API } from '@API';
+import { UserData } from '@Interfaces';
+
+// Relative imports
+import { normalize } from './fn';
+import './style.css';
+```
+
+## Module Exports
+
+### Default Exports
+- Use default exports for main component/hook files
+- Use named exports for utilities and constants
+
+### Index Files
+- Create `index.js` files for clean imports
+- Re-export components/hooks from index files
+- Example: `components/alerts/index.js` exports all alert components
+
+## Domain-Driven Organization
+
+### Backend Domains
+- **Users** - User management, authentication, profiles
+- **Celebrations** - Donation events and processing
+- **Payments** - Payment processing and Stripe integration
+- **Congress** - Congressional data and political information
+- **Comms** - Email and notification services
+- **Sys** - System operations and utilities
+
+### Frontend Domains
+- **Authentication** - Login, registration, password management
+- **Donations** - Donation flow, payment processing
+- **Account** - User profile and settings
+- **Search** - Politician search and selection
+- **Navigation** - App navigation and routing
+
+## Constants Organization
+
+### Backend Constants (`/constants`)
+- Organized by domain: `server.js`, `email.js`, `api.js`, `fec.js`, `stripe.js`, `compliance.js`
+- Centralized in `index.js` for easy imports
+- Environment-based configuration
+
+### Frontend Constants (`/client/src/constants`)
+- Copy text organized by feature: `celebrate.ts`, `splash.ts`, `account.ts`, `search.ts`
+- Error messages: `errors.js`
+- Configuration: `config.ts`
+
+## Documentation Structure
+
+### Documentation Files (`/docs`)
+- Architecture and system design
+- API documentation
+- Feature documentation
+- Development guides
+
+### Specification Files (`/specs`)
+- Domain specifications
+- Compliance requirements
+- UI/UX patterns
+- Testing strategies
+
+## Best Practices
+
+1. **Co-location**: Keep related files together (component + styles + tests)
+2. **Feature-based**: Organize by feature/domain, not by file type
+3. **Clear boundaries**: Maintain clear separation between frontend and backend
+4. **Consistent naming**: Follow established naming conventions
+5. **Index exports**: Use index files for clean import paths
+6. **Domain organization**: Group related functionality by business domain

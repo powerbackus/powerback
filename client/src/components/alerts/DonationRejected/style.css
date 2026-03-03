@@ -1,0 +1,18 @@
+.donation-failed-alert {
+  position: fixed !important;
+  text-align: left;
+  font-family: 'Inter';
+  z-index: 3000;
+}
+
+/* Tablet, landscape */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .donation-failed-alert {
+    width: 33.75vw;
+    height: 11vh;
+    top: 0.5vh;
+    left: 28.5%;
+  }
+
+}
+
