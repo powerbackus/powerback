@@ -197,6 +197,8 @@ function runWatchers() {
       'Watchers disabled (START_WATCHERS not set) - skipping initial execution'
     );
   }
+
+  logger.info('cycle completed');
 }
 
 module.exports = runWatchers;
