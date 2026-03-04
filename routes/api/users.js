@@ -153,7 +153,7 @@ router
  * @returns {Object} New access token or error response
  */
 
-router.route('/refresh').post(csrfTokenValidator(), tokenizer.refresh());
+router.route('/refresh').post(tokenizer.refresh());
 
 /**
  * GET /api/users/data/:userId
