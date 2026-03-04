@@ -239,6 +239,11 @@ Ensures database connectivity before running check functions:
 
 - **START_WATCHERS**: set `START_WATCHERS=1` to run watchers; leave unset or blank to disable (e.g. for maintenance or testing). When disabled, the initial run is skipped.
 
+### Social webhook rate limiting and cold start
+
+- **Rate limiting**: Social webhook posts are throttled (min delay between posts, per-run cap, per-event-type cap). See [Social Announcements Webhooks](./social-announcements-webhooks.md) and `SOCIAL_WEBHOOK_*` env vars in `.env.example.backend`.
+- **Cold start**: On a fresh clone or empty `snapshots/` and `deltas/`, the first run can treat all current data as "new" and would otherwise send hundreds of emails and social posts. houseWatcher and challengersWatcher detect bootstrap (no previous snapshot) and skip per-member/per-district social posts and bulk alert emails; they still sync data and save snapshots so the next run is incremental.
+
 ## Error Handling
 
 ### Independent Execution

@@ -1,7 +1,42 @@
 /**
  * @fileoverview Posts watcher events to social/webhook automation (e.g. Make).
+ * Rate limits: minimum delay between posts, per-run cap, per-event-type cap.
  * @module services/utils/socialPoster
  */
+
+const logger = require('./logger')(__filename);
+
+const MIN_DELAY_MS = Math.max(
+  0,
+  parseInt(process.env.SOCIAL_WEBHOOK_MIN_DELAY_MS, 10) || 10000
+);
+const MAX_PER_RUN = Math.max(
+  0,
+  parseInt(process.env.SOCIAL_WEBHOOK_MAX_PER_RUN, 10) || 30
+);
+const MAX_PER_EVENT_TYPE = Math.max(
+  0,
+  parseInt(process.env.SOCIAL_WEBHOOK_MAX_PER_EVENT_TYPE, 10) || 5
+);
+const DISABLED =
+  process.env.SOCIAL_WEBHOOK_DISABLED === '1' ||
+  process.env.SOCIAL_WEBHOOK_DISABLED === 'true';
+
+let lastPostTime = 0;
+let runPostCount = 0;
+const runPostCountByType = Object.create(null);
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Resets per-run counters. Call at the start of each watcher run so caps apply per run.
+ */
+function resetSocialPostRunCount() {
+  runPostCount = 0;
+  Object.keys(runPostCountByType).forEach((k) => delete runPostCountByType[k]);
+}
 
 /**
  * Sends an event payload to the configured webhook. Caller is responsible for
@@ -54,11 +89,41 @@ async function postToSocial({
   states,
   state,
 }) {
-  const key = process.env.SOCIAL_WEBHOOK_API_KEY,
-    url = process.env.SOCIAL_WEBHOOK_URL;
+  if (DISABLED) {
+    return;
+  }
+
+  const key = process.env.SOCIAL_WEBHOOK_API_KEY;
+  const url = process.env.SOCIAL_WEBHOOK_URL;
 
   if (!url || !key) {
     throw new Error('Missing SOCIAL_WEBHOOK_URL or SOCIAL_WEBHOOK_API_KEY');
+  }
+
+  if (MAX_PER_RUN > 0 && runPostCount >= MAX_PER_RUN) {
+    logger.warn('Social post skipped: per-run cap reached', {
+      cap: MAX_PER_RUN,
+      eventType,
+      dedupeKey,
+    });
+    return;
+  }
+
+  const typeCount = runPostCountByType[eventType] || 0;
+  if (MAX_PER_EVENT_TYPE > 0 && typeCount >= MAX_PER_EVENT_TYPE) {
+    logger.warn('Social post skipped: per-event-type cap reached', {
+      eventType,
+      cap: MAX_PER_EVENT_TYPE,
+      dedupeKey,
+    });
+    return;
+  }
+
+  if (MIN_DELAY_MS > 0 && lastPostTime > 0) {
+    const elapsed = Date.now() - lastPostTime;
+    if (elapsed < MIN_DELAY_MS) {
+      await sleep(MIN_DELAY_MS - elapsed);
+    }
   }
 
   const body = {
@@ -112,6 +177,10 @@ async function postToSocial({
     body: JSON.stringify(body),
     method: 'POST',
   });
+
+  lastPostTime = Date.now();
+  runPostCount += 1;
+  runPostCountByType[eventType] = typeCount + 1;
 }
 
-module.exports = { postToSocial };
+module.exports = { postToSocial, resetSocialPostRunCount };

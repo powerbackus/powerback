@@ -94,6 +94,7 @@ const challengersWatcher = require('./challengersWatcher');
 const { electionDatesUpdater } = require('./electionDatesUpdater');
 const defunctCelebrationWatcher = require('./defunctCelebrationWatcher');
 const { scheduleTipLimitReachedReset } = require('./tipLimitReachedReset');
+const { resetSocialPostRunCount } = require('../services/utils');
 
 const POLL_SCHEDULE = SERVER.CRON_SCHEDULES.WEEKDAY_3PM;
 
@@ -124,6 +125,8 @@ function runWatchers() {
   scheduleTipLimitReachedReset();
 
   async function runAll(POLL_SCHEDULE) {
+    resetSocialPostRunCount();
+
     logger.info(
       'running houseWatcher -> challengersWatcher -> checkHJRes54 -> electionDatesUpdater -> defunctCelebrationWatcher'
     );

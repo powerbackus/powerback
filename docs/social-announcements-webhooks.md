@@ -8,6 +8,10 @@ Watcher jobs send event payloads to an external webhook (e.g. Make.com) to drive
 
 **Environment**: `SOCIAL_WEBHOOK_URL`, `SOCIAL_WEBHOOK_API_KEY` (sent as header `x-make-apikey`)
 
+**Rate limiting** (in `postToSocial`): Minimum delay between posts (`SOCIAL_WEBHOOK_MIN_DELAY_MS`, default 10000), per-run cap (`SOCIAL_WEBHOOK_MAX_PER_RUN`, default 30), per-event-type cap (`SOCIAL_WEBHOOK_MAX_PER_EVENT_TYPE`, default 5). Counters reset at the start of each watcher run. Set `SOCIAL_WEBHOOK_DISABLED=1` (or `true`) to disable all social webhook posts (e.g. dev or fresh clone). See `.env.example.backend` for optional env vars.
+
+**Cold start**: When watchers run with empty snapshots (e.g. fresh clone), houseWatcher and challengersWatcher skip per-item social posts and bulk alert emails; they send a single bootstrap notice or log and still save the new snapshot so the next run is incremental.
+
 ## Event types
 
 | Event type         | Source job                | When                                                                                          |

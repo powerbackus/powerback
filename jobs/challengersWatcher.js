@@ -344,6 +344,13 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
       (change) => change.old && change.old.has_stakes
     );
 
+    const isBootstrapRun = snapshot.length === 0;
+    if (isBootstrapRun && (added.length > 0 || removals.length > 0)) {
+      logger.info(
+        `Bootstrap run: skipping challenger/incumbent emails and social posts (${added.length} added, ${removals.length} removals)`
+      );
+    }
+
     for (const change of added) {
       const polId = change.key;
       try {
@@ -363,38 +370,40 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
 
         logger.info(`Processing added pol: ${polId} (${state}-${district})`);
 
-        // Social announcement for the new challenger event
-        try {
-          const polFullName = [
-            polDoc.first_name,
-            polDoc.middle_name,
-            polDoc.last_name,
-          ]
-            .filter(Boolean)
-            .join(' ');
-          const polName = fixPolName(polFullName);
-          await postToSocial({
-            eventType: 'challengers',
-            action: 'added',
-            polName: polName,
-            handles: {
-              bluesky: polDoc.bluesky_account || '',
-              twitter: polDoc.twitter_account || '',
-              youtube: polDoc.youtube_account || '',
-              facebook: polDoc.facebook_account || '',
-              mastodon: polDoc.mastodon_account || '',
-              truth: polDoc.truth_social_account || '',
-              instagram: polDoc.instagram_account || '',
-            },
-            dedupeKey: `challenger:${polId}`,
-            district: district,
-            state: state,
-          });
-          logger.info(
-            `Posted social challenger event for ${state}-${district}`
-          );
-        } catch (postErr) {
-          logger.error('Failed to post social challenger event:', postErr);
+        if (!isBootstrapRun) {
+          // Social announcement for the new challenger event
+          try {
+            const polFullName = [
+              polDoc.first_name,
+              polDoc.middle_name,
+              polDoc.last_name,
+            ]
+              .filter(Boolean)
+              .join(' ');
+            const polName = fixPolName(polFullName);
+            await postToSocial({
+              eventType: 'challengers',
+              action: 'added',
+              polName: polName,
+              handles: {
+                bluesky: polDoc.bluesky_account || '',
+                twitter: polDoc.twitter_account || '',
+                youtube: polDoc.youtube_account || '',
+                facebook: polDoc.facebook_account || '',
+                mastodon: polDoc.mastodon_account || '',
+                truth: polDoc.truth_social_account || '',
+                instagram: polDoc.instagram_account || '',
+              },
+              dedupeKey: `challenger:${polId}`,
+              district: district,
+              state: state,
+            });
+            logger.info(
+              `Posted social challenger event for ${state}-${district}`
+            );
+          } catch (postErr) {
+            logger.error('Failed to post social challenger event:', postErr);
+          }
         }
 
         // Check if this is a reappearance by looking for users who have previously made celebrations
@@ -407,41 +416,43 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
             `Found ${usersWithCelebrations.length} users with celebrations for ${polId}`
           );
 
-          // Filter out users unsubscribed from district updates
-          const subscribedUsers = await filterUnsubscribed(
-            usersWithCelebrations,
-            EMAIL_TOPICS.districtUpdates
-          );
+          if (!isBootstrapRun) {
+            // Filter out users unsubscribed from district updates
+            const subscribedUsers = await filterUnsubscribed(
+              usersWithCelebrations,
+              EMAIL_TOPICS.districtUpdates
+            );
 
-          // Notify users with celebrations
-          for (const user of subscribedUsers) {
-            const recipient = (user.email || user.username || '').trim();
-            if (!recipient) {
-              logger.warn(
-                `Skipped email for user ${user._id} - no valid email or username`
-              );
-              continue;
-            }
+            // Notify users with celebrations
+            for (const user of subscribedUsers) {
+              const recipient = (user.email || user.username || '').trim();
+              if (!recipient) {
+                logger.warn(
+                  `Skipped email for user ${user._id} - no valid email or username`
+                );
+                continue;
+              }
 
-            try {
-              await sendEmail(
-                recipient,
-                'Your Representative Has a New Challenger!',
-                ChallengerReappeared(
-                  user.first_name,
-                  state,
-                  district,
-                  polDoc.name
-                )
-              );
-            } catch (err) {
-              logger.error(
-                `Failed to send ChallengerReappeared email to ${recipient}:`,
-                err
-              );
+              try {
+                await sendEmail(
+                  recipient,
+                  'Your Representative Has a New Challenger!',
+                  ChallengerReappeared(
+                    user.first_name,
+                    state,
+                    district,
+                    polDoc.name
+                  )
+                );
+              } catch (err) {
+                logger.error(
+                  `Failed to send ChallengerReappeared email to ${recipient}:`,
+                  err
+                );
+              }
             }
           }
-        } else {
+        } else if (!isBootstrapRun) {
           // Handle new challenger appearance (existing code)
           const districtUsers = await getUsersInDistrict(state, district);
           logger.info(
@@ -528,13 +539,15 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
           `Found ${celebrationUsers.length} users with active celebrations for removed pol ${polId}`
         );
 
-        try {
-          await sendSMS(
-            `Challenger left race in ${state}-${district}. ${celebrationUsers.length} celebrations paused.`
-          );
-          logger.info('Alert SMS sent');
-        } catch (err) {
-          logger.error('Failed to send SMS alert:', err);
+        if (!isBootstrapRun) {
+          try {
+            await sendSMS(
+              `Challenger left race in ${state}-${district}. ${celebrationUsers.length} celebrations paused.`
+            );
+            logger.info('Alert SMS sent');
+          } catch (err) {
+            logger.error('Failed to send SMS alert:', err);
+          }
         }
 
         if (!celebrationUsers.length) {
@@ -556,38 +569,39 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
         );
         logger.info(`Paused celebrations for ${polId}`);
 
-        // Filter out users unsubscribed from district updates
-        const subscribedUsers = await filterUnsubscribed(
-          celebrationUsers,
-          EMAIL_TOPICS.districtUpdates
-        );
+        if (!isBootstrapRun) {
+          const subscribedUsers = await filterUnsubscribed(
+            celebrationUsers,
+            EMAIL_TOPICS.districtUpdates
+          );
 
-        for (const user of subscribedUsers) {
-          const recipient = (user.email || user.username || '').trim();
-          if (!recipient) {
-            logger.warn(
-              `Skipped email for user ${user._id} - no valid email or username`
-            );
-            continue;
-          }
+          for (const user of subscribedUsers) {
+            const recipient = (user.email || user.username || '').trim();
+            if (!recipient) {
+              logger.warn(
+                `Skipped email for user ${user._id} - no valid email or username`
+              );
+              continue;
+            }
 
-          try {
-            const challengerEmailData = ChallengerDisappeared(
-              user.first_name,
-              state,
-              district,
-              polDoc.name
-            );
-            await sendEmail(
-              recipient,
-              challengerEmailData[1], // subject
-              challengerEmailData[2] // html
-            );
-          } catch (err) {
-            logger.error(
-              `Failed to send ChallengerDisappeared email to ${recipient}:`,
-              err
-            );
+            try {
+              const challengerEmailData = ChallengerDisappeared(
+                user.first_name,
+                state,
+                district,
+                polDoc.name
+              );
+              await sendEmail(
+                recipient,
+                challengerEmailData[1], // subject
+                challengerEmailData[2] // html
+              );
+            } catch (err) {
+              logger.error(
+                `Failed to send ChallengerDisappeared email to ${recipient}:`,
+                err
+              );
+            }
           }
         }
       } catch (err) {
@@ -626,38 +640,40 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
           `Processing incumbent dropout: ${polId} (${state}-${district})`
         );
 
-        // Social announcement for incumbent dropout (incumbent removed from race)
-        try {
-          const polFullName = [
-            polDoc.first_name,
-            polDoc.middle_name,
-            polDoc.last_name,
-          ]
-            .filter(Boolean)
-            .join(' ');
-          const polName = fixPolName(polFullName || polDoc.name);
-          await postToSocial({
-            polName,
-            eventType: 'incumbents',
-            action: 'removed',
-            handles: {
-              bluesky: polDoc.bluesky_account || '',
-              twitter: polDoc.twitter_account || '',
-              youtube: polDoc.youtube_account || '',
-              facebook: polDoc.facebook_account || '',
-              mastodon: polDoc.mastodon_account || '',
-              truth: polDoc.truth_social_account || '',
-              instagram: polDoc.instagram_account || '',
-            },
-            dedupeKey: `incumbent_dropout:${polId}`,
-            district,
-            state,
-          });
-          logger.info(
-            `Posted social incumbents event (removed) for ${state}-${district}`
-          );
-        } catch (postErr) {
-          logger.error('Failed to post social incumbents event:', postErr);
+        if (!isBootstrapRun) {
+          // Social announcement for incumbent dropout (incumbent removed from race)
+          try {
+            const polFullName = [
+              polDoc.first_name,
+              polDoc.middle_name,
+              polDoc.last_name,
+            ]
+              .filter(Boolean)
+              .join(' ');
+            const polName = fixPolName(polFullName || polDoc.name);
+            await postToSocial({
+              polName,
+              eventType: 'incumbents',
+              action: 'removed',
+              handles: {
+                bluesky: polDoc.bluesky_account || '',
+                twitter: polDoc.twitter_account || '',
+                youtube: polDoc.youtube_account || '',
+                facebook: polDoc.facebook_account || '',
+                mastodon: polDoc.mastodon_account || '',
+                truth: polDoc.truth_social_account || '',
+                instagram: polDoc.instagram_account || '',
+              },
+              dedupeKey: `incumbent_dropout:${polId}`,
+              district,
+              state,
+            });
+            logger.info(
+              `Posted social incumbents event (removed) for ${state}-${district}`
+            );
+          } catch (postErr) {
+            logger.error('Failed to post social incumbents event:', postErr);
+          }
         }
 
         // Find users with active Celebrations for this incumbent
@@ -666,13 +682,15 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
           `Found ${celebrationUsers.length} users with active celebrations for dropped-out incumbent ${polId}`
         );
 
-        try {
-          await sendSMS(
-            `Incumbent dropped out in ${state}-${district}. ${celebrationUsers.length} celebrations defuncted.`
-          );
-          logger.info('Alert SMS sent');
-        } catch (err) {
-          logger.error('Failed to send SMS alert:', err);
+        if (!isBootstrapRun) {
+          try {
+            await sendSMS(
+              `Incumbent dropped out in ${state}-${district}. ${celebrationUsers.length} celebrations defuncted.`
+            );
+            logger.info('Alert SMS sent');
+          } catch (err) {
+            logger.error('Failed to send SMS alert:', err);
+          }
         }
 
         if (!celebrationUsers.length) {
@@ -737,39 +755,39 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
           }
         }
 
-        // Filter out users unsubscribed from district updates
-        const subscribedUsers = await filterUnsubscribed(
-          celebrationUsers,
-          EMAIL_TOPICS.districtUpdates
-        );
+        if (!isBootstrapRun) {
+          const subscribedUsers = await filterUnsubscribed(
+            celebrationUsers,
+            EMAIL_TOPICS.districtUpdates
+          );
 
-        // Send email notifications
-        for (const user of subscribedUsers) {
-          const recipient = (user.email || user.username || '').trim();
-          if (!recipient) {
-            logger.warn(
-              `Skipped email for user ${user._id} - no valid email or username`
-            );
-            continue;
-          }
+          for (const user of subscribedUsers) {
+            const recipient = (user.email || user.username || '').trim();
+            if (!recipient) {
+              logger.warn(
+                `Skipped email for user ${user._id} - no valid email or username`
+              );
+              continue;
+            }
 
-          try {
-            const emailData = IncumbentDroppedOut(
-              user.first_name || user.firstName,
-              state,
-              district,
-              polDoc.name
-            );
-            await sendEmail(
-              recipient,
-              emailData[1], // subject
-              emailData[2] // html
-            );
-          } catch (err) {
-            logger.error(
-              `Failed to send IncumbentDroppedOut email to ${recipient}:`,
-              err
-            );
+            try {
+              const emailData = IncumbentDroppedOut(
+                user.first_name || user.firstName,
+                state,
+                district,
+                polDoc.name
+              );
+              await sendEmail(
+                recipient,
+                emailData[1], // subject
+                emailData[2] // html
+              );
+            } catch (err) {
+              logger.error(
+                `Failed to send IncumbentDroppedOut email to ${recipient}:`,
+                err
+              );
+            }
           }
         }
       } catch (err) {
@@ -803,40 +821,42 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
           `Processing newly added incumbent: ${polId} (${state}-${district})`
         );
 
-        try {
-          const polFullName = [
-            polDoc.first_name,
-            polDoc.middle_name,
-            polDoc.last_name,
-          ]
-            .filter(Boolean)
-            .join(' ');
-          const polName = fixPolName(polFullName || polDoc.name);
-          await postToSocial({
-            polName,
-            eventType: 'incumbents',
-            action: 'added',
-            handles: {
-              bluesky: polDoc.bluesky_account || '',
-              twitter: polDoc.twitter_account || '',
-              youtube: polDoc.youtube_account || '',
-              facebook: polDoc.facebook_account || '',
-              mastodon: polDoc.mastodon_account || '',
-              truth: polDoc.truth_social_account || '',
-              instagram: polDoc.instagram_account || '',
-            },
-            dedupeKey: `incumbent:${polId}`,
-            district,
-            state,
-          });
-          logger.info(
-            `Posted social incumbents event (added) for ${state}-${district}`
-          );
-        } catch (postErr) {
-          logger.error(
-            'Failed to post social incumbents added event:',
-            postErr
-          );
+        if (!isBootstrapRun) {
+          try {
+            const polFullName = [
+              polDoc.first_name,
+              polDoc.middle_name,
+              polDoc.last_name,
+            ]
+              .filter(Boolean)
+              .join(' ');
+            const polName = fixPolName(polFullName || polDoc.name);
+            await postToSocial({
+              polName,
+              eventType: 'incumbents',
+              action: 'added',
+              handles: {
+                bluesky: polDoc.bluesky_account || '',
+                twitter: polDoc.twitter_account || '',
+                youtube: polDoc.youtube_account || '',
+                facebook: polDoc.facebook_account || '',
+                mastodon: polDoc.mastodon_account || '',
+                truth: polDoc.truth_social_account || '',
+                instagram: polDoc.instagram_account || '',
+              },
+              dedupeKey: `incumbent:${polId}`,
+              district,
+              state,
+            });
+            logger.info(
+              `Posted social incumbents event (added) for ${state}-${district}`
+            );
+          } catch (postErr) {
+            logger.error(
+              'Failed to post social incumbents added event:',
+              postErr
+            );
+          }
         }
       } catch (err) {
         logger.error(

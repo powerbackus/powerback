@@ -89,7 +89,7 @@ const { ...csrfServices } = require('./csrf');
 const { fixPolName } = require('./fixPolName');
 const DockingManager = require('./dockingManager');
 const { ...cookieServices } = require('./cookies');
-const { postToSocial } = require('./socialPoster');
+const { postToSocial, resetSocialPostRunCount } = require('./socialPoster');
 const { ...auditServices } = require('./auditLogger');
 const { ...errorResponseServices } = require('./errorResponse');
 
@@ -97,6 +97,7 @@ module.exports = {
   DockingManager,
   createRateLimiter,
   postToSocial,
+  resetSocialPostRunCount,
   isLocalhost,
   fixPolName,
   sendSMS,

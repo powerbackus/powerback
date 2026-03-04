@@ -761,6 +761,7 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
       return;
     }
     const oldIds = snapshot;
+    const isBootstrapRun = oldIds.length === 0;
 
     const { added, removed } = await diff(oldIds, newIds);
     if (!added.length && !removed.length) {
@@ -795,11 +796,13 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
     logger.info('3. When ready, promote to live:');
     logger.info('   node services/utils/dockingManager.js promote pols');
 
-    // SEND ALERTS
+    // SEND ALERTS (bootstrap run: one short email, no per-member social posts)
     const politicianNames = addedPoliticians
       .map((p) => `${p.first_name} ${p.last_name}`)
       .join(', ');
-    const html = `
+    const html = isBootstrapRun
+      ? `<h3>House watcher bootstrap</h3><p>Roster synced (${added.length} members). No per-member alerts or social posts this run.</p><small>${new Date().toISOString()}</small>`
+      : `
       <h3>House roster changed</h3>
       ${
         added.length
@@ -810,7 +813,10 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
       <small>${new Date().toISOString()}</small>`;
 
     try {
-      await sendEmail('House membership change', html);
+      await sendEmail(
+        isBootstrapRun ? 'House watcher bootstrap' : 'House membership change',
+        html
+      );
       logger.info('alert email sent');
     } catch (err) {
       logger.error('sendEmail failed', {
@@ -819,39 +825,44 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
       });
     }
 
-    // Social announcement per new House member
-    for (const p of addedPoliticians) {
-      await postHouseMemberChange(p, `house_membership:${p.id}`, 'added');
-    }
+    if (!isBootstrapRun) {
+      // Social announcement per new House member
+      for (const p of addedPoliticians) {
+        await postHouseMemberChange(p, `house_membership:${p.id}`, 'added');
+      }
 
-    // Social announcement per departed House member
-    for (const bioguideId of removed) {
-      let p;
-      try {
-        p = await Pol.findOne({ id: bioguideId }).lean();
-      } catch (err) {
-        logger.error('Failed to look up removed pol for social post:', {
-          bioguideId,
-          message: err.message,
-        });
-        continue;
-      }
-      if (!p) {
-        logger.warn(
-          `Skipping social post for departed ${bioguideId}: not found in Pol collection`
+      // Social announcement per departed House member
+      for (const bioguideId of removed) {
+        let p;
+        try {
+          p = await Pol.findOne({ id: bioguideId }).lean();
+        } catch (err) {
+          logger.error('Failed to look up removed pol for social post:', {
+            bioguideId,
+            message: err.message,
+          });
+          continue;
+        }
+        if (!p) {
+          logger.warn(
+            `Skipping social post for departed ${bioguideId}: not found in Pol collection`
+          );
+          continue;
+        }
+        await postHouseMemberChange(
+          p,
+          `house_membership:${bioguideId}`,
+          'removed'
         );
-        continue;
       }
-      await postHouseMemberChange(
-        p,
-        `house_membership:${bioguideId}`,
-        'removed'
-      );
     }
 
     // *** TOGGLE TEST SMS
     try {
-      await mimicSMS('House membership change', html);
+      await mimicSMS(
+        isBootstrapRun ? 'House watcher bootstrap' : 'House membership change',
+        html
+      );
       logger.info('alert mimic SMS sent');
     } catch (err) {
       logger.error('mimicSMS failed', {
