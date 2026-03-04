@@ -43,7 +43,7 @@ const accessToken = jwt.sign(
 // Refresh token
 const refreshToken = jwt.sign(
   { userId: user.id, tokenVersion: user.tokenVersion },
-  process.env.JWT_REFRESH_SECRET,
+  process.env.SESSION_SECRET,
   { expiresIn: '18d' }
 );
 ```
@@ -94,7 +94,7 @@ router.post('/refresh', async (req, res) => {
   }
   
   // 1. Verify refresh token
-  const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+  const decoded = jwt.verify(refreshToken, process.env.SESSION_SECRET);
   
   // 2. Check token store
   const stored = tokenizer.findRefreshToken(refreshToken);

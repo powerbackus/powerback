@@ -19,7 +19,6 @@ const examplePath = path.join(rootDir, '.env.example.backend');
 const requiredVars = [
   'MONGODB_URI',
   'JWT_SECRET',
-  'JWT_REFRESH_SECRET',
   'SESSION_SECRET',
 ];
 
