@@ -300,6 +300,11 @@ if (process.env.NODE_ENV !== 'test' && require.main === module) {
         startServer(app, PORT, logger, async () => {
           logger.info(`API Server now listening on PORT ${PORT}!`);
 
+          if (isProductionEnv)
+            setInterval(() => {
+              logger.info('(heartbeat) app running');
+            }, 60000);
+
           // Only start jobs after successful DB connection and server start
           startBackgroundJobs(logger);
 
