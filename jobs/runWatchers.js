@@ -62,25 +62,29 @@
  *
  * DEPENDENCIES
  * - node-cron: Cron scheduling
- * - ./checkHJRes54: Bill watcher
- * - ./houseWatcher: House membership watcher
- * - ./challengersWatcher: Challenger status watcher
- * - ./electionDatesUpdater: Election dates updater
- * - ./defunctCelebrationWatcher: Defunct celebration watcher
- * - ./tipLimitReachedReset: PAC tip limit reset scheduler
  * - constants: SERVER cron schedules
  * - services/utils/logger: Logging
+ * - services/utils/resetSocialPostRunCount: Reset social post run count
+ * - services/utils/scheduleTipLimitReachedReset: Schedule tip limit reached reset
+ * - ./tipLimitReachedReset: PAC tip limit reset scheduler
+ * - ./defunctCelebrationWatcher: Defunct celebration watcher
+ * - ./electionDatesUpdater: Election dates updater
+ * - ./challengersWatcher: Challenger status watcher
+ * - ./checkHJRes54: Bill watcher
+ * - ./houseWatcher: House membership watcher
  *
  * @module jobs/runWatchers
  * @requires node-cron
+ * @requires ../constants
+ * @requires ../services/utils
+ * @requires ./challengersWatcher
+ * @requires ./resetSocialPostRunCount
+ * @requires ./scheduleTipLimitReachedReset
+ * @requires ./defunctCelebrationWatcher
+ * @requires ./electionDatesUpdater
+ * @requires ./challengersWatcher
  * @requires ./checkHJRes54
  * @requires ./houseWatcher
- * @requires ./challengersWatcher
- * @requires ./electionDatesUpdater
- * @requires ./defunctCelebrationWatcher
- * @requires ./tipLimitReachedReset
- * @requires ../constants
- * @requires ../services/utils/logger
  */
 
 const cron = require('node-cron');
@@ -88,13 +92,13 @@ const cron = require('node-cron');
 const { SERVER } = require('../constants');
 const logger = require('../services/utils/logger')(__filename);
 
+const { resetSocialPostRunCount } = require('../services/utils');
+const { scheduleTipLimitReachedReset } = require('./tipLimitReachedReset');
+const defunctCelebrationWatcher = require('./defunctCelebrationWatcher');
+const { electionDatesUpdater } = require('./electionDatesUpdater');
+const challengersWatcher = require('./challengersWatcher');
 const checkHJRes54 = require('./checkHJRes54');
 const houseWatcher = require('./houseWatcher');
-const challengersWatcher = require('./challengersWatcher');
-const { electionDatesUpdater } = require('./electionDatesUpdater');
-const defunctCelebrationWatcher = require('./defunctCelebrationWatcher');
-const { scheduleTipLimitReachedReset } = require('./tipLimitReachedReset');
-const { resetSocialPostRunCount } = require('../services/utils');
 
 const POLL_SCHEDULE = SERVER.CRON_SCHEDULES.WEEKDAY_3PM;
 
