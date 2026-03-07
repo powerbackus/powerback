@@ -4,7 +4,7 @@ This document explains the docking system for safely managing the `pols` (politi
 
 ## Overview
 
-The docking system provides a staging area (`docking_pols`) between external data sources (Congress.gov API, FEC API) and the live `pols` collection. All writes go to `docking_pols` first. A human-run promotion step moves data from staging to production.
+The docking system provides a staging area (`docking_pols`) between external data sources (Congress.gov API, FEC API) and the live `pols` collection. All writes go to `docking_pols` first. A human-run promotion step moves data from staging to production. There is no stable key linking Congress.gov members to OpenFEC candidates; FEC IDs are resolved by office (incumbent for district) or by name + district + election year (see [Background jobs – Congress.gov and OpenFEC data](./background-jobs.md#congressgov-and-openfec-data)).
 
 **Flow:** External API data -> `docking_pols` (staging) -> `pols` (live)
 

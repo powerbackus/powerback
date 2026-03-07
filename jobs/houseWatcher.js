@@ -29,8 +29,8 @@
  * - Handles API errors gracefully
  *
  * ALERT SYSTEM
- * - Sends email alerts for membership changes
- * - Optional SMS alerts (commented out)
+ * - Sends email alerts for membership, candidate and election changes
+ * - Optional SMS alerts (commented out, not yet implemented)
  * - Notifies administrators of changes
  *
  * BUSINESS LOGIC
@@ -72,6 +72,7 @@
  * @requires node-cron
  * @requires nodemailer
  * @requires ../models
+ * @requires mongoose
  * @requires ../services
  * @requires ../services/utils/sendSMS
  * @requires ../services/utils/fixPolName
@@ -94,6 +95,7 @@ const cron = require('node-cron');
 
 const nodemailer = require('nodemailer');
 require('../services/utils/db');
+const mongoose = require('mongoose');
 const { Pol } = require('../models');
 const { getSnapshotsDir } = require('../constants/paths');
 const { session } = require('../controller/congress/config');
@@ -128,6 +130,100 @@ let fecCache = new Map();
  * @type {number}
  */
 let lastFecCallAt = 0;
+
+/**
+ * Runs integrity checks on the pols collection and emails results when issues are found.
+ *
+ * Checks for: missing FEC candidate ID, missing district/state (House), missing OCD ID.
+ * Logs counts and, when any count > 0, sends an email with per-check counts and
+ * affected pol names/ids. Subject is escalated to CRITICAL when missing FEC count > 10.
+ *
+ * @async
+ * @function runIntegrityChecks
+ * @param {Object} db - Native MongoDB Db instance (e.g. mongoose.connection.db)
+ * @param {Function} sendEmail - Async function receiving { subject, body }
+ * @param {Object} logger - Logger instance
+ * @returns {Promise<void>}
+ */
+async function runIntegrityChecks(db, sendEmail, logger) {
+  try {
+    const checks = {
+      missingFec: {
+        query: { 'roles.0.fec_candidate_id': '' },
+        label: 'Missing FEC candidate ID',
+      },
+      missingDistrict: {
+        query: {
+          'roles.0.chamber': 'House',
+          'roles.0.district': '',
+        },
+        label: 'Missing district',
+      },
+      missingState: {
+        query: {
+          'roles.0.chamber': 'House',
+          'roles.0.state': '',
+        },
+        label: 'Missing state',
+      },
+      missingOcd: {
+        query: { 'roles.0.ocd_id': '' },
+        label: 'Missing OCD division ID',
+      },
+    };
+
+    const results = {};
+
+    for (const key of Object.keys(checks)) {
+      const { query } = checks[key];
+      const count = await db.collection('pols').countDocuments(query);
+      results[key] = count;
+    }
+
+    logger.info('[integrity-check] results', results);
+
+    const problems = Object.entries(results).filter(([, count]) => count > 0);
+
+    if (problems.length === 0) {
+      return;
+    }
+
+    let subject = 'POWERBACK DATA ALERT';
+    const bodyLines = [];
+
+    for (const [key, count] of problems) {
+      const { query, label } = checks[key];
+
+      bodyLines.push(`${label}: ${count}`);
+
+      const pols = await db
+        .collection('pols')
+        .find(query, {
+          projection: { first_name: 1, last_name: 1, id: 1, _id: 0 },
+        })
+        .toArray();
+
+      for (const p of pols) {
+        bodyLines.push(` - ${p.first_name} ${p.last_name} (${p.id})`);
+      }
+
+      bodyLines.push('');
+    }
+
+    const missingFec = results.missingFec;
+
+    if (missingFec > 10) {
+      subject = 'CRITICAL: FEC resolver likely broken';
+    }
+
+    await sendEmail({
+      subject,
+      body: `POWERBACK integrity check detected issues:\n\n${bodyLines.join('\n')}`,
+    });
+  } catch (err) {
+    logger.error('[integrity-check] failed', err);
+  }
+}
 
 /**
  * Simple in-process rate limiter for FEC API calls.
@@ -379,9 +475,9 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
         office: 'H',
         state,
         per_page: 100,
-        election_year: ELECTION_YEAR,
         candidate_status: 'C',
         is_active_candidate: 'true',
+        election_year: ELECTION_YEAR,
         api_key: process.env.FEC_API_KEY,
       });
 
@@ -894,6 +990,16 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
 
     // persist FEC cache after each membership check
     saveFecCache();
+
+    // integrity checks on pols collection; email alert when issues found
+    const db = mongoose.connection.db;
+    const sendEmailForIntegrity = async ({ subject, body }) => {
+      const html = body
+        ? `<pre>${String(body).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>`
+        : '';
+      await sendEmail(subject, html);
+    };
+    await runIntegrityChecks(db, sendEmailForIntegrity, logger);
   }
 
   // SCHEDULE ────────────────────────────────────────────────────────
