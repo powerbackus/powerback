@@ -48,7 +48,7 @@ The Status Ledger System provides comprehensive tracking of all status changes t
 
 ### **3. `resolved`**
 
-- **Description**: Condition met, funds released to politician
+- **Description**: Condition met; funds are eligible for release to the politician (release and FEC reporting are done manually by the PAC operator, not by the app)
 - **Valid Transitions**: None (terminal state)
 - **Typical Triggers**: Bill brought to vote, condition satisfied
 

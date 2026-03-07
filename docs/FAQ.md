@@ -56,4 +56,4 @@ We don't provide your email address to candidate campaigns, so you won't get add
 
 ### Is POWERBACK a prediction or event market?
 
-No. POWERBACK is an election campaign donation conduit, not a market. We don't offer trading, odds, shares, or payouts based on events. POWERBACK is operated by a federally registered political committee (PAC).
+No. POWERBACK is an election campaign donation conduit, not a market. We don't offer trading, odds, shares, or payouts based on events. POWERBACK is operated by a federally registered political committee (PAC). Delivery of funds to campaigns and FEC filing are handled manually by the PAC operator; the app holds donations in escrow and provides data for reporting.

@@ -163,7 +163,7 @@ The system maintains complete audit trails for compliance verification:
 - **Donor Information**: All required fields based on tier
 - **Timing**: Date and time of contribution
 - **Recipient**: Which candidate/committee received the funds
-- **Status**: Escrow, forwarded, accepted, or refunded
+- **Status**: Escrow, delivered (by operator), accepted, or refunded
 
 #### Retention Requirements
 
@@ -196,9 +196,9 @@ All validation decisions are logged for audit purposes:
 
 ## Compliance Monitoring
 
-### Automated Checks
+### In-App Compliance Checks
 
-The system performs continuous compliance monitoring:
+The system performs continuous in-app compliance monitoring (no automated FEC filing or fund delivery):
 
 1. **Limit Enforcement**: Real-time checking against FEC limits
 2. **Data Validation**: Automatic validation of donor information
@@ -214,13 +214,15 @@ The system performs continuous compliance monitoring:
 - **Limit Tracking**: Usage against annual and per-candidate limits
 - **Audit Trails**: Complete transaction history
 
-#### FEC Filing Support
+#### FEC Filing Support (Data Only; Filing Is Manual)
 
-The system provides data exports to support recipient committee FEC filings:
+The system does not file with the FEC. It provides data exports so the recipient committee or PAC operator can file manually:
 
 - **Donor Information**: Formatted for FEC reporting requirements
 - **Contribution Details**: Amount, date, and recipient information
 - **Compliance Status**: Validation results and flag information
+
+Actual FEC filing and delivery of funds to campaigns are performed manually by the PAC operator, not by automated backend systems.
 
 ### Best Practices
 

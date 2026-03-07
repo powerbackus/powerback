@@ -2,7 +2,7 @@
 
 ## Overview
 
-POWERBACK uses Stripe for payment processing, implementing an escrow-based system where donations are held until celebration conditions are met. The payment system handles payment method collection, payment intent creation, and secure payment processing with FEC compliance validation.
+POWERBACK uses Stripe for payment processing, implementing an escrow-based system where donations are held until celebration conditions are met. The payment system handles payment method collection, payment intent creation, and secure payment processing with FEC compliance validation. Releasing funds to campaigns and filing with the FEC are done manually by the PAC operator, not by the app.
 
 ## Architecture
 
@@ -12,7 +12,7 @@ POWERBACK uses Stripe for payment processing, implementing an escrow-based syste
 2. **Payment Intent Creation**: Payment intent created but not charged
 3. **Escrow Holding**: Funds held in Stripe until celebration resolved
 4. **Payment Confirmation**: Payment confirmed when celebration condition met
-5. **Fund Release**: Funds released to politician campaign
+5. **Fund Release**: Funds are released to the politician campaign by the PAC operator (manual process; not automated)
 
 ### Key Components
 
@@ -74,7 +74,7 @@ POWERBACK uses Stripe for payment processing, implementing an escrow-based syste
 
 ### Payment Intents
 
-- **Purpose**: Hold funds in escrow until celebration resolved
+- **Purpose**: Hold funds in escrow until celebration resolved (release to campaign is manual)
 - **Status**: Created but not charged until condition met
 - **Amount**: Donation + tip + Stripe processing fee
 - **Currency**: USD

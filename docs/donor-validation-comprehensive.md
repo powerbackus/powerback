@@ -11,10 +11,10 @@ POWERBACK operates as a conduit platform that:
 1. **Accepts contributions** from donors through Stripe payment processing
 2. **Holds funds in escrow** until donor contingency conditions are met
 3. **Validates donor information** and flags any issues for recipient committee review
-4. **Forwards funds + donor info** (with flags attached) to recipient committees when conditions are satisfied
-5. **Executes refunds** when recipient committees reject flagged contributions
+4. **Makes funds and donor info available** (with flags attached) so the recipient committee or PAC operator can receive and report them when conditions are satisfied; delivery of funds and FEC filing are done manually by the operator, not by automated backend systems
+5. **Executes refunds** when recipient committees reject flagged contributions (refunds are initiated by the operator via Stripe)
 
-**Key Compliance Point**: The legal burden sits with the recipient committee (to decide and to report). The mechanical burden sits with POWERBACK (since only we can move money back to the donor via Stripe).
+**Key Compliance Point**: The legal burden sits with the recipient committee (to decide and to report). The mechanical burden for moving money sits with POWERBACK as the registered PAC (since only we can move money back to the donor via Stripe). Forwarding funds to campaigns and filing with the FEC are handled manually by the PAC operator.
 
 ## FEC "Best Efforts" Requirements
 
@@ -129,7 +129,7 @@ The system normalizes donor information while preserving the original meaning:
 - Generic occupations that may need clarification
 - Employment status inconsistencies
 
-**Important**: All flagged contributions are forwarded to recipient committees with flag information attached. POWERBACK does not block donations - recipient committees make the final decision to accept or reject flagged contributions.
+**Important**: All flagged contributions are made available to recipient committees with flag information attached (forwarding and FEC reporting are done manually by the PAC operator). POWERBACK does not block donations - recipient committees make the final decision to accept or reject flagged contributions.
 
 ## Validation Rules
 
@@ -419,18 +419,18 @@ This system helps meet FEC "best efforts" requirements by:
 2. **Stripe processes payment** and deposits funds into POWERBACK conduit account
 3. **Donor information is validated** and flagged if issues are detected
 4. **Contribution sits in escrow** until donor's contingency condition is met
-5. **Funds + donor info (with flags)** are forwarded to recipient committee when condition is satisfied
+5. **Funds and donor info (with flags)** are delivered to the recipient committee by the PAC operator when condition is satisfied (manual process; not automated)
 6. **Recipient committee reviews** the contribution:
    - If they **accept** → they keep and report it
    - If they **reject** → they instruct POWERBACK to refund
-7. **POWERBACK executes refund** via Stripe back to donor's original payment method
-8. **Recipient committee reports** the refund on their FEC filings (because the contribution was legally "made" to them)
+7. **POWERBACK executes refund** via Stripe back to donor's original payment method (operator-initiated)
+8. **Recipient committee reports** contributions and any refunds on their FEC filings (FEC filing is done manually by the committee/operator, not by the app)
 
 ### Documentation Requirements
 
 - **Maintain records** of all validation results and flags
 - **Log all flagging decisions** for audit purposes
-- **Track contribution status** (escrow → forwarded → accepted/rejected)
+- **Track contribution status** (escrow → delivered/accepted/rejected; delivery and FEC filing are manual)
 - **Regular review** of flagged records for patterns and improvements
 
 ## Related Documentation

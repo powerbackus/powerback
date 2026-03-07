@@ -2,7 +2,7 @@
 
 ## Overview
 
-POWERBACK uses a comprehensive background job system to monitor external APIs, update congressional data, track election dates, and manage celebration lifecycles. These jobs run automatically on scheduled intervals to ensure the platform stays current with political data and properly manages user donations.
+POWERBACK uses a comprehensive background job system to monitor external APIs, update congressional data, track election dates, and manage celebration lifecycles. These jobs run automatically on scheduled intervals to keep the platform current with political data and celebration state. Delivery of funds to campaigns and FEC filing are not automated; they are handled manually by the PAC operator.
 
 ## Job Architecture
 
@@ -191,6 +191,15 @@ All background jobs are orchestrated through the `runWatchers` system, which:
 - Cron schedule: `'0 0 1 1 *'` (midnight on January 1st)
 - Timezone: America/New_York (Eastern Time)
 - Runs automatically each year
+
+## Congress.gov and OpenFEC data
+
+There is **no stable shared identifier** between Congress.gov (member data) and the OpenFEC API (candidate/committee data). Congress.gov does not expose FEC candidate ID in the member responses we use, and OpenFEC does not expose bioguide_id or a similar key. Pol records are therefore linked to FEC candidate IDs by:
+
+- **Office-first (preferred)**: Query OpenFEC by state, district, office (H), election year, and `incumbent_challenge=I`. For a given district there is at most one incumbent; a single result gives the FEC candidate ID without name matching. Used by `dev/update-fec-ids.js` when backfilling missing FEC IDs.
+- **Name + district + year (fallback)**: When incumbent lookup returns zero or multiple results, match by normalized name, state, district, and election year. Used by `houseWatcher.js` (when resolving FEC ID for new members) and by `update-fec-ids.js` as fallback.
+
+See `dev/update-fec-ids.js` (file header and `fetchFecIdByIncumbent` / `fetchFecCandidateId`) and `jobs/houseWatcher.js` (`fetchFecCandidateId`) for the implementation.
 
 ## Snapshot Management
 
