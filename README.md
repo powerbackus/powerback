@@ -143,7 +143,7 @@ The **demo** experience uses fake totals, no authentication, and no real payment
 - **[React Contexts](./docs/contexts.md)** - Global state management
 - **[Custom Hooks](./docs/hooks.md)** - Reusable React hooks catalog
 - **[Design System](./docs/design-system.md)** - UI components and styling
-- **[Props System](./docs/props.md)** - Centralized props type system
+- **[Common Props](./docs/common-props.md)** - Centralized props type system
 
 ### Communication
 

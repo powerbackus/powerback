@@ -43,6 +43,7 @@ This directory contains comprehensive documentation for the POWERBACK.us platfor
 - **[Background Jobs](./background-jobs.md)** - Automated watchers and monitoring system
 - **[Social Announcements Webhooks](./social-announcements-webhooks.md)** - Watcher events to Make.com for social posts
 - **[Election Date Notifications](./election-dates.md)** - Election date change alerts
+- **[Docking Pols Runbook](./docking-pols-runbook.md)** - Runbook for staging members for docking
 
 ### Frontend Architecture
 
@@ -81,6 +82,7 @@ This directory contains comprehensive documentation for the POWERBACK.us platfor
 - **[Linting & Formatting](./linting-formatting.md)** - Code style guidelines
 - **[Git Worktree Guide](./git-worktree-guide.md)** - Git workflow utilities
 - **[Version Information](./version.md)** - Dependency versions
+- **[LLM-Assisted Development](./llm-assisted-development.md)** - Using AI assistants with the codebase
 
 ### User-Facing Documentation
 
@@ -90,7 +92,6 @@ This directory contains comprehensive documentation for the POWERBACK.us platfor
 ### Reference Documentation
 
 - **[API Key List](./keylist.md)** - Required API keys and setup
-- **[CHANGELOG](./CHANGELOG.md)** - Project changelog
 - **[Codebase Evaluation Prompts](./codebase-evaluation-prompts.md)** - Evaluation framework
 - **[Coding Idiosyncrasies](./coding-idiosyncrasies.md)** - Project-specific patterns
 - **[Dev Scripts Security](./dev-scripts-security.md)** - Development script security

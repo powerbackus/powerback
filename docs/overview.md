@@ -79,7 +79,7 @@ This document provides an overview of the file and folder structure of the proje
 
 The app is made up of several pages - [`Login`](../client/src/pages/Login/), [`Funnel`](../client/src/pages/Funnel/), [`Reset`](../client/src/pages/Reset/), and [`Unsub`](../client/src/pages/Unsub/). After logging in, the user will experience the app through the **Funnel** page. In case a user forgets their password, they can visit the **Reset** page. The **Reset** and **Unsub** pages use the shared [`MagicLink`](../client/src/components/page/MagicLink/) component for consistent hash verification and user experience. Account activation is handled automatically via email links and redirects to the home page with a success notification.
 
-The **Funnel** page has four major elements arranged in a funnel-like procession for the user to customize and submit a **[`Celebration`](FAQ.md/#celebrations)**, which is a campaign donation to be delivered upon the occurrence of a real-world political event. The four elements are:
+The **Funnel** page has four major elements arranged in a funnel-like procession for the user to customize and submit a **[`Celebration`](./FAQ.md#celebrations)**, which is a campaign donation to be delivered upon the occurrence of a real-world political event. The four elements are:
 
 - [`/Lobby`](../client/src/pages/Funnel/TabContents/Lobby/) user chooses a candidate recipient and donation amount
 - [`/Payment`](../client/src/pages/Funnel/TabContents/Payment/) user submits credit card information
