@@ -22,6 +22,14 @@
 const fs = require('fs');
 const path = require('path');
 
+// Environment variable loading
+// Development: Load from .env.local file using dotenv
+// Production: Load from SECRETS_PATH environment variable
+if (process.env.NODE_ENV !== 'production') {
+  // Development environment - load from .env.local file
+  require('dotenv').config({ path: path.join(__dirname, '.env.local') });
+}
+
 // Third-party libraries
 const express = require('express');
 const mongoose = require('mongoose');
@@ -51,10 +59,7 @@ const logger = requireLogger(__filename);
 // Environment variable loading
 // Development: Load from .env.local file using dotenv
 // Production: Load from SECRETS_PATH environment variable
-if (process.env.NODE_ENV !== 'production') {
-  // Development environment - load from .env.local file
-  require('dotenv').config({ path: path.join(__dirname, '.env.local') });
-} else {
+if (process.env.NODE_ENV === 'production') {
   // Production environment - load from SECRETS_PATH
   const secretsPath = process.env.SECRETS_PATH;
 

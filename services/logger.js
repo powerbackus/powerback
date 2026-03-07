@@ -60,15 +60,15 @@
  * @requires path
  * @module services/logger
  * @requires winston
- * @requires winston-daily-rotate-file 
+ * @requires winston-daily-rotate-file
  */
 
 const path = require('path');
 const { createLogger, format, transports } = require('winston');
 require('winston-daily-rotate-file');
 
-
-const logDir = process.env.NODE_ENV === 'production' ? process.env.LOG_DIR : 'logs';
+const logDir =
+  process.env.NODE_ENV === 'production' ? process.env.LOG_DIR : 'logs';
 
 const dailyRotate = new transports.DailyRotateFile({
   filename: path.resolve(process.cwd(), logDir, 'powerback-%DATE%.log'),
@@ -114,14 +114,14 @@ const smartTimestamp = format.timestamp({
       second: '2-digit',
       hour12: false,
     }).formatToParts(now);
-    
+
     const currentDate = {
-      year: parseInt(utcTime.find(part => part.type === 'year').value),
-      month: parseInt(utcTime.find(part => part.type === 'month').value),
-      day: parseInt(utcTime.find(part => part.type === 'day').value),
-      hours: parseInt(utcTime.find(part => part.type === 'hour').value),
-      minutes: parseInt(utcTime.find(part => part.type === 'minute').value),
-      seconds: parseInt(utcTime.find(part => part.type === 'second').value),
+      year: parseInt(utcTime.find((part) => part.type === 'year').value),
+      month: parseInt(utcTime.find((part) => part.type === 'month').value),
+      day: parseInt(utcTime.find((part) => part.type === 'day').value),
+      hours: parseInt(utcTime.find((part) => part.type === 'hour').value),
+      minutes: parseInt(utcTime.find((part) => part.type === 'minute').value),
+      seconds: parseInt(utcTime.find((part) => part.type === 'second').value),
     };
 
     let timestampFormat = '';
