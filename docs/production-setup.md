@@ -58,7 +58,7 @@ cd powerback
 npm install
 
 # Build client
-# Note: The prebuild hook automatically runs scripts/build/build-faq.js to generate
+# Note: The prebuild hook automatically runs scripts/build/build-content.js to generate
 # FAQ JSON-LD schema and markdown documentation before building
 cd client && npm install && npm run build && cd ..
 ```
@@ -552,7 +552,7 @@ launch
 
 ```bash
 # Build client
-# Note: The prebuild hook automatically runs scripts/build/build-faq.js to generate
+# Note: The prebuild hook automatically runs scripts/build/build-content.js to generate
 # FAQ JSON-LD schema and markdown documentation before building
 cd client && npm run build && cd ..
 

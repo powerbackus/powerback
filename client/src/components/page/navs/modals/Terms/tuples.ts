@@ -14,10 +14,11 @@ export interface Term {
   section: string;
   term: string;
 }
+
 export const TERMS: Term[] = [
   {
     section: 'Introduction',
-    term: 'Welcome to POWERBACK, the web application! By using our web application, you agree to these Terms of Use. If you do not agree with these Terms of Use, please do not use our web application (POWERBACK).',
+    term: 'Welcome to POWERBACK.us (the “Platform” or “Application”). By accessing or using the POWERBACK.us web application, you agree to these Terms of Use. If you do not agree to these Terms, please do not use the Platform.',
   },
   {
     section: 'Definitions',
@@ -37,11 +38,11 @@ export const TERMS: Term[] = [
   },
   {
     section: 'Refunds and Donations',
-    term: "While there's no technical time limit to issuing a refund through the API or in the dashboard, we recommend users create refunds no more than 90 days after a payment was created. Refunds issued within this period are more likely to behave as expected, ensuring successful fund transfers to your customer's bank. After 90 days, there is no guarantee of a refund, although we will always attempt to process refunds. It is the user's responsibility to verify the validity of the account or card number before initiating a refund for a charge made a long time ago. In cases where the account is no longer active, users may need to make alternative arrangements, such as issuing a check to the customer directly. For donations made under the condition that an elected official leaves Congress (e.g., loses re-election, dies, falls ill, retires, resigns, etc.), refunds will be processed in accordance with the agreed-upon terms. If refunds cannot be processed due to processing errors, users agree that the donation money will be given directly to Powerback to be used at Powerback's discretion. We do not guarantee the accuracy or completeness of the data provided on the web application. Users acknowledge that the data may contain errors and omissions.",
+    term: 'Contributions made through POWERBACK.us are subject to the specific terms disclosed at the time of contribution. Where a contribution is made subject to stated conditions, any eligibility for a refund will be governed by those disclosed terms.\n\nExcept where a refund option is expressly offered and approved in advance, contributions are final and non-refundable. POWERBACK.us does not guarantee that refunds will be available in every circumstance, including after funds have been processed, committed, redirected, or reported in accordance with applicable law and the terms accepted by the contributor.\n\nUsers are responsible for reviewing the applicable contribution terms before completing any transaction.',
   },
   {
     section: 'Conditional Redirects',
-    term: "Contributions made through POWERBACK's platform may be conditionally earmarked for one or more federal candidates, subject to publicly disclosed performance criteria or other thresholds.\n\nIf the specified candidate fails to meet those conditions by the relevant deadline, and the contributor has not requested a refund in advance, the contribution will instead be treated as a direct contribution to POWERBACK PAC. In such cases:\n\n- The funds will not be forwarded to the candidate.\n- The contribution will be reported to the Federal Election Commission (FEC) as a contribution to POWERBACK PAC.\n- It will count toward the donor's individual contribution limit for PACs under federal law.\n- The contribution is not refundable unless previously requested and approved.\n\nDonors are provided notice of this redirection at the point of contribution and must affirmatively agree to these terms before completing their transaction.",
+    term: 'Contributions made through the POWERBACK.us platform may be conditionally earmarked for one or more federal candidates, subject to publicly disclosed performance criteria or other thresholds.\n\nIf a specified candidate fails to meet those conditions by the relevant deadline, and the contributor has not requested a refund in advance, the contribution will instead be treated as a direct contribution to POWERBACK, a political committee organized under applicable campaign finance laws (the "Committee").\n\nIn such cases:\n\n- The funds will not be forwarded to the candidate.\n- The contribution will be reported to the Federal Election Commission (FEC) as a contribution to the Committee.\n- It will count toward the donor\'s individual contribution limit for PACs under federal law.\n- The contribution is not refundable unless previously requested and approved.\n\nDonors are provided notice of this potential redirection at the point of contribution and must affirmatively agree to these terms before completing their transaction.',
   },
   {
     section: 'Intellectual Property',
@@ -57,37 +58,31 @@ export const TERMS: Term[] = [
   },
   {
     section: 'Cookie Policy',
-    term: `Cookies are small text files that are stored on your computer or mobile device when you visit a website. They are widely used to make websites work more efficiently and to provide information to the owners of the site.
+    term: `Cookies are small text files stored on your computer or mobile device when you visit a website. They are widely used to help websites function properly and to provide information to site operators.
 
-      We use cookies for the following purposes:
+POWERBACK.us uses cookies for the following purposes:
 
-      Authentication: We use cookies to authenticate users and prevent fraudulent use of user accounts. These cookies are essential for the operation of our Website.
+Authentication: We use cookies to authenticate users and maintain session security. These cookies are essential for the operation of the website and help prevent unauthorized access to user accounts.
 
-      Tracking and Analytics: We use Google Pixel and similar technologies to analyze trends, administer the website, track users' movements around the site, and gather demographic information about our user base as a whole. This helps us improve our services and understand visitor interests.
+Analytics: We use Google Analytics to collect aggregated, anonymized information about how visitors interact with the website. This information helps us understand usage patterns, improve functionality, and enhance the overall user experience.
 
-      Preferences: We use cookies to remember your preferences and settings, such as language preferences and display settings.
+Preferences: We use cookies to remember certain user preferences and settings that improve usability and consistency when navigating the website.
 
-      Types of Cookies We Use:
+Types of Cookies We Use:
 
-      Session Cookies: These are temporary cookies that are erased when you close your browser. We use these cookies to store your authentication status.
+Session Cookies: These are temporary cookies that are erased when you close your browser. We use these cookies to maintain authentication state during your visit.
 
-      Persistent Cookies: These cookies remain on your device for a longer period and help us recognize you as a return visitor, tailor the website to your preferences, and improve our services.
+Persistent Cookies: These cookies remain on your device for a longer period of time and help us recognize returning visitors and maintain certain preferences.
 
-      Third-Party Cookies:
+Third-Party Cookies: Google Analytics may set cookies in order to collect aggregated usage statistics about how visitors interact with the website. These cookies do not provide us with personally identifying information.
 
-      In addition to our own cookies, we may also use various third-party cookies to report usage statistics of the Website and deliver advertisements on and through the Website.
+Your Choices Regarding Cookies:
 
-      Your Choices Regarding Cookies:
+Most web browsers allow you to control or disable cookies through your browser settings. If you choose to disable cookies, some portions of the website may not function properly, particularly features that require authentication.
 
-      You can control and manage cookies in various ways. Please note that removing or blocking cookies may affect your user experience and parts of our Website may no longer be fully accessible.
+Changes to This Cookie Policy:
 
-      Browser Settings: You can set your browser to refuse all or some browser cookies, or to alert you when websites set or access cookies. Check your browser settings for more information.
-
-      Google Analytics Opt-Out: You can opt out of Google Analytics by installing the Google Analytics Opt-Out Browser Add-On. This prevents the Google Analytics JavaScript (ga.js, analytics.js, and dc.js) from sharing information with Google Analytics about visits activity.
-
-      Changes to This Cookie Policy:
-
-      We may update this Cookie Policy from time to time to reflect changes in our practices and service offerings. Please check this page periodically for updates.`,
+We may update this Cookie Policy from time to time to reflect changes in our practices or service offerings. Please review this page periodically for updates. `,
   },
   {
     section: 'Changes to Terms of Use',

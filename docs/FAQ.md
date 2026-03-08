@@ -48,7 +48,7 @@ Right now, we only focus on "[We The People](https://www.congress.gov/bill/119th
 
 ### Does POWERBACK have any party or corporate affiliation?
 
-No. We're independent and open source. Candidate order is randomized, and we never mention political parties. Check out our code on [GitHub](https://github.com/powerbackus/powerback), follow us on [X](https://x.com/PowerbackApp), join [Discord](https://powerback.us/discord), or read our [position paper](https://powerback.us/position-paper.pdf) for details.
+No. We're independent and open source. Candidate order is randomized, and we never mention political parties. Check out our code on [GitHub](https://github.com/powerbackus/powerback), follow us on [X](https://x.com/PowerbackApp), join [Discord](https://powerback.us/discord), or read our [position paper](/position-paper.pdf) for details.
 
 ### Will campaigns email me?
 

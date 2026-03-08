@@ -34,7 +34,7 @@ powershell -ExecutionPolicy Bypass -File dev/deploy.ps1 -ConfigPath dev/deploy.c
 2. Runs non-destructive tests (Jest; optional Playwright)
 3. Creates a temporary release branch via worktree, commits, pushes, cleans up
 4. Builds `client` with production env variables
-   - Automatically runs `scripts/build/build-faq.js` via prebuild hook to generate FAQ JSON-LD schema and markdown docs
+   - Automatically runs `scripts/build/build-content.js` via prebuild hook to generate FAQ JSON-LD schema and markdown docs
 5. Packages artifacts (client and backend subset)
 6. Uploads zips to the server via scp
 7. Runs remote helper to upsert build, sync backend, install deps, and restart the app

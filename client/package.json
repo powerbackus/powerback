@@ -48,7 +48,7 @@
   "scripts": {
     "analyze": "source-map-explorer 'build/static/js/*.js'",
     "start": "NODE_OPTIONS='--no-deprecation' craco start",
-    "prebuild": "node ../scripts/build/build-faq.js && node ../scripts/build/build-breakpoints-css.js",
+    "prebuild": "node ../scripts/build/build-content.js && node ../scripts/build/build-breakpoints-css.js",
     "prestart": "node ../scripts/build/build-breakpoints-css.js",
     "build": "craco build && compress-cra -d ./build",
     "test": "craco test",

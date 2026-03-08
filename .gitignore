@@ -36,6 +36,7 @@ jspm_packages/
 
 # Build outputs
 /client/build
+/client/public/generated/*.html
 dist/
 /build/
 *.tsbuildinfo
@@ -96,6 +97,7 @@ __tests__/
 client/src/__mocks__/
 client/src/__tests__/
 scripts/tests/
+scripts/build/.temp-*.cjs
 tests/
 
 # PM2 ecosystem configs (contain secrets)

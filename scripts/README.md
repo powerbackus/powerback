@@ -22,7 +22,7 @@ Utility and automation scripts for the POWERBACK repo. Run from the **project ro
 
 ## build/
 
-- **build-faq.js** – Read `client/src/tuples/faq.js`, write FAQ JSON-LD into `client/public/index.html` and `docs/FAQ.md`. Run by client `prebuild`.
+- **build-content.js** – Read `client/src/tuples/faq.js`, write FAQ JSON-LD into `client/public/index.html` and `docs/FAQ.md`. Run by client `prebuild`.
 - **build-breakpoints-css.js** – Generate `client/src/breakpoints.css` from `client/src/constants/breakpoints.js`. Run by client `prestart` and `prebuild`.
 
 ## deploy/

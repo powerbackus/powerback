@@ -31,9 +31,9 @@ const Unsub = React.lazy(() => import('./Unsub'));
 // Modal component lazy-loading configuration
 const MODAL_IMPORTS = {
     eligibility: () => import('../components/page/navs/modals/Eligibility'),
-    credentials: () => import('../components/modals/Credentials'),
+    privacy: () => import('../components/page/navs/modals/Terms/Privacy'),
     resetPass: () => import('../components/modals/ForgotPassword'),
-    privacy: () => import('../components/page/navs/modals/Privacy'),
+    credentials: () => import('../components/modals/Credentials'),
     terms: () => import('../components/page/navs/modals/Terms'),
     FAQ: () => import('../components/page/navs/modals/FAQ'),
   } as const,

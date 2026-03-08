@@ -1,10 +1,26 @@
-module.exports = {
-  PRIVACY: [
-    {
-      section: 'Introduction',
-      privacy:
-        'Welcome to POWERBACK.us. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our web application. Please read this Privacy Policy carefully. By using POWERBACK.us, you agree to the collection and use of information in accordance with this policy.',
-    },
+/**
+ * Privacy Policy for POWERBACK.us
+ * @typedef {Object} PrivacyItem
+ * @property {string} section - The section of the Privacy Policy
+ * @property {string} privacy - The privacy policy text for the section
+ */
+
+/**
+ * Privacy Policy for POWERBACK.us
+ * @type {PrivacyItem[]}
+ */
+
+export interface PrivacyItem {
+  section: string;
+  privacy: string;
+}
+
+export const PRIVACY: PrivacyItem[] = [
+  {
+    section: 'Introduction',
+    privacy:
+      'Welcome to POWERBACK.us. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our web application. Please read this Privacy Policy carefully. By using POWERBACK.us, you agree to the collection and use of information in accordance with this policy.',
+  },
   {
     section: 'Information We Collect',
     privacy:
@@ -38,7 +54,7 @@ module.exports = {
   {
     section: 'Cookies and Tracking',
     privacy:
-      'We use cookies and similar tracking technologies to track activity on our service and hold certain information. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, you may not be able to use some portions of our service.',
+      'We use cookies and similar tracking technologies to track activity on our service and hold certain information. We also use Google Analytics, a web analytics service provided by Google LLC, to collect aggregated information about how visitors interact with the website. Google Analytics uses cookies and similar technologies to collect usage data such as pages visited, time spent on the site, and general geographic region derived from IP address. This information is used solely to improve the functionality and performance of POWERBACK.us. You can instruct your browser to refuse all cookies or to indicate when a cookie is being sent. However, if you do not accept cookies, some portions of our service may not function properly.',
   },
   {
     section: 'Third-Party Services',
@@ -46,7 +62,7 @@ module.exports = {
       'Our service uses third-party services such as Stripe for payment processing. These third parties have access to your information only to perform specific tasks on our behalf and are obligated not to disclose or use it for any other purpose.',
   },
   {
-    section: 'Children\'s Privacy',
+    section: "Children's Privacy",
     privacy:
       'Our service is not intended for individuals under the age of 18. We do not knowingly collect personal information from children under 18. If you are a parent or guardian and believe your child has provided us with personal information, please contact us immediately.',
   },
@@ -55,10 +71,9 @@ module.exports = {
     privacy:
       'We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new Privacy Policy on this page and updating the "Last updated" date. You are advised to review this Privacy Policy periodically for any changes.',
   },
-    {
-      section: 'Contact Us',
-      privacy:
-        'If you have any questions about this Privacy Policy, please contact us at support@powerback.us.',
-    },
-  ],
-};
+  {
+    section: 'Contact Us',
+    privacy:
+      'If you have any questions about this Privacy Policy, please contact us at support@powerback.us.',
+  },
+];
