@@ -75,21 +75,17 @@ const Headshot = ({ name, cls, src, id }: HeadshotProps) => {
   }, [src, backup]);
 
   /**
-   * On image load error: switch to backup URL and notify API
-   * @param {React.SyntheticEvent<HTMLImageElement, Event>} e - Image error event
+   * On image load error: switch to backup URL and notify API.
+   * API expects pol ID (e.g. W000831), not the image URL.
    */
-  const handleError = useCallback<ReactEventHandler<HTMLImageElement>>((e) => {
+  const handleError = useCallback<ReactEventHandler<HTMLImageElement>>(() => {
     setBackup();
-    const src =
-      (e.target as HTMLImageElement).getAttribute('src') ??
-      (e.target as HTMLImageElement).attributes.getNamedItem('src')?.value ??
-      '';
-    API.notifyImgErr(src).catch((err) =>
-      logError('Image error notification failed', err)
-    );
-  }, []);
-
-  console.log('dynamicClass.. fart!', dynamicClass);
+    if (src) {
+      API.notifyImgErr(src).catch((err) =>
+        logError('Image error notification failed', err)
+      );
+    }
+  }, [src]);
 
   return (
     <div className={'headshot-container'}>
