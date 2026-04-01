@@ -26,13 +26,6 @@
   font-family: 'Inconsolata';
 }
 
-.cta-w-icon {
-  color: var(--text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .mobile-splash-btns {
   display: flex;
   justify-content: center;
@@ -76,11 +69,6 @@
 
   .credentials-fields .row {
     height: 23vw;
-  }
-
-  .cta-w-icon {
-    flex-direction: row;
-    font-size: 1.125em;
   }
 }
 
@@ -143,15 +131,6 @@
     line-height: 2.75rem;
   }
 
-  .cta-w-icon {
-    height: 7.13vh;
-    margin-top: 2rem;
-    font-size: 2em;
-  }
-
-  .splash-icon {
-    margin-left: 0.25em;
-  }
 }
 
 /* Tablet, landscape */
@@ -226,14 +205,6 @@
     letter-spacing: 0;
   }
 
-  #splash .splash-grid .cta-w-icon {
-    font-size: clamp(1.1rem, 1.75vw, 2rem);
-  }
-
-  #splash .splash-grid .cta-w-icon .splash-icon {
-    margin-left: 0.5em;
-  }
-
   #splash .splash-video {
     grid-area: video;
     align-self: end;
@@ -270,12 +241,6 @@
     padding-bottom: 0.5em;
     letter-spacing: -0.025rem;
     line-height: 1.5em;
-  }
-
-  .cta-w-icon {
-    height: 7.13vh;
-    margin-top: 2rem;
-    font-size: 2em;
   }
 
   #splash label.form-check-label {

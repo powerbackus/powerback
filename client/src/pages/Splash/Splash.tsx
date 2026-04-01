@@ -3,11 +3,11 @@
  * @module Splash
  */
 import React, { useMemo, useCallback } from 'react';
-import { SPLASH, MEDIA_PATHS, SPLASH_COPY, BRAND_DISPLAY } from '@CONSTANTS';
-import { Col, Row, Image, Stack, Container } from 'react-bootstrap';
+import { Col, Row, Stack, Container } from 'react-bootstrap';
 import { VideoPlayer } from '@Components/interactive';
-import { handleKeyDown, publicAsset } from '@Utils';
+import { MEDIA_PATHS, SPLASH_COPY } from '@CONSTANTS';
 import { useIsDemoMode } from '../../demoMode';
+import { handleKeyDown } from '@Utils';
 import {
   type CredentialsFormView,
   type LandingNavView,
@@ -16,8 +16,6 @@ import {
   useDevice,
 } from '@Contexts';
 import './style.css';
-
-const logoImgPath = publicAsset(MEDIA_PATHS.CABLE_LOGO);
 
 const Splash = () => {
   const { splash, navigateToSplashView } = useNavigation(),
@@ -31,6 +29,27 @@ const Splash = () => {
       setShowAlert((a) => ({ ...a, logout: false }));
     },
     [navigateToSplashView, setShowAlert]
+  );
+
+  const IntroParagraph = useMemo(
+    () => (
+      <p className={'intro'}>
+        <span className='powerback'>{SPLASH_COPY.SPLASH.COPY.demand}</span>
+        <br />
+        {SPLASH_COPY.SPLASH.COPY.intro} <br />
+        <br />
+        {/* Tour link >> */}
+        <span
+          onKeyDown={(e) => handleKeyDown(e, () => changeSplash('Tour'))}
+          onClick={() => changeSplash('Tour')}
+          className={'natural-link fs-1'}
+          tabIndex={0}
+        >
+          {SPLASH_COPY.SPLASH.COPY.tour}
+        </span>
+      </p>
+    ),
+    [changeSplash]
   );
 
   const demoClass = useMemo(
@@ -58,34 +77,7 @@ const Splash = () => {
               className={'splash-copy'}
               aria-labelledby={'splash-mission'}
             >
-              {splash === '' && (
-                <p className={'intro'}>
-                  <span className='powerback'>{'POWERBACK'}</span>
-                  {SPLASH_COPY.SPLASH.COPY.intro} {/* Tour link >> */}
-                  <span
-                    onKeyDown={(e) =>
-                      handleKeyDown(e, () => changeSplash('Tour'))
-                    }
-                    className={'natural-link'}
-                    onClick={() => changeSplash('Tour')}
-                    tabIndex={0}
-                  >
-                    {SPLASH_COPY.SPLASH.COPY.tour}
-                  </span>
-                </p>
-              )}
-
-              <div className={'cta-w-icon'}>
-                {SPLASH_COPY.SPLASH.COPY.cta}
-                <Image
-                  height={SPLASH.IMG_HEIGHT}
-                  width={SPLASH.IMG_HEIGHT * 0.905}
-                  alt={`${BRAND_DISPLAY} "cable" icon`}
-                  className={'splash-icon pt-1'}
-                  loading={'eager'}
-                  src={logoImgPath}
-                />
-              </div>
+              {splash === '' && IntroParagraph}
             </section>
 
             <section
@@ -130,20 +122,7 @@ const Splash = () => {
                         )}
 
                         {/* Splash written copy */}
-                        <p className={'intro'}>
-                          <span className='powerback'>{BRAND_DISPLAY}</span>
-                          {SPLASH_COPY.SPLASH.COPY.intro} {/* Tour link >> */}
-                          <span
-                            onKeyDown={(e) =>
-                              handleKeyDown(e, () => changeSplash('Tour'))
-                            }
-                            className={'natural-link'}
-                            onClick={() => changeSplash('Tour')}
-                            tabIndex={0}
-                          >
-                            {SPLASH_COPY.SPLASH.COPY.tour}
-                          </span>
-                        </p>
+                        {IntroParagraph}
                       </Stack>
                     </section>
                   </Col>
@@ -165,28 +144,6 @@ const Splash = () => {
                   </Col>
                 )}
               </div>
-
-              {/* Slogan and logo */}
-              {(isDesktop ||
-                isTabletPortrait ||
-                (splash !== 'Join Now' &&
-                  splash !== 'Sign In' &&
-                  isMobile)) && (
-                <Col
-                  lg={isTabletPortrait ? 12 : 3}
-                  className={'cta-w-icon'}
-                >
-                  {SPLASH_COPY.SPLASH.COPY.cta}
-                  <Image
-                    height={SPLASH.IMG_HEIGHT}
-                    width={SPLASH.IMG_HEIGHT * 0.905}
-                    className={'splash-icon pt-1'}
-                    alt={'POWERBACK Logo'}
-                    src={logoImgPath}
-                    loading={'eager'}
-                  />
-                </Col>
-              )}
             </Row>
           </>
         )}

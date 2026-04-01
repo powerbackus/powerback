@@ -10,9 +10,9 @@ interface SplashCopy {
     SLOGAN: string;
     TAGLINE: string;
     COPY: {
-      cta: string;
       tour: string;
       intro: string;
+      demand: string;
       explainer: string;
     };
   };
@@ -20,13 +20,13 @@ interface SplashCopy {
 
 export const SPLASH_COPY: SplashCopy = {
   SPLASH: {
-    SLOGAN: 'Concede Nothing Without A Demand!', //'Your Money, Your Mandate.', // 'No Donation Without Representation!',
+    SLOGAN: 'Make Congress Earn Your Money.', //'Concede Nothing Without A Demand!', //'Your Money, Your Mandate.', // 'No Donation Without Representation!',
     TAGLINE: process.env.REACT_APP_TAGLINE ?? '(donation capital)',
     COPY: {
-      cta: 'Take the power back.',
-      tour: 'Occupy the lobby >>',
+      demand: 'Concede nothing without a demand.',
+      tour: 'Occupy the Lobby >>',
       intro:
-        ' stockpiles small-dollar political campaign donations as united leverage to inspire real-world legislative action.',
+        'Withhold your donations until politicians deliver real legislative action.',
       explainer:
         'Click \xA0▶ \xA0below to watch a brief explainer video about how our service works',
     },
