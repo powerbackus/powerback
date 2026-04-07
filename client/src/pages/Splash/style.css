@@ -54,13 +54,22 @@
     line-height: calc(0.5em + 2vw + 3vh);
     text-shadow: none !important;
   }
+
   .intro {
     padding-bottom: 2.75vw;
-    margin-top: 0.5em;
+    margin-top: 0.25em;
     font-size: 1.06875rem;
     text-align: left;
     line-height: 1.5em;
     text-shadow: 0px 0px 1px var(--bg);
+  }
+
+  .intro .powerback {        
+    font-size: 1.25em;
+  }
+
+  .intro-text {
+    line-height: 1.35em;
   }
 
   .credentials-fields {

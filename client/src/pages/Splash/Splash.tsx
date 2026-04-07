@@ -35,21 +35,21 @@ const Splash = () => {
     () => (
       <p className={'intro'}>
         <span className='powerback'>{SPLASH_COPY.SPLASH.COPY.demand}</span>
-        <br />
-        {SPLASH_COPY.SPLASH.COPY.intro} <br />
-        <br />
+        <p className='intro-text mt-lg-1 mb-lg-3 mb-2'>
+          {SPLASH_COPY.SPLASH.COPY.intro}
+        </p>
         {/* Tour link >> */}
         <span
           onKeyDown={(e) => handleKeyDown(e, () => changeSplash('Tour'))}
           onClick={() => changeSplash('Tour')}
-          className={'natural-link fs-1'}
+          className={`natural-link fs-${isDesktop ? '1' : '4'}`}
           tabIndex={0}
         >
           {SPLASH_COPY.SPLASH.COPY.tour}
         </span>
       </p>
     ),
-    [changeSplash]
+    [changeSplash, isDesktop]
   );
 
   const demoClass = useMemo(
