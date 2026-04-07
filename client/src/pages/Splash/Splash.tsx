@@ -34,7 +34,7 @@ const Splash = () => {
   const IntroParagraph = useMemo(
     () => (
       <p className={'intro'}>
-        <span className='powerback'>{SPLASH_COPY.SPLASH.COPY.demand}</span>
+        <span className='powerback fs-2'>{SPLASH_COPY.SPLASH.COPY.demand}</span>
         <p className='intro-text mt-lg-1 mb-lg-3 mb-2'>
           {SPLASH_COPY.SPLASH.COPY.intro}
         </p>
@@ -42,7 +42,7 @@ const Splash = () => {
         <span
           onKeyDown={(e) => handleKeyDown(e, () => changeSplash('Tour'))}
           onClick={() => changeSplash('Tour')}
-          className={`natural-link fs-${isDesktop ? '1' : '4'}`}
+          className={`natural-link fs-${isDesktop ? '2' : '4'}`}
           tabIndex={0}
         >
           {SPLASH_COPY.SPLASH.COPY.tour}
@@ -109,7 +109,7 @@ const Splash = () => {
                     <section aria-labelledby={'splash-mission'}>
                       <Stack direction='vertical'>
                         {isMobile && (
-                          <Col className={'mb-3'}>
+                          <Col className={'mb-2'}>
                             <section aria-label='Explainer video'>
                               <VideoPlayer
                                 altVideoPath={MEDIA_PATHS.EXPLAINER.MP4}
