@@ -172,10 +172,9 @@
   #splash .splash-grid .mission-statement {
     padding-top: 1rem;    
     font-size: clamp(4rem, 7vw, 7.75rem);
-    line-height: 0.98;
-    letter-spacing: -0.06rem;
+    line-height: 1.05;    
     text-shadow: none !important;
-  }
+  }  
 
   #splash .splash-blank {
     grid-area: blank;

@@ -193,7 +193,7 @@ const Page = ({
 
   /**
    * Track legitimate guest access to funnel
-   * Only set to true when guest explicitly navigates via "Occupy the lobby" button
+   * Only set to true when guest explicitly navigates via "Follow the money" button
    */
   const hasGuestAccess = useRef(false);
 
@@ -205,7 +205,7 @@ const Page = ({
   }, [isLoggedIn]);
 
   useEffect(() => {
-    // Listen for legitimate guest access granted via "Occupy the lobby" button
+    // Listen for legitimate guest access granted via "Follow the money" button
     const handleGuestAccessGranted = () => {
       hasGuestAccess.current = true;
     };
