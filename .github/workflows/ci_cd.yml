@@ -144,19 +144,34 @@ jobs:
             ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }} \
             "nginxreload"
 
-      - name: Check service status and security score
+      - name: Wait for service startup
+        run: |
+          for i in {1..10}; do
+            echo "Checking service status (attempt $i)..."
+            ssh -p ${{ secrets.PROD_SSH_PORT }} -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
+              ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }} \
+              "sudo systemctl is-active --quiet powerback.service" \
+              && echo "Service is active" && exit 0
+            sleep 2
+          done
+      
+          echo "Service did not become active in time"
+          exit 1
+
+      - name: Verify powerback service status
+        run: |
+          echo "Checking service status..."
+          ssh -p ${{ secrets.PROD_SSH_PORT }} -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
+            ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }} \
+            "sudo pbstatus"
+          
+      - name: Capture security snapshot
         continue-on-error: true
         run: |
-          echo "Checking service status and security score (requires wrapper commands)..."
+          echo "Capturing security snapshot..."
           ssh -p ${{ secrets.PROD_SSH_PORT }} -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
             ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }} \
-            "pbstatus" || echo "::warning::pbstatus wrapper not available - add to ${{ secrets.PROD_WRAPPER_SCRIPT }}"
-          ssh -p ${{ secrets.PROD_SSH_PORT }} -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
-            ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }} \
-            "pbsecurity" || echo "::warning::pbsecurity wrapper not available - security score logged to ${{ secrets.PROD_DEPLOY_LOG_PATH }}"
-
-      - name: Wait for service startup
-        run: sleep 5
+            "sudo pbsecurity" || echo '::warning::pbsecurity wrapper not available or failed'
 
       - name: Smoke test - HTTPS homepage returns 200
         continue-on-error: true
