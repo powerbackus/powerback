@@ -150,21 +150,14 @@ jobs:
             echo "Checking service status (attempt $i)..."
             ssh -p ${{ secrets.PROD_SSH_PORT }} -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
               ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }} \
-              "sudo systemctl is-active --quiet powerback.service" \
+              "pbstatus" \
               && echo "Service is active" && exit 0
             sleep 2
           done
-      
+
           echo "Service did not become active in time"
           exit 1
 
-      - name: Verify powerback service status
-        run: |
-          echo "Checking service status..."
-          ssh -p ${{ secrets.PROD_SSH_PORT }} -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes \
-            ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }} \
-            "sudo pbstatus"
-          
       - name: Capture security snapshot
         continue-on-error: true
         run: |
