@@ -44,6 +44,19 @@
  * - Finds users in affected districts
  * - Sends targeted alerts to relevant users
  *
+ * FLOW (one cron run of checkChallengers)
+ *
+ * 1. Fetch FEC House incumbents (I) and challengers (C, O) for ELECTION_YEAR.
+ * 2. Build a Set of state-district keys where a challenger exists; keys use
+ *    normalizeHouseDistrictKeyPart so DB "4" and FEC "04" match.
+ * 3. For each incumbent FEC id with a Pol row, if that pol's state-district key
+ *    is in the Set, add id to finalIds → competitive race for carousel/has_stakes.
+ * 4. updateMany: has_stakes true for roles[0].fec_candidate_id in finalIds;
+ *    has_stakes false for everyone else (full recompute each run).
+ * 5. diffSnapshot compares current competitive incumbents vs file snapshot;
+ *    drive emails, SMS, social posts, celebration cancel/defunct on transitions.
+ * 6. First run with empty snapshot is bootstrap: DB updates run, alerts skipped.
+ *
  * DEPENDENCIES
  * - fs: File system operations
  * - path: Path manipulation
@@ -115,6 +128,11 @@ const runCheck = require('./runCheck');
 const FROM_ADDRESS = getEmailAddress(6);
 const PAGE_SIZE = 100;
 
+/**
+ * Loads persisted challenger snapshot from disk (FEC ids we last treated as
+ * has_stakes competitive). Empty file or parse error yields [] (bootstrap).
+ * @returns {{ fec_candidate_id: string, has_stakes: boolean }[]}
+ */
 function loadSnapshot() {
   try {
     const data = JSON.parse(fs.readFileSync(SNAPSHOT));
@@ -128,6 +146,12 @@ function loadSnapshot() {
   }
 }
 
+/**
+ * Builds OpenFEC /candidates/ query URL for House, filtered by incumbent_challenge
+ * types (I incumbents, C/O challengers and open-seat).
+ * @param {{ page: number, challengeTypes: string[] }} opts
+ * @returns {string} Full URL with api_key
+ */
 function getFecUrl({ page, challengeTypes }) {
   const base = process.env.FEC_API_CANDIDATES_ENDPOINT;
   const query = new URLSearchParams({
@@ -146,6 +170,23 @@ function getFecUrl({ page, challengeTypes }) {
   return `${base}?${query.toString()}`;
 }
 
+/**
+ * Aligns district strings for Set lookup: Pol may store "4", FEC may use "04".
+ * Non-numeric values (e.g. At-Large text) pass through unchanged for now.
+ * @param {string|number|null|undefined} district
+ * @returns {string}
+ */
+function normalizeHouseDistrictKeyPart(district) {
+  if (district == null || district === '') return '';
+  const s = String(district).trim();
+  if (!/^\d+$/.test(s)) return s;
+  return String(Number.parseInt(s, 10)).padStart(2, '0');
+}
+
+/**
+ * All running House incumbent FEC candidate_ids for ELECTION_YEAR (paginated).
+ * @returns {Promise<string[]>}
+ */
 async function fetchIncumbents() {
   // For testing: use snapshot
   if (process.env.NODE_ENV === 'test') {
@@ -165,6 +206,11 @@ async function fetchIncumbents() {
   return ids;
 }
 
+/**
+ * House challenger (and open-seat) rows from FEC for ELECTION_YEAR; used only
+ * to derive which state-districts have opposition (paginated).
+ * @returns {Promise<Object[]>} Raw FEC result objects
+ */
 async function fetchChallengers() {
   // For testing: use snapshot
   if (process.env.NODE_ENV === 'test') {
@@ -189,6 +235,12 @@ async function fetchChallengers() {
   return challengers;
 }
 
+/**
+ * Sends one HTML email via nodemailer (alerts noreply transport).
+ * @param {string} to
+ * @param {string} subject
+ * @param {string} html
+ */
 async function sendEmail(to, subject, html) {
   logger.info(`Attempting to send email: subject="${subject}" to="${to}"`);
   const mailer = nodemailer.createTransport({
@@ -223,6 +275,10 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
   logger.info(`Using election year: ${ELECTION_YEAR}`);
   logger.info(`Current snapshot contains ${snapshot.length} IDs`);
 
+  /**
+   * Single pass: recompute has_stakes from FEC, persist, then notify on diffs.
+   * @returns {Promise<void>}
+   */
   async function checkChallengers() {
     let incumbents, challengers;
     try {
@@ -235,17 +291,22 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
       return;
     }
 
+    // --- Competitive districts: any House district with a C/O FEC row this cycle
     const challengerDistricts = new Set(
-      challengers.map((c) => {
+      challengers.flatMap((c) => {
         const idx = c.election_years.findIndex((y) => y === ELECTION_YEAR);
         const dist = c.election_districts[idx];
-        return `${c.state}-${dist}`;
+        if (idx === -1 || dist == null || dist === '') {
+          return [];
+        }
+        return [`${c.state}-${normalizeHouseDistrictKeyPart(dist)}`];
       })
     );
     logger.info(
       `matching ${incumbents.length} incumbents against ${challengerDistricts.size} districts`
     );
 
+    // --- Incumbent FEC ids that map to a Pol in a district with a challenger
     const finalIds = [];
     for (const incId of incumbents) {
       // Only treat FEC incumbents as incumbents in our universe
@@ -268,13 +329,14 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
         continue;
       }
 
-      const key = `${info.state}-${info.district}`;
+      const key = `${info.state}-${normalizeHouseDistrictKeyPart(info.district)}`;
       if (challengerDistricts.has(key)) {
         finalIds.push(incId);
       }
     }
     logger.info(`found ${finalIds.length} incumbents with challengers`);
 
+    // --- Mirror competitive set onto Pol.has_stakes (carousel + donation targeting)
     const resultTrue = await Pol.updateMany(
       {
         'roles.0.fec_candidate_id': { $in: finalIds },
@@ -300,7 +362,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
       } modified=${resultFalse.modifiedCount ?? resultFalse.nModified}`
     );
 
-    // Convert finalIds array into array of objects with has_stakes property
+    // Shape expected by diffSnapshot (key = fec_candidate_id, value = has_stakes)
     const polsArray = finalIds.map((id) => ({
       fec_candidate_id: id,
       has_stakes: true,
@@ -309,7 +371,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
     // Track current incumbents for distinguishing dropout types
     const currentIncumbentIds = new Set(incumbents);
 
-    // Diff incumbents snapshot to detect newly running incumbents
+    // New FEC incumbent ids vs last snapshot (social: incumbent added)
     const { changes: incumbentChanges } = diffSnapshot({
       name: 'incumbents',
       current: incumbents.map((id) => ({ fec_candidate_id: id })),
@@ -322,6 +384,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
       logger.info(`${addedIncumbents.length} incumbents added.`);
     }
 
+    // Challenger snapshot diff: who gained/lost competitive status → emails/SMS/social
     const { changes, removals } = diffSnapshot({
       name: 'challengers',
       current: polsArray,
@@ -344,6 +407,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
       (change) => change.old && change.old.has_stakes
     );
 
+    // Empty snapshot = first deploy or wiped file; avoid email/SMS storms
     const isBootstrapRun = snapshot.length === 0;
     if (isBootstrapRun && (added.length > 0 || removals.length > 0)) {
       logger.info(
@@ -351,6 +415,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
       );
     }
 
+    // --- District gained a serious challenger (or pol newly competitive)
     for (const change of added) {
       const polId = change.key;
       try {
@@ -514,7 +579,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
       }
     }
 
-    // Process removed challengers
+    // --- District no longer has challenger in our model; pause celebrations, notify
     for (const change of removed) {
       const polId = change.key;
       try {
@@ -609,7 +674,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
       }
     }
 
-    // Process incumbent dropouts (removed from snapshot and no longer in incumbents list)
+    // removals includes both challenger-only and full incumbent dropout; branch on FEC list
     for (const removal of removals) {
       const polId = removal.key;
 
@@ -797,7 +862,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
       }
     }
 
-    // Process newly added incumbents (now running this cycle) for social announcements
+    // FEC says they are filing as incumbent this cycle; optional social ping
     for (const change of addedIncumbents) {
       const polId = change.key;
       try {
@@ -865,7 +930,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
       }
     }
 
-    // Snapshot is already saved by diffSnapshot above, so we only update in-memory state
+    // diffSnapshot wrote challengers.snapshot.json; keep in-memory copy for next tick
     snapshot = polsArray;
   }
 
