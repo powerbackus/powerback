@@ -122,6 +122,9 @@ const SNAPSHOT = path.join(getSnapshotsDir(), 'challengers.snapshot.json');
 const NEXT_START = require('../controller/congress').nextStart();
 const ELECTION_YEAR = Number(NEXT_START.slice(-4)) - 1;
 const { fixPolName } = require('../services/utils/fixPolName');
+const {
+  normalizeHouseDistrictKeyPart,
+} = require('../services/utils/normalizeHouseDistrict');
 const { diffSnapshot } = require('./snapshotManager');
 const runCheck = require('./runCheck');
 
@@ -168,19 +171,6 @@ function getFecUrl({ page, challengeTypes }) {
 
   challengeTypes.forEach((type) => query.append('incumbent_challenge', type));
   return `${base}?${query.toString()}`;
-}
-
-/**
- * Aligns district strings for Set lookup: Pol may store "4", FEC may use "04".
- * Non-numeric values (e.g. At-Large text) pass through unchanged for now.
- * @param {string|number|null|undefined} district
- * @returns {string}
- */
-function normalizeHouseDistrictKeyPart(district) {
-  if (district == null || district === '') return '';
-  const s = String(district).trim();
-  if (!/^\d+$/.test(s)) return s;
-  return String(Number.parseInt(s, 10)).padStart(2, '0');
 }
 
 /**

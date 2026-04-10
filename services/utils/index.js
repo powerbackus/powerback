@@ -87,6 +87,7 @@ const { sendSMS } = require('./sendSMS');
 const { ...dbServices } = require('./db');
 const { ...csrfServices } = require('./csrf');
 const { fixPolName } = require('./fixPolName');
+const { normalizeHouseDistrictKeyPart } = require('./normalizeHouseDistrict');
 const DockingManager = require('./dockingManager');
 const { ...cookieServices } = require('./cookies');
 const { postToSocial, resetSocialPostRunCount } = require('./socialPoster');
@@ -100,6 +101,7 @@ module.exports = {
   resetSocialPostRunCount,
   isLocalhost,
   fixPolName,
+  normalizeHouseDistrictKeyPart,
   sendSMS,
   rateLimiters,
   ...dbServices,

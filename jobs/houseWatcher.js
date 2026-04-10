@@ -102,6 +102,7 @@ const { session } = require('../controller/congress/config');
 const {
   // sendSMS,
   fixPolName,
+  normalizeHouseDistrictKeyPart,
 } = require('../services/utils');
 
 const { requireLogger } = require('../services/logger');
@@ -445,7 +446,13 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
       }
 
       const stateKey = `${state}-${ELECTION_YEAR}`;
-      const normalizedDistrict = String(district).padStart(2, '0');
+      const normDistrict = normalizeHouseDistrictKeyPart(district);
+      const yearNum = Number(ELECTION_YEAR);
+      const fecRowMatchesCycle = (c) =>
+        Number(c.active_through) === yearNum &&
+        Array.isArray(c.election_years) &&
+        c.election_years.length > 0 &&
+        Number(c.election_years[c.election_years.length - 1]) === yearNum;
 
       // 1. Try cache first
       if (fecCache.has(stateKey)) {
@@ -453,15 +460,14 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
         const candidate = cached.find(
           (c) =>
             c.state === state &&
-            c.district === normalizedDistrict &&
+            normalizeHouseDistrictKeyPart(c.district) === normDistrict &&
             matchByName((c.name || '').toUpperCase(), firstName, lastName) &&
-            c.active_through === String(ELECTION_YEAR) &&
-            c.election_years?.at(-1) === String(ELECTION_YEAR) &&
+            fecRowMatchesCycle(c) &&
             !c.candidate_inactive
         );
         if (candidate) {
           logger.info(
-            `Matched cached FEC ID ${candidate.candidate_id} for ${firstName} ${lastName} (${state}-${normalizedDistrict})`
+            `Matched cached FEC ID ${candidate.candidate_id} for ${firstName} ${lastName} (${state}-${normDistrict})`
           );
           return candidate.candidate_id;
         }
@@ -501,22 +507,21 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
       const candidate = results.find(
         (c) =>
           c.state === state &&
-          c.district === normalizedDistrict &&
+          normalizeHouseDistrictKeyPart(c.district) === normDistrict &&
           matchByName((c.name || '').toUpperCase(), firstName, lastName) &&
-          c.active_through === String(ELECTION_YEAR) &&
-          c.election_years?.at(-1) === String(ELECTION_YEAR) &&
+          fecRowMatchesCycle(c) &&
           !c.candidate_inactive
       );
 
       if (candidate) {
         logger.info(
-          `Found FEC candidate ID ${candidate.candidate_id} for ${firstName} ${lastName} (${state}-${normalizedDistrict})`
+          `Found FEC candidate ID ${candidate.candidate_id} for ${firstName} ${lastName} (${state}-${normDistrict})`
         );
         return candidate.candidate_id;
       }
 
       logger.warn(
-        `Name or district mismatch: no FEC candidate matched for ${firstName} ${lastName} (${state}-${normalizedDistrict})`
+        `Name or district mismatch: no FEC candidate matched for ${firstName} ${lastName} (${state}-${normDistrict})`
       );
       return '';
     } catch (err) {
@@ -545,6 +550,22 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
         `Fixing politician name: ${m.firstName} ${lastName} → ${fixedLastName}`
       );
     }
+
+    const term = m.terms[m.terms.length - 1];
+    const rawDistrict = term?.district;
+    let districtStr = '';
+    let ocdCd = '0';
+    if (rawDistrict != null && rawDistrict !== '') {
+      const d = String(rawDistrict).trim();
+      if (/^\d+$/.test(d)) {
+        districtStr = normalizeHouseDistrictKeyPart(d);
+        ocdCd = districtStr;
+      } else {
+        districtStr = d;
+        ocdCd = d;
+      }
+    }
+
     return {
       id: m.bioguideId,
       last_name: fixedLastName,
@@ -567,20 +588,20 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
         {
           chamber: CHAMBER,
           congress: CONGRESS,
-          short_title: m.terms[m.terms.length - 1]?.shortTitle || '', // Add short_title
+          short_title: term?.shortTitle || '',
           committees:
             m.committees?.map((c) => ({
               name: c.name,
               code: c.code,
             })) || [],
           fec_candidate_id: fecCandidateId,
-          district: m.terms[m.terms.length - 1].district,
+          district: districtStr,
           ocd_id:
             'ocd-division/country:us/state:' +
-            m.terms[m.terms.length - 1].stateCode.toLowerCase() +
+            (term?.stateCode ?? '').toLowerCase() +
             '/cd:' +
-            m.terms[m.terms.length - 1].district,
-          state: m.terms[m.terms.length - 1].stateCode.toUpperCase(),
+            ocdCd,
+          state: (term?.stateCode ?? '').toUpperCase(),
         },
       ],
     };
