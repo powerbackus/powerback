@@ -19,12 +19,12 @@ module.exports = [
     questions: [
       {
         q: 'What is POWERBACK.us?',
-        a: `POWERBACK.us ("POWERBACK") is a donation platform that gives small-dollar donors real leverage. Instead of giving money directly to campaigns, your donations are held in escrow and only delivered when specific conditions are met. This creates accountability and ensures your money goes to politicians who actually represent your interests.`,
+        a: `POWERBACK.us ("POWERBACK") is a donation platform that gives small-dollar donors real leverage. Instead of giving money directly to campaigns, your donations are kept in a segregated account and only forwarded to the campaign when the conditional rules you agreed to are satisfied. This creates accountability and ensures your money goes to politicians who actually represent your interests.`,
         key: 1,
       },
       {
         q: 'Why should I only use POWERBACK for my political contributions, and not other platforms?',
-        a: `POWERBACK is built for voters, not politicians. We hold your donations in escrow until conditions are met, giving you real leverage. Our first goal is a House floor vote on the "<a href="${WE_THE_PEOPLE_BILL_URL}" target="_blank" rel="noopener noreferrer">We The People</a>" amendment to overturn Citizens United.`,
+        a: `POWERBACK is built for voters, not politicians. Your contributions stay in a segregated account until the conditional rules you accepted are met, giving you real leverage. Our first goal is a House floor vote on the "<a href="${WE_THE_PEOPLE_BILL_URL}" target="_blank" rel="noopener noreferrer">We The People</a>" amendment to overturn Citizens United.`,
         key: 2,
       },
 
@@ -46,7 +46,7 @@ module.exports = [
     questions: [
       {
         q: 'What is a Celebration?',
-        a: `A Celebration is your conditional donation. POWERBACK holds it in escrow and only delivers it to the campaign if the "<a href="${WE_THE_PEOPLE_BILL_URL}" target="_blank" rel="noopener noreferrer">We The People</a>" amendment gets a House floor vote. It's tied to the vote happening, not any individual lawmaker's actions.`,
+        a: `A Celebration is your conditional donation. POWERBACK keeps it in a segregated account and only delivers it to the campaign if the "<a href="${WE_THE_PEOPLE_BILL_URL}" target="_blank" rel="noopener noreferrer">We The People</a>" amendment gets a House floor vote. It's tied to the vote happening, not any individual lawmaker's actions.`,
         key: 1,
       },
       {
@@ -87,7 +87,7 @@ module.exports = [
       },
       {
         q: 'Is POWERBACK a prediction or event market?',
-        a: "No. POWERBACK is an election campaign donation conduit, not a market. We don't offer trading, odds, shares, or payouts based on events. POWERBACK is operated by a federally registered political committee (PAC). Delivery of funds to campaigns and FEC filing are handled manually by the PAC operator; the app holds donations in escrow and provides data for reporting.",
+        a: "No. POWERBACK is an election campaign donation conduit, not a market. We don't offer trading, odds, shares, or payouts based on events. POWERBACK is operated by a federally registered political committee (PAC). Delivery of funds to campaigns and FEC filing are handled manually by the PAC operator; contributions remain in a segregated account under those conditional rules until disposition, and the app provides data for reporting.",
         key: 4,
       },
     ],
