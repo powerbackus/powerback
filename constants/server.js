@@ -40,9 +40,9 @@ module.exports = {
       contentSecurityPolicy: false,
       crossOriginEmbedderPolicy: false,
       hsts: {
-        includeSubDomains: true,
-        maxAge: 63072000,
-        preload: true,
+        maxAge: 31536000,
+        includeSubDomains: false,
+        preload: false,
       },
       frameguard: { action: 'deny' },
       noSniff: true,
