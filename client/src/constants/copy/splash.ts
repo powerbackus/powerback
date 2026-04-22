@@ -24,7 +24,7 @@ export const SPLASH_COPY: SplashCopy = {
     TAGLINE: process.env.REACT_APP_TAGLINE ?? '(donation capital)',
     COPY: {
       demand: 'Concede nothing without a demand.',
-      tour: 'Follow the money >>',
+      tour: 'Take your power back >>',
       intro:
         'Hold back your donations until Congress delivers real legislative action.',
       explainer:
