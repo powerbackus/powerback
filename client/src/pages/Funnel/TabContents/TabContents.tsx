@@ -249,6 +249,18 @@ const TabContents = ({
       }
     } else {
       // User not authenticated, show credentials modal
+      trackGoogleAnalyticsEvent('celebrate_auth_blocked', {
+        selected_pol: selectedPol,
+        donation_amount: donation,
+        auth_modal_source: 'celebrate_click',
+        auth_modal_path: 'Join Now',
+      });
+
+      trackGoogleAnalyticsEvent('auth_modal_shown', {
+        auth_modal_source: 'celebrate_click',
+        auth_modal_path: 'Join Now',
+      });
+
       setCredentialsPath('Join Now');
       setShowModal((s) => ({
         ...s,
