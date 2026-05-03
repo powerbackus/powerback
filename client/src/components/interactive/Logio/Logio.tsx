@@ -186,7 +186,6 @@ const Logio = ({
     setCheckedTerms(false);
     setUserFormValidated(false);
 
-    // Allow swap when in credentials modal, on Tour, or on splash page with Join Now/Sign In views
     const canSwap =
       showModal.credentials ||
       splash === 'Tour' ||
@@ -198,12 +197,25 @@ const Logio = ({
     }
 
     if (showModal.credentials || splash === 'Tour') {
-      if (credentialsPath === 'Join Now') setCredentialsPath('Sign In');
-      else if (credentialsPath === 'Sign In') setCredentialsPath('Join Now');
+      const nextPath = credentialsPath === 'Join Now' ? 'Sign In' : 'Join Now';
+
+      trackGoogleAnalyticsEvent('auth_modal_path_switched', {
+        from_auth_modal_path: credentialsPath,
+        to_auth_modal_path: nextPath,
+        auth_modal_source: showModal.credentials ? 'credentials_modal' : 'tour',
+      });
+
+      setCredentialsPath(nextPath);
     } else {
-      // On splash page with Join Now or Sign In views
-      if (splash === 'Join Now') navigateToSplashView('Sign In');
-      else if (splash === 'Sign In') navigateToSplashView('Join Now');
+      const nextSplash = splash === 'Join Now' ? 'Sign In' : 'Join Now';
+
+      trackGoogleAnalyticsEvent('auth_splash_path_switched', {
+        from_auth_modal_path: splash,
+        to_auth_modal_path: nextSplash,
+        auth_modal_source: 'splash',
+      });
+
+      navigateToSplashView(nextSplash);
     }
   }, [
     splash,
