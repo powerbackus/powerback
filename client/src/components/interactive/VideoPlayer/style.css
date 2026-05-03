@@ -10,6 +10,8 @@
 }
 
 .react-player video {
-  border-radius: calc(2vmax - 3vmin);
+  border-radius: 0.6rem;
 }
+
+
 

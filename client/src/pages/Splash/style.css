@@ -7,10 +7,92 @@
   text-shadow: 0px 0px 0px;
 }
 
-#splash .btn {
+/* Hero CTA keeps its own fill; other splash .btn stay flat purple */
+#splash .btn:not(.splash-enter--btn) {
   background-color: var(--btn) !important;
   font-family: 'Inconsolata';
   font-weight: 700;
+}
+
+/** Splash lobby CTA: plain dark control (no offset shadow / transform). */
+#splash .intro .splash-enter--btn.button--continue {
+  color: var(--link) !important;
+  width: min(100%, 28rem);
+  display: block;
+  margin: 0.65rem auto 0;
+  padding: 0.5rem 1.25rem !important;
+  background-color: var(--contrast-black) !important;
+  border: 1px solid var(--link-hover) !important;
+  border-radius: 4px;
+  transition: background-color 0.12s ease, color 0.12s ease,
+    border-color 0.12s ease;
+  font-family: 'Oswald', sans-serif !important;
+  font-size: clamp(1rem, 2.5vmin, 1.2rem) !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.25em;
+}
+
+#splash .intro .splash-enter--btn.button--continue:hover {
+  color: var(--success-theme) !important;
+  background-color: var(--slate) !important;
+  border-color: var(--btn-hover) !important;
+}
+
+#splash .intro .splash-enter--btn.button--continue:focus {
+  outline: none;
+}
+
+#splash .intro .splash-enter--btn.button--continue:focus-visible {
+  color: var(--success-theme) !important;
+  background-color: var(--slate) !important;
+  border-color: var(--btn-hover) !important;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+#splash .intro .splash-enter--btn.button--continue:active {
+  color: var(--success) !important;
+  background-color: var(--semi-dark) !important;
+  border-color: var(--btn-border) !important;
+  box-shadow: none;
+}
+
+#splash .intro .splash-disclaimer {
+  color: var(--text-placeholder);
+  width: min(100%, 28rem);
+  max-width: min(100%, 28rem);
+  display: block;
+  margin-top: 0.25rem;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+  font-size: clamp(0.75rem, 2.2vmin, 0.75rem);
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+/* Non-mobile: narrower CTA, left-aligned in the intro / grid cell */
+@media only screen and (min-width: 600px) {
+  #splash .intro .splash-enter--btn.button--continue,
+  #splash .intro .splash-disclaimer {
+    width: min(100%, 22.5rem);
+    max-width: min(100%, 22.5rem);
+    margin-left: 0;
+    margin-right: auto;
+  }
+
+  #splash .intro .splash-disclaimer {
+    text-align: left;
+    letter-spacing: -0.0125em;
+  }
+}
+
+/* Tight stack: no gap between button and disclaimer on small screens */
+@media only screen and (max-width: 599px) {
+  #splash .intro .splash-disclaimer {
+    margin-top: 0;
+  }
 }
 
 .mission-statement {
@@ -65,7 +147,7 @@
   }
 
   .intro .powerback {        
-    font-size: 1.25em;
+    font-size: 1.5em !important;
   }
 
   .intro-text {
@@ -207,10 +289,6 @@
     letter-spacing: -0.025rem;
     text-align: left;
     text-shadow: 0px 0px 1px var(--bg);
-  }
-
-  #splash .splash-grid .intro span.natural-link {
-    letter-spacing: 0;
   }
 
   #splash .splash-video {

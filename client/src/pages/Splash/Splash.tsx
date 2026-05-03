@@ -4,10 +4,10 @@
  */
 import React, { useMemo, useCallback } from 'react';
 import { Col, Row, Stack, Container } from 'react-bootstrap';
+import { ContinueBtn } from '@Components/buttons';
 import { VideoPlayer } from '@Components/interactive';
 import { MEDIA_PATHS, SPLASH_COPY } from '@CONSTANTS';
 import { useIsDemoMode } from '../../demoMode';
-import { handleKeyDown } from '@Utils';
 import {
   type CredentialsFormView,
   type LandingNavView,
@@ -18,10 +18,10 @@ import {
 import './style.css';
 
 const Splash = () => {
+  /* Contexts - Centralized state management */
   const { splash, navigateToSplashView } = useNavigation(),
     { isTabletPortrait, isDesktop, isMobile } = useDevice(),
     { setShowAlert } = useDialogue();
-  const isDemoMode = useIsDemoMode();
 
   const changeSplash = useCallback(
     (nextSplash: LandingNavView | CredentialsFormView) => {
@@ -33,35 +33,38 @@ const Splash = () => {
 
   const IntroParagraph = useMemo(
     () => (
-      <p className={'intro'}>
-        <span className='powerback fs-2'>{SPLASH_COPY.SPLASH.COPY.demand}</span>
-        <p className='intro-text mt-lg-1 mb-lg-3 mb-2'>
+      <p className={'intro mt-lg-0 mt-2'}>
+        <span className='powerback fs-1'>{SPLASH_COPY.SPLASH.COPY.demand}</span>
+        <p className='intro-text mt-lg-2 mt-1 mb-lg-4 mb-2'>
           {SPLASH_COPY.SPLASH.COPY.intro}
         </p>
-        {/* Tour link >> */}
-        <span
-          onKeyDown={(e) => handleKeyDown(e, () => changeSplash('Tour'))}
-          onClick={() => changeSplash('Tour')}
-          className={`natural-link fs-${isDesktop ? '2' : '4'}`}
-          tabIndex={0}
-        >
-          {SPLASH_COPY.SPLASH.COPY.tour}
-        </span>
+        <ContinueBtn
+          classProp='splash-enter--btn button--continue'
+          handleClick={() => changeSplash('Tour')}
+          label={SPLASH_COPY.SPLASH.COPY.tour}
+          variant={'dark'}
+          type={'button'}
+          size={'lg'}
+        />
+        <small className='splash-disclaimer'>
+          {SPLASH_COPY.SPLASH.COPY.disclaimer}
+        </small>
       </p>
     ),
-    [changeSplash, isDesktop]
+    [changeSplash]
   );
 
-  const demoClass = useMemo(
-    () => (isDemoMode && isMobile ? 'demo-splash' : ''),
-    [isDemoMode, isMobile]
-  );
+  const isDemoMode = useIsDemoMode(),
+    demoClass = useMemo(
+      () => (isDemoMode && isMobile ? 'demo-splash' : ''),
+      [isDemoMode, isMobile]
+    );
 
   return (
     <>
-      <Container id='splash'>
+      <Container id={'splash'}>
         {isDesktop && !isTabletPortrait ? (
-          <div className='splash-grid'>
+          <div className={'splash-grid'}>
             <h1
               id={'splash-mission'}
               className={'mission-statement'}
@@ -81,8 +84,8 @@ const Splash = () => {
             </section>
 
             <section
-              className={'splash-video'}
               aria-label={'Explainer video'}
+              className={'splash-video'}
             >
               <VideoPlayer
                 altVideoPath={MEDIA_PATHS.EXPLAINER.MP4}
@@ -110,7 +113,10 @@ const Splash = () => {
                       <Stack direction='vertical'>
                         {isMobile && (
                           <Col className={'mb-2'}>
-                            <section aria-label='Explainer video'>
+                            <section
+                              className={'splash-video'}
+                              aria-label='Explainer video'
+                            >
                               <VideoPlayer
                                 altVideoPath={MEDIA_PATHS.EXPLAINER.MP4}
                                 videoPath={MEDIA_PATHS.EXPLAINER.WEBM}

@@ -147,7 +147,7 @@ const { handlePaymentSubmit } = usePaymentProcessing({
 
 ### Guest Access Flow
 
-1. **Legitimate Access**: User clicks "Take your power back" → sets sessionStorage flag → navigates to funnel
+1. **Legitimate Access**: User clicks "OCCUPY THE LOBBY" → sets sessionStorage flag → navigates to funnel
 2. **Unauthorized Access**: Browser back navigation blocked unless guest access flag is set
 3. **State Cleanup**: Flags cleared on login/logout to prevent stale access
 4. **Session Persistence**: Guest access persists across page refreshes
