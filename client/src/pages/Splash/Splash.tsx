@@ -39,14 +39,14 @@ const Splash = () => {
           {SPLASH_COPY.SPLASH.COPY.intro}
         </p>
         <ContinueBtn
-          classProp='splash-enter--btn button--continue'
+          classProp={'splash-enter--btn button--continue'}
           handleClick={() => changeSplash('Tour')}
           label={SPLASH_COPY.SPLASH.COPY.tour}
           variant={'dark'}
           type={'button'}
           size={'lg'}
         />
-        <small className='splash-disclaimer'>
+        <small className={'mt-lg-2 splash-disclaimer'}>
           {SPLASH_COPY.SPLASH.COPY.disclaimer}
         </small>
       </p>
