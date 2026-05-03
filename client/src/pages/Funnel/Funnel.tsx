@@ -140,6 +140,48 @@ type FunnelProps = {
   setLimitMessage?: Dispatch<SetStateAction<string>>;
 } & NavigationProp;
 
+const JOYRIDE_GA_EVENTS = {
+  STEP_VIEWED: 'joyride_step_viewed',
+  INTERACTED: 'joyride_interacted',
+  FINISHED: 'joyride_finished',
+  SKIPPED: 'joyride_skipped',
+  STARTED: 'joyride_started',
+} as const;
+
+type JoyrideGAEvent =
+  (typeof JOYRIDE_GA_EVENTS)[keyof typeof JOYRIDE_GA_EVENTS];
+
+const JOYRIDE_ACTIONS = [
+  'beacon_clicked',
+  'next',
+  'prev',
+  'skip',
+  'close',
+] as const;
+
+type JoyrideAction = (typeof JOYRIDE_ACTIONS)[number];
+
+const isJoyrideAction = (value: string): value is JoyrideAction =>
+  JOYRIDE_ACTIONS.includes(value as JoyrideAction);
+
+type JoyrideTrackingParams = {
+  tour_final_step_index?: number;
+  joyride_action?: JoyrideAction;
+  joyride_lifecycle?: string;
+  tour_step_target?: string;
+  tour_step_title?: string;
+  tour_step_index?: number;
+  joyride_type?: string;
+  tour_name: string;
+};
+
+const trackJoyrideGAEvent = (
+  eventName: JoyrideGAEvent,
+  params: JoyrideTrackingParams
+) => {
+  trackGoogleAnalyticsEvent(eventName, params);
+};
+
 const Funnel = ({ setActiveKey, ...props }: FunnelProps) => {
   /**
    * Funnel steps in order
@@ -391,6 +433,13 @@ const Funnel = ({ setActiveKey, ...props }: FunnelProps) => {
 
       const stepKey = `${tourName}:${index}`;
 
+      if (typeName === 'tour:start') {
+        trackJoyrideGAEvent(JOYRIDE_GA_EVENTS.STARTED, {
+          joyride_type: typeName,
+          tour_name: tourName,
+        });
+      }
+
       // Beacon appeared on screen.
       if (typeName === 'beacon' && lifecycleName === 'beacon') {
         joyrideBeaconStepsRef.current.add(stepKey);
@@ -405,7 +454,7 @@ const Funnel = ({ setActiveKey, ...props }: FunnelProps) => {
       ) {
         joyrideBeaconClickedStepsRef.current.add(stepKey);
 
-        trackGoogleAnalyticsEvent('joyride_interacted', {
+        trackJoyrideGAEvent(JOYRIDE_GA_EVENTS.INTERACTED, {
           joyride_action: 'beacon_clicked',
           joyride_lifecycle: lifecycleName,
           tour_step_target: stepTarget,
@@ -434,7 +483,7 @@ const Funnel = ({ setActiveKey, ...props }: FunnelProps) => {
         if (!joyrideViewedStepsRef.current.has(stepKey)) {
           joyrideViewedStepsRef.current.add(stepKey);
 
-          trackGoogleAnalyticsEvent('joyride_step_viewed', {
+          trackJoyrideGAEvent(JOYRIDE_GA_EVENTS.STEP_VIEWED, {
             tour_step_target: stepTarget,
             tour_step_title: stepTitle,
             tour_step_index: index,
@@ -444,8 +493,8 @@ const Funnel = ({ setActiveKey, ...props }: FunnelProps) => {
       }
 
       // User interaction with the tour controls.
-      if (['next', 'prev', 'skip', 'close'].includes(actionName)) {
-        trackGoogleAnalyticsEvent('joyride_interacted', {
+      if (isJoyrideAction(actionName) && actionName !== 'beacon_clicked') {
+        trackJoyrideGAEvent(JOYRIDE_GA_EVENTS.INTERACTED, {
           tour_step_target: stepTarget,
           joyride_action: actionName,
           tour_step_index: index,
@@ -454,15 +503,15 @@ const Funnel = ({ setActiveKey, ...props }: FunnelProps) => {
       }
 
       if (statusName === 'finished') {
-        trackGoogleAnalyticsEvent('joyride_finished', {
-          final_tour_step_index: index,
+        trackJoyrideGAEvent(JOYRIDE_GA_EVENTS.FINISHED, {
+          tour_final_step_index: index,
           tour_name: tourName,
         });
       }
 
       if (statusName === 'skipped') {
-        trackGoogleAnalyticsEvent('joyride_skipped', {
-          final_tour_step_index: index,
+        trackJoyrideGAEvent(JOYRIDE_GA_EVENTS.SKIPPED, {
+          tour_final_step_index: index,
           tour_name: tourName,
         });
       }
