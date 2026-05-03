@@ -7,36 +7,47 @@
   text-shadow: 0px 0px 0px;
 }
 
-/* Hero CTA keeps its own fill; other splash .btn stay flat purple */
-#splash .btn:not(.splash-enter--btn) {
-  background-color: var(--btn) !important;
+.mission-statement {
+  color: var(--text-mission);
+  text-align: left;
+  font-weight: 900;
+  text-shadow: -1px 1px 0px #e3bbbbbb !important;
+}
+
+.intro {
+  text-align: center;
+  font-weight: 500;
   font-family: 'Inconsolata';
-  font-weight: 700;
 }
 
 /** Splash lobby CTA: plain dark control (no offset shadow / transform). */
 #splash .intro .splash-enter--btn.button--continue {
-  color: var(--link) !important;
+  color: var(--btn) !important;
   width: min(100%, 28rem);
   display: block;
   margin: 0.65rem auto 0;
   padding: 0.5rem 1.25rem !important;
-  background-color: var(--contrast-black) !important;
-  border: 1px solid var(--link-hover) !important;
+  background-color: var(--elevated) !important;
+  border: 2px solid var(--btn) !important;
   border-radius: 4px;
-  transition: background-color 0.12s ease, color 0.12s ease,
-    border-color 0.12s ease;
   font-family: 'Oswald', sans-serif !important;
   font-size: clamp(1rem, 2.5vmin, 1.2rem) !important;
   font-weight: 600 !important;
   line-height: 1.2 !important;
   letter-spacing: 0.25em;
+  box-shadow: 0 0 3px var(--attention-muted);
+  transition:    
+    color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 120ms ease;
 }
 
 #splash .intro .splash-enter--btn.button--continue:hover {
   color: var(--success-theme) !important;
   background-color: var(--slate) !important;
   border-color: var(--btn-hover) !important;
+  box-shadow: 0 0 3px var(--attention);
 }
 
 #splash .intro .splash-enter--btn.button--continue:focus {
@@ -72,6 +83,8 @@
   line-height: 1.35;
 }
 
+
+
 /* Non-mobile: narrower CTA, left-aligned in the intro / grid cell */
 @media only screen and (min-width: 600px) {
   #splash .intro .splash-enter--btn.button--continue,
@@ -90,34 +103,25 @@
 
 /* Tight stack: no gap between button and disclaimer on small screens */
 @media only screen and (max-width: 599px) {
-  #splash .intro .splash-disclaimer {
-    margin-top: 0;
+  #splash .intro .splash-enter--btn.button--continue 
+  {
+    border: 1px solid var(--btn) !important;
   }
 }
 
-.mission-statement {
-  color: var(--text-mission);
-  text-align: left;
-  font-weight: 900;
-  text-shadow: -1px 1px 0px #e3bbbbbb !important;
-}
 
-.intro {
-  text-align: center;
-  font-weight: 500;
-  font-family: 'Inconsolata';
-}
-
-.mobile-splash-btns {
-  display: flex;
-  justify-content: center;
-}
 
 /*** SCREEN SIZES ***/
 /* Mobile, portrait (small) */
 @media only screen and (max-width: 379px) and (orientation: portrait) {
   .intro {
     font-size: 1rem !important;
+    line-height: 1.175em;
+  }
+
+  #splash .intro .splash-enter--btn.button--continue 
+  {
+    border: 1px solid var(--btn) !important;
   }
 }
 
@@ -142,7 +146,7 @@
     margin-top: 0.25em;
     font-size: 1.06875rem;
     text-align: left;
-    line-height: 1.5em;
+    line-height: 1.25em;
     text-shadow: 0px 0px 1px var(--bg);
   }
 
@@ -151,7 +155,7 @@
   }
 
   .intro-text {
-    line-height: 1.35em;
+    line-height: 1.25em;
   }
 
   .credentials-fields {
@@ -227,13 +231,11 @@
 /* Tablet, landscape */
 @media only screen and (min-width: 900px) and (orientation: landscape) {
   #splash {
-    /* Navbar/footer are fixed-position; reserve space so the grid can stay balanced. */
-    --nav-h: 6vh;
-    /* Footer includes the "paid for" block + citations row; give it more room on desktop. */
-    /* --footer-h: 140px; */
+    /* Navbar is in fixed-position; reserve space so the grid can stay balanced. */
+    --nav-h: 6vh;        
+    max-height: 100%;
     padding-top: calc(var(--nav-h) + 1rem) !important;
     padding-left: 0 !important;
-    max-height: 100%;
   }
 
   #splash .splash-grid {
@@ -241,14 +243,13 @@
      * Make the grid span the available Container width so the right column can stay "in place"
      * (pinned to the right) while the left column breathes further left.
      */
-    /* max-height: clamp(72vh, 73.5dvh, 73.5svh); */
-    max-height: clamp(72vh, 76.5dvh, 78.5svh);
+    max-height: clamp(72vh, 77.25dvh, 78.5svh);
     display: grid;
     /*
      * Keep the video column stable by constraining it; let the left column take the rest.
      * This shifts the left-side content further left without moving the video column.
      */
-    grid-template-columns: minmax(0, 1fr) clamp(20rem, 28vw, 32rem);
+    grid-template-columns: minmax(0, 1fr) clamp(20rem, 29vw, 33rem);
     grid-template-rows: auto minmax(0, 1fr);
     grid-template-areas: 'headline blank' 'copy video';
     column-gap: clamp(0.75rem, 1.5vw, 1.5rem);
@@ -262,7 +263,7 @@
 
   #splash .splash-grid .mission-statement {
     padding-top: 1rem;    
-    font-size: clamp(4rem, 7vw, 7.75rem);
+    font-size: clamp(4rem, 7.5vw, 8rem);
     line-height: 1.05;    
     text-shadow: none !important;
   }  
@@ -283,12 +284,12 @@
   #splash .splash-grid .intro {
     margin: 0;
     padding: 0;
-    max-width: 44rem;
+    max-width: 85%;
     font-size: clamp(1rem, 1.5vw, 1.75rem);
-    line-height: 1.4;
-    letter-spacing: -0.025rem;
     text-align: left;
     text-shadow: 0px 0px 1px var(--bg);
+    line-height: 1.3;
+    letter-spacing: -0.025rem;
   }
 
   #splash .splash-video {
@@ -298,6 +299,13 @@
 
   #splash .splash-video .react-player {
     margin: 0 !important;
+  }
+}
+
+/* Tablet, landscape (large) */
+@media only screen and (min-width: 1485px) and (orientation: landscape) {
+  #splash.container {
+    max-width: 1400px !important;
   }
 }
 
