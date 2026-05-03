@@ -9,6 +9,13 @@ export const trackGoogleAnalyticsEvent = (
   params: Record<string, unknown> = {}
 ) => {
   if (typeof window !== 'undefined' && window.gtag) {
-    window.gtag('event', eventName, params);
+    const isLocalDebug =
+      window.location.hostname === 'localhost' ||
+      window.location.hostname === '127.0.0.1';
+
+    window.gtag('event', eventName, {
+      ...params,
+      ...(isLocalDebug ? { debug_mode: true } : {}),
+    });
   }
 };

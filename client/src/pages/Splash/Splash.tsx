@@ -114,8 +114,8 @@ const Splash = () => {
                         {isMobile && (
                           <Col className={'mb-2'}>
                             <section
+                              aria-label={'Explainer video'}
                               className={'splash-video'}
-                              aria-label='Explainer video'
                             >
                               <VideoPlayer
                                 altVideoPath={MEDIA_PATHS.EXPLAINER.MP4}

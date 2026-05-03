@@ -13,6 +13,22 @@ import React, {
   useLayoutEffect,
   type SetStateAction,
 } from 'react';
+import type { Celebration, CelebrationRejection, NavigationProp } from '@Types';
+import { Button, Container, TabContainer } from 'react-bootstrap';
+import { logError, trackGoogleAnalyticsEvent } from '@Utils';
+import Joyride, { type CallBackProps } from 'react-joyride';
+import { useRoute, routes } from '../../router';
+import { useIsDemoMode } from '../../demoMode';
+import { WE_THE_PEOPLE } from '@CONSTANTS';
+import type { Bill } from '@Interfaces';
+import TabContents from './TabContents';
+import type { Route } from 'type-route';
+import { useParade } from '@Hooks';
+import {
+  useFunnelNavigationSync,
+  useInitialPolsOnParade,
+  useFunnelTours,
+} from './hooks';
 import {
   useAuth,
   useDevice,
@@ -25,22 +41,6 @@ import {
   type ShowAlert,
   type ShowModal,
 } from '@Contexts';
-import type { Celebration, CelebrationRejection, NavigationProp } from '@Types';
-import { Button, Container, TabContainer } from 'react-bootstrap';
-import { useRoute, routes } from '../../router';
-import { useIsDemoMode } from '../../demoMode';
-import { WE_THE_PEOPLE } from '@CONSTANTS';
-import type { Bill } from '@Interfaces';
-import TabContents from './TabContents';
-import type { Route } from 'type-route';
-import Joyride from 'react-joyride';
-import { useParade } from '@Hooks';
-import { logError } from '@Utils';
-import {
-  useFunnelNavigationSync,
-  useInitialPolsOnParade,
-  useFunnelTours,
-} from './hooks';
 import './style.css';
 
 /**
@@ -298,10 +298,10 @@ const Funnel = ({ setActiveKey, ...props }: FunnelProps) => {
     effectiveLimits,
     setDonation,
     setShowModal,
-    openDonationLimitModal,
-    getRemainingDonationLimit,
     navigateToFunnel,
     wouldExceedLimits,
+    openDonationLimitModal,
+    getRemainingDonationLimit,
   ]);
 
   useFunnelNavigationSync(tabKey, navContext, navigateToFunnel, FUNNEL);
@@ -349,6 +349,9 @@ const Funnel = ({ setActiveKey, ...props }: FunnelProps) => {
     }
   }, [paymentError, setRejectedDonationReasons]);
 
+  /**
+   * Joyride tour state and callbacks
+   */
   const {
     tour,
     stopTourLoop,
@@ -366,6 +369,108 @@ const Funnel = ({ setActiveKey, ...props }: FunnelProps) => {
     tabKey,
     userId,
   });
+
+  const joyrideViewedStepsRef = useRef<Set<string>>(new Set());
+  const joyrideBeaconStepsRef = useRef<Set<string>>(new Set()),
+    joyrideBeaconClickedStepsRef = useRef<Set<string>>(new Set());
+
+  const trackedJoyrideCallback = useCallback(
+    (data: CallBackProps) => {
+      const { action, index, lifecycle, status, type, step } = data;
+
+      const tourName = String(tour.tourName ?? 'funnel_tour');
+      const lifecycleName = String(lifecycle ?? '');
+      const actionName = String(action ?? '');
+      const statusName = String(status ?? '');
+      const typeName = String(type ?? '');
+
+      const stepTarget =
+        typeof step?.target === 'string' ? step.target : 'element';
+
+      const stepTitle = typeof step?.title === 'string' ? step.title : '';
+
+      const stepKey = `${tourName}:${index}`;
+
+      // Beacon appeared on screen.
+      if (typeName === 'beacon' && lifecycleName === 'beacon') {
+        joyrideBeaconStepsRef.current.add(stepKey);
+      }
+
+      // Beacon was clicked/resumed into tooltip.
+      if (
+        typeName === 'tooltip' &&
+        lifecycleName === 'tooltip' &&
+        joyrideBeaconStepsRef.current.has(stepKey) &&
+        !joyrideBeaconClickedStepsRef.current.has(stepKey)
+      ) {
+        joyrideBeaconClickedStepsRef.current.add(stepKey);
+
+        trackGoogleAnalyticsEvent('joyride_interacted', {
+          joyride_action: 'beacon_clicked',
+          joyride_lifecycle: lifecycleName,
+          tour_step_target: stepTarget,
+          joyride_type: typeName,
+          tour_step_index: index,
+          tour_name: tourName,
+        });
+      }
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Joyride callback', {
+          lifecycle: lifecycleName,
+          action: actionName,
+          status: statusName,
+          type: typeName,
+          stepTarget,
+          stepTitle,
+          index,
+        });
+      }
+
+      // Step exposure: this includes the automatic first step.
+      if (lifecycleName === 'tooltip' || typeName === 'tooltip') {
+        const stepKey = `${tourName}:${index}`;
+
+        if (!joyrideViewedStepsRef.current.has(stepKey)) {
+          joyrideViewedStepsRef.current.add(stepKey);
+
+          trackGoogleAnalyticsEvent('joyride_step_viewed', {
+            tour_step_target: stepTarget,
+            tour_step_title: stepTitle,
+            tour_step_index: index,
+            tour_name: tourName,
+          });
+        }
+      }
+
+      // User interaction with the tour controls.
+      if (['next', 'prev', 'skip', 'close'].includes(actionName)) {
+        trackGoogleAnalyticsEvent('joyride_interacted', {
+          tour_step_target: stepTarget,
+          joyride_action: actionName,
+          tour_step_index: index,
+          tour_name: tourName,
+        });
+      }
+
+      if (statusName === 'finished') {
+        trackGoogleAnalyticsEvent('joyride_finished', {
+          final_tour_step_index: index,
+          tour_name: tourName,
+        });
+      }
+
+      if (statusName === 'skipped') {
+        trackGoogleAnalyticsEvent('joyride_skipped', {
+          final_tour_step_index: index,
+          tour_name: tourName,
+        });
+      }
+
+      joyrideCallback(data);
+    },
+    [joyrideCallback, tour.tourName]
+  );
 
   // Open account from tour is disabled in demo mode
   const openAccountFromTour = useMemo(() => {
@@ -447,7 +552,7 @@ const Funnel = ({ setActiveKey, ...props }: FunnelProps) => {
                 ? celebrationTooltipComponent
                 : undefined
             }
-            callback={joyrideCallback}
+            callback={trackedJoyrideCallback}
             disableOverlay={true}
             spotlightClicks
             showSkipButton
