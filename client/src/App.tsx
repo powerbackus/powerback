@@ -39,7 +39,7 @@ type AppProps = {
  */
 const App = ({ serverConstantsError }: AppProps) => {
   /* notifications, alerts, modals, overlays, etc */
-  const { setShowAlert, setShowSideNav } = useDialogue();
+  const { setShowAlert, setShowSideNav, setShowModal } = useDialogue();
   /**
    * State for account modal active tab
    */
@@ -48,13 +48,18 @@ const App = ({ serverConstantsError }: AppProps) => {
   const { navigateToSplash, navigateToFunnel, navContext, funnel, splash } =
       useNavigation(),
     { authOut, isLoggedIn, isInitializing } = useAuth(),
-    { resetDonationState } = useDonationState();
+    { resetDonationState, setCredentialsPath } = useDonationState();
 
   // Track funnel state: 'reset' | 'progressing' | 'complete'
   const funnelStateRef = useRef<'reset' | 'progressing' | 'complete'>('reset');
 
   // Track previous funnel state to detect when leaving Confirmation
   const prevFunnelRef = useRef<string | undefined>(undefined);
+
+  /** Prior navContext for detecting funnel → splash (e.g. Back from funnel with auth modal open). */
+  const prevNavContextForAuthRef = useRef<'splash' | 'funnel' | undefined>(
+    undefined
+  );
 
   /**
    * Fires `campaign_path_seen` once per browser tab session for short-link entry
@@ -134,6 +139,17 @@ const App = ({ serverConstantsError }: AppProps) => {
   useLayoutEffect(() => {
     if (navContext === 'splash') setShowSideNav(false);
   }, [navContext, setShowSideNav]);
+
+  // Credentials modal is tied to funnel celebrate flow; clear it when leaving funnel (Back, etc.).
+  // Also clears credentialsPath so desktop User nav sync does not reopen the modal.
+  useLayoutEffect(() => {
+    const prev = prevNavContextForAuthRef.current;
+    prevNavContextForAuthRef.current = navContext;
+    if (prev === 'funnel' && navContext === 'splash') {
+      setCredentialsPath('');
+      setShowModal((s) => ({ ...s, credentials: false }));
+    }
+  }, [navContext, setCredentialsPath, setShowModal]);
 
   // mobile form path control
   const route = useRoute();

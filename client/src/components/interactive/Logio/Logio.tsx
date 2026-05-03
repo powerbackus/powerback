@@ -11,20 +11,6 @@ import React, {
   type SetStateAction,
 } from 'react';
 import {
-  useEntryForm,
-  useButtonErrorSwapper,
-  type UserEntryForm,
-} from '@Hooks';
-import {
-  Col,
-  Row,
-  Form,
-  Button,
-  FormCheck,
-  FormGroup,
-  Placeholder,
-} from 'react-bootstrap';
-import {
   useAuth,
   useDialogue,
   useNavigation,
@@ -38,12 +24,26 @@ import { handleOverlay, handleFeedback } from './fn';
 import { PopoverTarget } from '@Components/buttons';
 import { AxiosError, HttpStatusCode } from 'axios';
 import { INIT, ACCOUNT_COPY } from '@CONSTANTS';
+import {
+  Placeholder,
+  FormGroup,
+  FormCheck,
+  Button,
+  Form,
+  Row,
+  Col,
+} from 'react-bootstrap';
 import API from '@API';
 import {
   type FormValidationProp,
   type NavigationProp,
   type AuthProp,
 } from '@Types';
+import {
+  useEntryForm,
+  useButtonErrorSwapper,
+  type UserEntryForm,
+} from '@Hooks';
 import './style.css';
 
 /**
@@ -219,11 +219,11 @@ const Logio = ({
     }
   }, [
     splash,
-    navigateToSplashView,
     showModal,
     credentialsPath,
     clearUserEntryForm,
     setCredentialsPath,
+    navigateToSplashView,
     setUserFormValidated,
   ]);
 

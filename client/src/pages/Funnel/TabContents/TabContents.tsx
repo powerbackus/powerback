@@ -186,8 +186,8 @@ type TabContentsProps = {
 const TabContents = ({
   restorePolsOnParade,
   setLimitMessage,
-  bill,
   isDemoMode,
+  bill,
   ...props
 }: TabContentsProps) => {
   /* Contexts */
