@@ -200,9 +200,9 @@ const Logio = ({
       const nextPath = credentialsPath === 'Join Now' ? 'Sign In' : 'Join Now';
 
       trackGoogleAnalyticsEvent('auth_modal_path_switched', {
-        from_auth_modal_path: credentialsPath,
-        to_auth_modal_path: nextPath,
         auth_modal_source: showModal.credentials ? 'credentials_modal' : 'tour',
+        from_path: credentialsPath,
+        to_path: nextPath,
       });
 
       setCredentialsPath(nextPath);
@@ -210,9 +210,9 @@ const Logio = ({
       const nextSplash = splash === 'Join Now' ? 'Sign In' : 'Join Now';
 
       trackGoogleAnalyticsEvent('auth_splash_path_switched', {
-        from_auth_modal_path: splash,
-        to_auth_modal_path: nextSplash,
         auth_modal_source: 'splash',
+        to_path: nextSplash,
+        from_path: splash,
       });
 
       navigateToSplashView(nextSplash);
