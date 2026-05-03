@@ -6,12 +6,17 @@ import React, {
   Suspense,
   useRef,
   useState,
+  useEffect,
   useCallback,
   useLayoutEffect,
 } from 'react';
-import { clearLocalMap, getScrollBehavior } from '@Utils';
+import {
+  clearLocalMap,
+  getScrollBehavior,
+  trackGoogleAnalyticsEvent,
+} from '@Utils';
+import { APP, ANALYTICS_COPY, type AccountTab } from '@CONSTANTS';
 import { Navigation, Footer } from '@Components/page';
-import { APP, type AccountTab } from '@CONSTANTS';
 import { ErrorBoundary, Page } from '@Pages';
 import { useRoute } from './router';
 import {
@@ -50,6 +55,31 @@ const App = ({ serverConstantsError }: AppProps) => {
 
   // Track previous funnel state to detect when leaving Confirmation
   const prevFunnelRef = useRef<string | undefined>(undefined);
+
+  /**
+   * Fires `campaign_path_seen` once per browser tab session for short-link entry
+   * paths (`/r/`, `/bsky/`, `/x/`, `/li/`). sessionStorage dedupes so reloads on
+   * the same path do not emit duplicate GA events.
+   */
+  useEffect(() => {
+    const path = window.location.pathname;
+
+    const isCampaignPath = ANALYTICS_COPY.CAMPAIGN_PATH_PREFIXES.some(
+      (prefix) => path.startsWith(prefix)
+    );
+
+    if (!isCampaignPath) return;
+
+    const storageKey = `${ANALYTICS_COPY.EVENTS.CAMPAIGN_PATH_SEEN}:${path}`;
+
+    if (sessionStorage.getItem(storageKey)) return;
+
+    sessionStorage.setItem(storageKey, 'true');
+
+    trackGoogleAnalyticsEvent(ANALYTICS_COPY.EVENTS.CAMPAIGN_PATH_SEEN, {
+      [ANALYTICS_COPY.PARAMS.CAMPAIGN_PATH]: path,
+    });
+  }, []);
 
   /**
    * Handles user logout process
