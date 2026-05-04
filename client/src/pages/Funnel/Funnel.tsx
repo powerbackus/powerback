@@ -218,7 +218,8 @@ const Funnel = ({ setActiveKey, ...props }: FunnelProps) => {
   /**
    * Context hooks for managing application state and user interactions
    */
-  const { showModal, showOverlay, setShowAlert, setShowModal } = useDialogue(),
+  const { showModal, showOverlay, showSideNav, setShowAlert, setShowModal } =
+      useDialogue(),
     { isDesktop } = useDevice(),
     { funnel: tabKey, navContext, navigateToFunnel } = useNavigation(),
     {
@@ -397,6 +398,7 @@ const Funnel = ({ setActiveKey, ...props }: FunnelProps) => {
   const {
     tour,
     stopTourLoop,
+    dismissUserTour,
     joyrideCallback,
     openAccountFromTour: rawOpenAccountFromTour,
   } = useFunnelTours<ShowModal>({
@@ -411,6 +413,27 @@ const Funnel = ({ setActiveKey, ...props }: FunnelProps) => {
     tabKey,
     userId,
   });
+
+  /**
+   * Last mobile User-tour step tells the user to open the menu via the logo.
+   * Opening the sidenav there should dismiss the tour permanently (not only pause).
+   */
+  useEffect(() => {
+    if (!showSideNav || isDesktop) return;
+    if (tour.tourName !== 'User' || !tour.run || tour.steps.length === 0) {
+      return;
+    }
+    if (tour.stepIndex !== tour.steps.length - 1) return;
+    dismissUserTour();
+  }, [
+    dismissUserTour,
+    isDesktop,
+    showSideNav,
+    tour.run,
+    tour.stepIndex,
+    tour.steps.length,
+    tour.tourName,
+  ]);
 
   const joyrideViewedStepsRef = useRef<Set<string>>(new Set());
   const joyrideBeaconStepsRef = useRef<Set<string>>(new Set()),
@@ -602,6 +625,8 @@ const Funnel = ({ setActiveKey, ...props }: FunnelProps) => {
                 : undefined
             }
             callback={trackedJoyrideCallback}
+            // Pause Joyride while main menu is open so only one overlay layer shows (mobile).
+            run={tour.run && !showSideNav}
             disableOverlay={true}
             spotlightClicks
             showSkipButton

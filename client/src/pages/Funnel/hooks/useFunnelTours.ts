@@ -29,12 +29,13 @@ export interface UseFunnelToursParams<
 }
 
 export interface UseFunnelToursResult {
-  tour: ReturnType<typeof useTour>[0];
   joyrideCallback: (
     data: Parameters<ReturnType<typeof useTour>[0]['callback']>[0]
   ) => void;
+  tour: ReturnType<typeof useTour>[0];
+  openAccountFromTour: () => void; /** Dismisses the User tour and persists skip (localStorage); used when sidenav opens on the logo/help step. */
+  dismissUserTour: () => void;
   stopTourLoop: () => void;
-  openAccountFromTour: () => void;
 }
 
 /**
@@ -141,6 +142,11 @@ export default function useFunnelTours<
     [stableStopTour]
   );
 
+  const dismissUserTour = useCallback(
+    () => stableStopTour('User'),
+    [stableStopTour]
+  );
+
   /**
    * Opens the Account modal from tour interactions.
    * Used by Celebration tour tooltip on mobile to open Account sidebar.
@@ -167,6 +173,7 @@ export default function useFunnelTours<
 
   return {
     openAccountFromTour,
+    dismissUserTour,
     joyrideCallback,
     stopTourLoop,
     tour,
