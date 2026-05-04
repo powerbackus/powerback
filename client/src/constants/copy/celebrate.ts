@@ -51,6 +51,7 @@ interface CelebrateCopy {
   };
   CHECKOUT: {
     statement: string;
+    conditionalRulesDisclaimer: string;
   };
   CELEBRATION_SCREEN_LOAD_HEADER: string;
 }
@@ -124,6 +125,8 @@ export const CELEBRATE_COPY: CelebrateCopy = {
   CHECKOUT: {
     statement:
       ' is the only independent campaign donation platform that demands urgent change backed by millions of Americans.',
+    conditionalRulesDisclaimer:
+      "Your Celebration follows the conditional rules you accept. POWERBACK verifies only the specified public record. We don't judge intent, bill merits, or downstream outcomes.",
   },
   CELEBRATION_SCREEN_LOAD_HEADER:
     'START A CELEBRATION BY CHOOSING A REPRESENTATIVE AND CASH AMOUNT.',

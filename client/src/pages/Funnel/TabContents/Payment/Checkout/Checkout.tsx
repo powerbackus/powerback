@@ -196,8 +196,21 @@ const Checkout = ({
                   className={'list-group-flush'}
                 >
                   <ListGroup.Item>
-                    <span className='celebration-condition'>
-                      Condition: {condition}
+                    <span className='celebration-condition checkout-condition-row'>
+                      <span className='checkout-condition-row--text'>
+                        Condition: {condition}
+                      </span>
+                      <span className='checkout-condition-row--icon'>
+                        <InfoTooltip
+                          icon={'info-circle'}
+                          infoPlacement={'top'}
+                          message={
+                            CELEBRATE_COPY.CHECKOUT.conditionalRulesDisclaimer
+                          }
+                          toolTipId={'checkout-conditional-rules-tooltip'}
+                          showToolTips={settings?.showToolTips ?? true}
+                        />
+                      </span>
                     </span>
                   </ListGroup.Item>
                   <ListGroup.Item>

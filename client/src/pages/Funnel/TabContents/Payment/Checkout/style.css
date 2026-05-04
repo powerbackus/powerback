@@ -1,5 +1,5 @@
 .checkout-card {
-  color: var(--text);
+  color: var(--text-contrast);
   background-color: rgb(from var(--semi-dark) r g b / 80%);
   border: 1px solid var(--btn);
 }
@@ -85,6 +85,29 @@ span.celebration-condition {
   color: var(--info);
 }
 
+.checkout-condition-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 0.35rem;
+  max-width: 100%;
+}
+
+.checkout-condition-row--text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.checkout-condition-row--icon {
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.checkout-card .checkout-condition-row .bi-info-circle {
+  color: var(--attention);
+}
+
 /*** SCREEN SIZES ***/
 /* Mobile, portrait */
 @media only screen and (max-width: 599px) and (orientation: portrait) {
@@ -153,9 +176,9 @@ span.celebration-condition {
   }
 
   .what-happens-next-tip {
-    padding: 0.5rem;
-    line-height: 20px;
-    height: 20px;
+    padding: 0.25rem 0;
+    line-height: 1.1;
+    white-space: nowrap;
   }
 }
 
