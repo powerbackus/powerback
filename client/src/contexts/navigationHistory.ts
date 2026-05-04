@@ -53,6 +53,21 @@ export const BASE_FUNNEL_STEPS: FunnelView[] = [
 ];
 
 /**
+ * Dispatched on browser history traversal (popstate) and in-app goBack.
+ * Listeners must not call history.pushState, replaceState, back, or forward.
+ */
+export const SESSION_HISTORY_TRAVERSE_EVENT = 'pb:session-history-traverse';
+
+/**
+ * Notifies listeners that the user moved backward in session history.
+ * Does not mutate the history stack.
+ */
+export function dispatchSessionHistoryTraverse(): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(SESSION_HISTORY_TRAVERSE_EVENT));
+}
+
+/**
  * Initial navigation state from browser history or default splash landing.
  * On full load with splash in history, always return landing (''); subscreen state is for in-session back/forward only.
  */
@@ -110,6 +125,7 @@ export function createPopstateHandler(
   } = env;
 
   return function onPop(e: PopStateEvent) {
+    dispatchSessionHistoryTraverse();
     const currentNavState = navigationStateRef.current;
     const currentHistoryStack = historyStackRef.current;
     const currentIdx = currentIndexRef.current;

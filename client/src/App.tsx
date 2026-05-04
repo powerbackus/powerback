@@ -25,6 +25,11 @@ import {
   useDialogue,
   useAuth,
 } from '@Contexts';
+import {
+  normalizeStateForComparison,
+  SESSION_HISTORY_TRAVERSE_EVENT,
+  type NavigationState,
+} from './contexts/navigationHistory';
 import './App.css';
 
 type AppProps = {
@@ -39,16 +44,24 @@ type AppProps = {
  */
 const App = ({ serverConstantsError }: AppProps) => {
   /* notifications, alerts, modals, overlays, etc */
-  const { setShowAlert, setShowSideNav, setShowModal } = useDialogue();
+  const { setShowAlert, setShowSideNav, setShowModal, showModal } =
+    useDialogue();
   /**
    * State for account modal active tab
    */
   const [activeKey, setActiveKey] = useState<AccountTab>('Profile');
 
-  const { navigateToSplash, navigateToFunnel, navContext, funnel, splash } =
-      useNavigation(),
+  const {
+      navigateToSplash,
+      navigateToFunnel,
+      navContext,
+      funnel,
+      splash,
+      step,
+    } = useNavigation(),
     { authOut, isLoggedIn, isInitializing } = useAuth(),
-    { resetDonationState, setCredentialsPath } = useDonationState();
+    { resetDonationState, setCredentialsPath, credentialsPath } =
+      useDonationState();
 
   // Track funnel state: 'reset' | 'progressing' | 'complete'
   const funnelStateRef = useRef<'reset' | 'progressing' | 'complete'>('reset');
@@ -60,6 +73,9 @@ const App = ({ serverConstantsError }: AppProps) => {
   const prevNavContextForAuthRef = useRef<'splash' | 'funnel' | undefined>(
     undefined
   );
+
+  /** Serialized nav for closing credentials when navigation moves without popstate (e.g. replaceState). */
+  const prevNavSignatureRef = useRef('');
 
   /**
    * Fires `campaign_path_seen` once per browser tab session for short-link entry
@@ -150,6 +166,48 @@ const App = ({ serverConstantsError }: AppProps) => {
       setShowModal((s) => ({ ...s, credentials: false }));
     }
   }, [navContext, setCredentialsPath, setShowModal]);
+
+  // Session back/forward: popstate + in-app goBack (replaceState paths do not emit popstate).
+  // Event is dispatched from navigationHistory / NavigationContext only; no history mutation here.
+  useEffect(() => {
+    const closeCredentialsOnSessionHistoryTraverse = () => {
+      setCredentialsPath('');
+      setShowModal((s) => (s.credentials ? { ...s, credentials: false } : s));
+    };
+    window.addEventListener(
+      SESSION_HISTORY_TRAVERSE_EVENT,
+      closeCredentialsOnSessionHistoryTraverse
+    );
+    return () =>
+      window.removeEventListener(
+        SESSION_HISTORY_TRAVERSE_EVENT,
+        closeCredentialsOnSessionHistoryTraverse
+      );
+  }, [setCredentialsPath, setShowModal]);
+
+  useLayoutEffect(() => {
+    const navSig = normalizeStateForComparison({
+      navContext,
+      splash,
+      funnel,
+    } as NavigationState);
+    const key = JSON.stringify({ ...navSig, step: step ?? -1 });
+    const prev = prevNavSignatureRef.current;
+    if (prev && prev !== key && (showModal.credentials || credentialsPath)) {
+      setCredentialsPath('');
+      setShowModal((s) => (s.credentials ? { ...s, credentials: false } : s));
+    }
+    prevNavSignatureRef.current = key;
+  }, [
+    navContext,
+    funnel,
+    splash,
+    step,
+    showModal.credentials,
+    credentialsPath,
+    setCredentialsPath,
+    setShowModal,
+  ]);
 
   // mobile form path control
   const route = useRoute();

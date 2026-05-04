@@ -17,6 +17,7 @@ import {
   SPLASH_NAV_GRAPH,
   BASE_FUNNEL_STEPS,
   createPopstateHandler,
+  dispatchSessionHistoryTraverse,
   getInitialState as getInitialNavState,
 } from './navigationHistory';
 import { logWarn } from '@Utils';
@@ -283,6 +284,7 @@ export function NavigationProvider({
    */
   const goBack = useCallback(() => {
     if (currentIndex > 0) {
+      dispatchSessionHistoryTraverse();
       const prevState = historyStack[currentIndex - 1];
       setNavigationState(prevState);
       setCurrentIndex((prev) => prev - 1);
@@ -294,11 +296,13 @@ export function NavigationProvider({
       navigationState.step !== undefined &&
       navigationState.step > 0
     ) {
+      dispatchSessionHistoryTraverse();
       // Go back within funnel
       const currentFunnelSteps = getFunnelSteps();
       const prevStep = currentFunnelSteps[navigationState.step - 1];
       navigateToFunnel(prevStep, navigationState.step - 1);
     } else if (navigationState.navContext === 'funnel') {
+      dispatchSessionHistoryTraverse();
       // Exit funnel back to splash
       navigateToSplash('Tour');
     }
