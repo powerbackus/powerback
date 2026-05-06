@@ -8,6 +8,8 @@
  * @module utils/tracking/linkTracking
  */
 
+import { shouldEnableGoogleAnalytics } from '../analytics/analytics';
+
 // Extend window interface for Google Analytics
 declare global {
   interface Window {
@@ -112,7 +114,7 @@ export const trackLinkClick = (
   linkText: string,
   config: TrackingConfig
 ): void => {
-  if (typeof window !== 'undefined' && window.gtag) {
+  if (shouldEnableGoogleAnalytics() && window.gtag) {
     window.gtag('event', 'external_link_click', {
       event_category: config.medium,
       event_label: linkText,
