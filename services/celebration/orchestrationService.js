@@ -75,6 +75,10 @@ const {
   validateDonorInfo: validateDonor,
   getValidationSummary,
 } = require('../user/donorValidation');
+const {
+  isPolRosterExcludedByBioguide,
+  POL_ROSTER_EXCLUDED_USER_MESSAGE,
+} = require('../congress/polRosterEligibility');
 const { sendPACLimitEmail, handleCelebrationEmail } = require('./emailService');
 const { getEscrowedTotalsByPol } = require('./dataService');
 
@@ -98,6 +102,20 @@ async function createCelebration(req, res) {
       bill_id_length: req.body.bill_id?.length,
       full_body: req.body,
     });
+
+    if (await isPolRosterExcludedByBioguide(Pol, req.body.pol_id)) {
+      logger.warn('Celebration creation blocked: roster_excluded Pol', {
+        pol_id: req.body.pol_id,
+        userId: req.body.donatedBy,
+      });
+      return {
+        status: 400,
+        response: {
+          code: 'POL_ROSTER_EXCLUDED',
+          message: POL_ROSTER_EXCLUDED_USER_MESSAGE,
+        },
+      };
+    }
 
     // 2. Get user data and compliance tier
     const compliance = await UserController.deem(req.body.donatedBy, User);

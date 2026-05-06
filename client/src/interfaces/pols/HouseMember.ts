@@ -20,5 +20,12 @@ export interface HouseMember {
   ocd_id: string;
   url?: string;
   id: string;
+  /** Watcher-derived competitive race flag */
+  has_stakes?: boolean;
+  /** Policy exclusion; omitted or false when selectable */
+  roster_excluded?: boolean;
+  roster_exclusion_reason?: string;
+  roster_exclusion_category?: string;
+  roster_exclusion_updated_at?: string;
   roles: [Role];
 }

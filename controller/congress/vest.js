@@ -7,10 +7,9 @@
  *
  * BUSINESS LOGIC
  *
- * STAKES VERIFICATION
- * - Checks if politician has has_stakes: true flag
- * - Returns boolean indicating competitive race status
- * - Used to filter politicians for donation targeting
+ * ELIGIBILITY (payment / donation gate)
+ * - Requires has_stakes: true (watcher competitive set)
+ * - Requires roster_excluded not true (policy exclusions: Speaker, left office, etc.)
  *
  * HAS_STAKES FLAG
  * - Indicates: seeking re-election, has raised funds, has serious challenger
@@ -51,6 +50,7 @@ module.exports = {
         has_stakes: {
           $eq: true,
         },
+        roster_excluded: { $ne: true },
       })
     );
   },

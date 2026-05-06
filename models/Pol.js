@@ -21,7 +21,16 @@
  * - current_party: Current political party affiliation
  * - last_updated: Timestamp of last data update
  * - has_stakes: Boolean indicating if politician is seeking re-election,
- *   has raised funds, and has a serious challenger (used for donation targeting)
+ *   has raised funds, and has a serious challenger (used for donation targeting;
+ *   computed by watcher jobs — not used as the policy exclusion mechanism)
+ *
+ * ROSTER EXCLUSION (policy layer; independent of has_stakes)
+ * - roster_excluded: When true, Pol must not appear on selectable rosters and
+ *   must not receive new Celebrations (enforced on celebration + payment APIs)
+ * - roster_exclusion_reason, roster_exclusion_category, roster_exclusion_updated_at:
+ *   audit metadata for exclusions (categories include speaker_of_house, left_office,
+ *   deceased, resigned, delegate_or_non_voting, manual_admin_exclusion,
+ *   data_integrity_hold)
  *
  * CONGRESSIONAL ROLES
  * - roles: Array of RoleSchema objects representing different congressional
@@ -91,6 +100,22 @@ const PolSchema = new Schema(
     current_party: String,
     last_updated: String,
     has_stakes: Boolean, // are they seeking re-election, have they raised funds, and do they have a serious challenger?
+    roster_excluded: {
+      type: Boolean,
+      default: false,
+    },
+    roster_exclusion_reason: {
+      type: String,
+      default: '',
+    },
+    roster_exclusion_category: {
+      type: String,
+      default: '',
+    },
+    roster_exclusion_updated_at: {
+      type: Date,
+      default: null,
+    },
     roles: [RoleSchema],
   },
   { timestamps: true }
