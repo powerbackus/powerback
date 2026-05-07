@@ -35,16 +35,16 @@ type SearchType = 'name' | 'state' | 'district' | 'mixed' | 'unknown';
 type MatchedEntityType = 'pol' | 'state' | 'district' | 'none' | 'multiple';
 
 type SearchAnalyticsParams = {
-  search_type: SearchType;
-  search_query_length: number;
   search_query_normalized: string | null;
   matched_entity_type: MatchedEntityType;
-  matched_pol_id: string | null;
-  matched_pol_name: string | null;
-  matched_state: string | null;
   matched_district: string | null;
-  result_count: number;
+  matched_pol_name: string | null;
   search_location: 'pol_carousel';
+  matched_pol_id: string | null;
+  matched_state: string | null;
+  search_query_length: number;
+  search_type: SearchType;
+  result_count: number;
 };
 
 const STATE_ABBREV_REGEX = /^[A-Za-z]{2}$/;
@@ -381,16 +381,16 @@ const PolCombobox = ({
       );
 
       let analyticsParams: SearchAnalyticsParams = {
-        search_type: searchType,
-        search_query_length: rawQuery.trim().length,
         search_query_normalized: searchQueryNormalized,
-        matched_entity_type: 'none',
-        matched_pol_id: null,
-        matched_pol_name: null,
-        matched_state: null,
-        matched_district: null,
+        search_query_length: rawQuery.trim().length,
         result_count: appliedPols.length,
         search_location: 'pol_carousel',
+        matched_entity_type: 'none',
+        search_type: searchType,
+        matched_pol_name: null,
+        matched_district: null,
+        matched_pol_id: null,
+        matched_state: null,
       };
 
       if (searchOption.name === 'NAME') {
@@ -409,10 +409,9 @@ const PolCombobox = ({
         analyticsParams = {
           ...analyticsParams,
           search_type: 'state',
-          search_query_normalized: selectedState.abbrev || null,
           matched_entity_type: 'state',
-          matched_state: selectedState.abbrev || null,
           result_count: stateMatches.length,
+          search_query_normalized: selectedState.abbrev || null,
           ...(stateMatches.length === 1
             ? getMatchedPolMeta(stateMatches[0])
             : {
@@ -420,6 +419,7 @@ const PolCombobox = ({
                 matched_pol_name: null,
                 matched_district: null,
               }),
+          matched_state: selectedState.abbrev || null,
         };
       }
 
@@ -435,12 +435,12 @@ const PolCombobox = ({
         );
     },
     [
-      searchPolsByName,
-      searchPolsByState,
-      searchOption.name,
       showClearBtn,
+      searchOption.name,
       polsOnParade?.applied,
       polsOnParade?.houseMembers,
+      searchPolsByName,
+      searchPolsByState,
     ]
   );
 
@@ -582,6 +582,13 @@ const PolCombobox = ({
                 );
                 trackGoogleAnalyticsEvent('pol_search_submitted', {
                   search_type: searchType,
+                  result_count: 0,
+                  matched_pol_id: null,
+                  matched_state: state,
+                  matched_pol_name: null,
+                  matched_district: district,
+                  matched_entity_type: 'none',
+                  search_location: 'pol_carousel',
                   search_query_length: addressInput.length,
                   search_query_normalized: getSafeNormalizedQuery(
                     addressInput,
@@ -589,13 +596,6 @@ const PolCombobox = ({
                     searchOption.name,
                     polsOnParade?.houseMembers || []
                   ),
-                  matched_entity_type: 'none',
-                  matched_pol_id: null,
-                  matched_pol_name: null,
-                  matched_state: state,
-                  matched_district: district,
-                  result_count: 0,
-                  search_location: 'pol_carousel',
                 } as SearchAnalyticsParams);
                 // Address is ambiguous - user needs to be more specific
                 alert(SEARCH_COPY.SEARCH.DISTRICT.SPLIT);
@@ -617,6 +617,7 @@ const PolCombobox = ({
                 );
                 trackGoogleAnalyticsEvent('pol_search_submitted', {
                   search_type: searchType,
+                  search_location: 'pol_carousel',
                   search_query_length: addressInput.length,
                   search_query_normalized: getSafeNormalizedQuery(
                     addressInput,
@@ -624,21 +625,20 @@ const PolCombobox = ({
                     searchOption.name,
                     polsOnParade?.houseMembers || []
                   ),
+                  result_count: paradeMatches.length,
                   matched_entity_type: paradeMatches.length
                     ? 'district'
                     : 'none',
-                  matched_pol_id:
-                    paradeMatches.length === 1 ? paradeMatches[0].id : null,
                   matched_pol_name:
                     paradeMatches.length === 1
                       ? buildPolDisplayName(paradeMatches[0])
                       : null,
                   matched_state:
                     state || paradeMatches[0]?.roles?.[0]?.state || null,
+                  matched_pol_id:
+                    paradeMatches.length === 1 ? paradeMatches[0].id : null,
                   matched_district:
                     district || paradeMatches[0]?.roles?.[0]?.district || null,
-                  result_count: paradeMatches.length,
-                  search_location: 'pol_carousel',
                 } as SearchAnalyticsParams);
                 incumbentHasNoChallenger(data);
               }
@@ -651,20 +651,20 @@ const PolCombobox = ({
               );
               trackGoogleAnalyticsEvent('pol_search_submitted', {
                 search_type: searchType,
-                search_query_length: addressInput.length,
                 search_query_normalized: getSafeNormalizedQuery(
                   addressInput,
                   searchType,
                   searchOption.name,
                   polsOnParade?.houseMembers || []
                 ),
+                search_query_length: addressInput.length,
+                search_location: 'pol_carousel',
                 matched_entity_type: 'none',
-                matched_pol_id: null,
+                matched_district: district,
                 matched_pol_name: null,
                 matched_state: state,
-                matched_district: district,
+                matched_pol_id: null,
                 result_count: 0,
-                search_location: 'pol_carousel',
               } as SearchAnalyticsParams);
               alert(SEARCH_COPY.SEARCH.DISTRICT.NOTFOUND);
             })
@@ -677,11 +677,11 @@ const PolCombobox = ({
     },
     [
       location,
-      setIsFinding,
-      incumbentHasNoChallenger,
       showClearBtn,
       searchOption.name,
       polsOnParade?.houseMembers,
+      incumbentHasNoChallenger,
+      setIsFinding,
     ]
   );
 
