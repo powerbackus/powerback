@@ -2,21 +2,21 @@
  * @fileoverview Politician List Retrieval Controller
  *
  * This controller handles retrieving a list of all politicians serving in
- * Congress. It filters results to only include politicians with has_stakes
- * flag set to true (those in competitive races with serious challengers).
+ * Congress. It returns only those with has_stakes true who are not
+ * roster_excluded (policy layer is separate from watcher stakes).
  *
  * BUSINESS LOGIC
  *
  * POLITICIAN FILTERING
- * - Retrieves all politicians from database
- * - Filters to only include those with has_stakes: true
- * - has_stakes indicates: seeking re-election, has raised funds, has serious challenger
+ * - Queries politicians matching carousel / selectable roster rules
+ * - Query: has_stakes true and roster_excluded not true
+ * - has_stakes is watcher-derived; roster_excluded is separate policy
  * - Used for donation targeting and prioritization
  *
  * RESPONSE FORMAT
  * - Returns array of politician objects
  * - Each object includes: id, name, party, roles, social media, etc.
- * - Filtered list excludes non-competitive races
+ * - Filtered list excludes non-competitive races and roster-excluded members
  *
  * DEPENDENCIES
  * - models/Pol: Politician model for database operations
@@ -57,11 +57,12 @@ module.exports = {
       hasModel: !!model,
     });
     model
-      .find({})
-      .then((dbModel) => {
-        const filtered = dbModel.filter((p) => p.has_stakes);
+      .find({
+        has_stakes: true,
+        roster_excluded: { $ne: true },
+      })
+      .then((filtered) => {
         logger.debug('getPols response', {
-          total: dbModel.length,
           filtered: filtered.length,
           responseType: 'json',
         });
