@@ -208,11 +208,28 @@ export const usePaymentProcessing = (uiDependencies: PaymentUIDependencies) => {
           donation?: number;
           complies?: boolean;
           understands?: boolean;
+          code?: string;
+          message?: string;
         }>;
         const status = axiosError.response?.status;
         const data = axiosError.response?.data;
 
         stopProcessingSpinner();
+
+        if (
+          status === 400 &&
+          data &&
+          typeof data === 'object' &&
+          data.code === 'POL_ROSTER_EXCLUDED' &&
+          typeof data.message === 'string'
+        ) {
+          setPaymentError(null);
+          setRejectedDonationReasons({
+            variant: 'warning',
+            message: data.message,
+          });
+          return;
+        }
 
         // Celebration creation rejected (e.g. FEC limit at save) returns 400 with donation/complies
         if (
@@ -310,8 +327,26 @@ export const usePaymentProcessing = (uiDependencies: PaymentUIDependencies) => {
         })
         .catch((err: Error) => {
           stopProcessingSpinner();
-          const axiosErr = err as AxiosError;
+          const axiosErr = err as AxiosError<{
+            code?: string;
+            message?: string;
+          }>;
           const status = axiosErr.response?.status;
+          const resData = axiosErr.response?.data;
+          if (
+            status === 400 &&
+            resData &&
+            typeof resData === 'object' &&
+            resData.code === 'POL_ROSTER_EXCLUDED' &&
+            typeof resData.message === 'string'
+          ) {
+            setPaymentError(null);
+            setRejectedDonationReasons({
+              variant: 'warning',
+              message: resData.message,
+            });
+            return;
+          }
           const stripeCode = (err as { code?: string }).code;
           const isRateLimit =
             status === 429 ||

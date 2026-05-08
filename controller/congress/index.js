@@ -9,7 +9,7 @@
  * KEY FUNCTIONS
  *
  * POLITICIAN DATA
- * - getPols: Retrieves all politicians (filtered by has_stakes)
+ * - getPols: Retrieves politicians for selectable roster (has_stakes, not roster_excluded)
  * - getPol: Retrieves specific politician by ID
  * - lookupPol: Looks up politician data from external APIs
  *
@@ -35,7 +35,7 @@
  * - Cycle dates based on state-specific election dates
  *
  * POLITICIAN FILTERING
- * - getPols filters by has_stakes flag (competitive races)
+ * - getPols filters by has_stakes and excludes roster_excluded (policy layer)
  * - Used for donation targeting and prioritization
  *
  * DATA SOURCES
@@ -65,13 +65,7 @@ const { lookupBill, lookupPol } = require('./storage'),
   { getPols } = require('./pols'),
   { getPol } = require('./pol'),
   { vest } = require('./vest'),
-  {
-    thisCampaign,
-    nextStart,
-    nextEnd,
-    cutoff,
-    cycle,
-  } = require('./campaign');
+  { thisCampaign, nextStart, nextEnd, cutoff, cycle } = require('./campaign');
 
 module.exports = {
   thisCampaign,

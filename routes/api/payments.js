@@ -40,11 +40,15 @@
 const rateLimit = require('express-rate-limit'),
   router = require('express').Router(),
   { validate, ...schemas } = require('../../validation'),
-  { Celebration, User } = require('../../models'),
+  { Celebration, User, Pol } = require('../../models'),
   tokenizer = require('../../auth/tokenizer'),
   Controller = require('../../controller');
 
 const { requireLogger } = require('../../services/logger');
+const {
+  isPolRosterExcludedByBioguide,
+  POL_ROSTER_EXCLUDED_USER_MESSAGE,
+} = require('../../services/congress/polRosterEligibility');
 
 const logger = requireLogger(__filename);
 
@@ -290,6 +294,17 @@ router
           donationAmount * parseInt(process.env.STRIPE_PROCESSING_PERCENTAGE) +
           parseInt(process.env.STRIPE_PROCESSING_ADDEND);
 
+        if (await isPolRosterExcludedByBioguide(Pol, req.body.pol_id)) {
+          logger.warn('Payment intent blocked: roster_excluded Pol', {
+            pol_id: req.body.pol_id,
+            userId: req.body.donatedBy,
+          });
+          return res.status(400).json({
+            code: 'POL_ROSTER_EXCLUDED',
+            message: POL_ROSTER_EXCLUDED_USER_MESSAGE,
+          });
+        }
+
         // Get user's current compliance tier and donation history
         const compliance = await Controller.users.deem(
             req.body.donatedBy,
@@ -303,7 +318,6 @@ router
         // Get politician state for enhanced compliance validation (Compliant tier election cycles)
         let politicianState = null;
         try {
-          const { Pol } = require('../../models');
           // Look up politician by FEC candidate ID to get their state
           const politician = await Pol.findOne({
             'roles.fec_candidate_id': req.body.pol_id,

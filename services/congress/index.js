@@ -38,10 +38,12 @@ const CongressionalSessionService = require('./sessionService'),
   // Election date change notifications
   {
     ...electionDateNotificationService
-  } = require('./electionDateNotificationService');
+  } = require('./electionDateNotificationService'),
+  polRosterEligibility = require('./polRosterEligibility');
 
 module.exports = {
   CongressionalSessionService,
   ...electionDateNotificationService,
   ...electionCycleService,
+  ...polRosterEligibility,
 };
