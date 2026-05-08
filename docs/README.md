@@ -31,6 +31,7 @@ This directory contains comprehensive documentation for the POWERBACK.us platfor
 - **[FEC Compliance Guide](./fec-compliance-guide.md)** - Comprehensive FEC compliance requirements
 - **[Donation Limits](./donation-limits.md)** - Annual and election cycle resets
 - **[Donor Validation](./donor-validation-comprehensive.md)** - FEC "best efforts" validation system
+- **[Pol roster exclusion](../specs/pol-roster-exclusion.md)** - Policy exclusions from selectable roster and new Celebrations (vs `has_stakes` watchers)
 
 ### Celebration Lifecycle
 

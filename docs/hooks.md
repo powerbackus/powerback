@@ -334,6 +334,8 @@ interface Handlers {
 }
 ```
 
+**Note**: Parade data ultimately comes from `GET /api/congress`, which excludes `roster_excluded` politicians (see [`specs/pol-roster-exclusion.md`](../specs/pol-roster-exclusion.md)).
+
 **Usage**:
 
 ```typescript
@@ -386,6 +388,7 @@ const [items, { setInputItems, resetSearchBar }] = useComboboxItems(
 - User data updates and navigation handling
 - PAC limit validation and error handling
 - Form submission management
+- Roster exclusion: Backend may return HTTP `400` with `code: POL_ROSTER_EXCLUDED` **before** Stripe (payment attempt) or **after** confirm when saving the celebration; both paths surface user-facing rejection reasons ([`specs/pol-roster-exclusion.md`](../specs/pol-roster-exclusion.md))
 - Comprehensive error handling for payment failures
 
 **Interface**:
@@ -425,12 +428,12 @@ interface PaymentProcessingActions {
 
 ```typescript
 const { handlePaymentSubmit } = usePaymentProcessing({
-  stripe,
+  setRejectedDonationReasons,
+  startProcessingSpinner,
+  stopProcessingSpinner,
   setPaymentError,
   setShowModal,
-  setRejectedDonationReasons,
-  stopProcessingSpinner,
-  startProcessingSpinner,
+  stripe,
 });
 
 // In component

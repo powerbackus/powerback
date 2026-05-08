@@ -80,15 +80,16 @@ function loadStatutoryGeneralElectionDate() {
 
 /**
  * GET /api/congress
- * Retrieves all politicians/congressional members
+ * Retrieves politicians for the selectable roster (lobby carousel / search feed)
  *
- * This endpoint returns a comprehensive list of all politicians serving in
- * the U.S. Congress, including House and Senate members. The data includes
- * biographical information, social media accounts, current party affiliation,
- * and congressional role history.
+ * The list includes only members with `has_stakes: true` who are not
+ * roster-excluded (`Pol.roster_excluded` must not be true). Full Pol
+ * documents for other flows use GET /api/congress/members/:pol (authenticated).
+ *
+ * Biographical information, social media, party, roles, etc. are sourced from
+ * OpenFEC / Congress.gov via ingestion jobs.
  *
  * The endpoint is publicly accessible and does not require authentication.
- * Data is primarily sourced from the OpenFEC API and Congress.gov API.
  *
  * @route GET /api/congress
  * @returns {Array<Object>} Array of politician objects

@@ -17,6 +17,13 @@ Define server-side compliance behavior, legal limits, reset logic, and authority
 - Server is authoritative; it may block donations if validation cannot be ensured.
 - Timezone: Eastern (Washington, D.C.) for all reset calculations.
 
+## Pol roster exclusion (non-FEC policy)
+
+- **Purpose**: Block new Celebrations and remove politicians from the **selectable** roster when POWERBACK policy says they must not receive new escrowed donations (e.g. Speaker, left office, manual admin hold). This is **not** the same as `has_stakes` (watcher / competitive-race flag); do not use `has_stakes` mutations for policy exclusion.
+- **Schema**: `Pol.roster_excluded`, `roster_exclusion_reason`, `roster_exclusion_category`, `roster_exclusion_updated_at` — see `models/Pol.js` and `specs/pol-roster-exclusion.md`.
+- **Enforcement**: `GET /api/congress` roster query; `createCelebration` in `services/celebration/orchestrationService.js`; `POST /api/payments/celebrations/:customer_id` before Stripe; `controller/congress/vest.js` for payment validation path.
+- **Errors**: HTTP `400` with `code: POL_ROSTER_EXCLUDED` and user-facing `message` from `services/congress/polRosterEligibility.js`.
+
 ## Inputs / Outputs
 
 - Inputs: user donations, compliance tier, politician/state (for compliant-tier checks), current election dates snapshot, backend constants.
@@ -30,6 +37,7 @@ Define server-side compliance behavior, legal limits, reset logic, and authority
   - getElectionDates(state, electionYear?) → { primary: string|null, general: string }
 - controller/users/account/utils (promotion, compliance upgrades)
 - routes/api/payments.js (server-side validation before payment processing)
+- services/congress/polRosterEligibility.js (roster exclusion lookup and user message)
 
 ## Logic & Invariants
 
@@ -71,8 +79,8 @@ Define server-side compliance behavior, legal limits, reset logic, and authority
 ## Links
 
 - Rules: 03-backend-authority-and-compliance, 04-election-dates-policy, 09-logging-and-privacy, 40-pac-limit-system, 41-employment-status-validation
-- Code: services/electionCycleService.js, routes/api/payments.js, routes/api/celebrations.js, services/donorValidation.js
-- Related: specs/pac-limit-system.md
+- Code: services/electionCycleService.js, routes/api/payments.js, routes/api/celebrations.js, services/donorValidation.js, services/congress/polRosterEligibility.js, services/celebration/orchestrationService.js
+- Related: specs/pac-limit-system.md, specs/pol-roster-exclusion.md
 
 ## Service Architecture
 
@@ -92,6 +100,8 @@ services/
 ├── defunctCelebrationService.js   # Celebration lifecycle management
 ├── electionCycleService.js        # FEC compliance and limits
 ├── electionDateNotificationService.js # Election date change notifications
+├── congress/
+│   └── polRosterEligibility.js   # Roster exclusion policy helpers and user-facing message
 ├── fixPolName.js                  # Politician name normalization
 ├── logger.js                      # Structured logging service
 ├── promoteUser.js                 # User privilege management

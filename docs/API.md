@@ -41,18 +41,20 @@ Each category is a link to its [`Routes`](../routes/) or relevant folder.
 - [`resolveDonation`](../controller/celebrations/resolve.js) converts a Celebration into a donation by updating the document
 - [`sendReceipt`](../controller/celebrations/receipt.js) emails Celebration receipt to user (uses refactored email system)
 - [`getWhatPolsHaveInEscrow`](../controller/celebrations/find/params/escrowed.js) sums all donation amounts for each politician from across the userbase
+- **Roster exclusion**: HTTP `400` with `code: POL_ROSTER_EXCLUDED` when `pol_id` is a `Pol` with `roster_excluded: true` — enforced in [`orchestrationService`](../services/celebration/orchestrationService.js) before create. See [`specs/pol-roster-exclusion.md`](../specs/pol-roster-exclusion.md).
 
 ### **[`Congress`](../routes/api/congress.js)**
 
-- [`getPolsByIds`](../controller/congress/methods/put/pols.js) returns a group of **Politicians** based on the ID(s) provided
-- [`getPol`](../controller/congress/methods/get/pol.js) returns a single **Politician's** document
-- [`getBill`](../controller/congress/methods/get/bill.js) returns a single **Bill's** document
+- `GET /api/congress/` — List politicians for the **selectable roster** (lobby carousel, search). [`getPols`](../controller/congress/pols.js): `has_stakes: true` and `roster_excluded` not true.
+- `GET /api/congress/members/:pol` — Single politician document ([`getPol`](../controller/congress/pol.js)); requires authentication.
+- `GET /api/congress/election-dates` — Election dates (snapshot / fallbacks).
 
 ### **[`Payments`](../routes/api/payments.js)** [(Stripe)](https://stripe.com)
 
 - [`sendPayment`](../controller/payments/createPayment.js) sends payment to [`Stripe`](https://stripe.com/docs/payments),
 - [`setupIntent`](../controller/payments/setupIntent.js) creates a "payment intent" object
 - [`setPaymentMethod`](../controller/payments/setPaymentMethod.js) creates a "payment method" i.e. user's credit card
+- **Roster exclusion**: `POST /api/payments/celebrations/:customer_id` rejects excluded `pol_id` with HTTP `400` and `code: POL_ROSTER_EXCLUDED` **before** Stripe payment intent creation (see [`polRosterEligibility`](../services/congress/polRosterEligibility.js)).
 
 > **📖 For comprehensive payment processing documentation, see [`docs/payment-processing.md`](./payment-processing.md)**  
 > **📖 For webhook processing details, see [`docs/webhooks.md`](./webhooks.md)**
@@ -86,3 +88,4 @@ Each category is a link to its [`Routes`](../routes/) or relevant folder.
 - [Background Jobs](./background-jobs.md) - Automated monitoring and updates
 - [Email System](./email-system.md) - Email notifications
 - [Bitcoin Donations](./bitcoin-donations.md) - Cryptocurrency support
+- [Pol roster exclusion](../specs/pol-roster-exclusion.md) - Policy exclusions for selectable roster and new Celebrations

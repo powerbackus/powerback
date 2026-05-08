@@ -90,4 +90,4 @@ If Senators appear in the docking collection, the Congress.gov API's `currentMem
 - `scripts/add-members-to-docking.js` -- Staging script for specific members
 - `services/utils/dockingManager.js` -- DockingManager class and CLI
 - `jobs/houseWatcher.js` -- Background job that auto-stages new members
-- `models/Pol.js` -- Pol schema definition
+- `models/Pol.js` -- Pol schema definition (`has_stakes`, policy `roster_excluded`; see [`specs/pol-roster-exclusion.md`](../specs/pol-roster-exclusion.md))

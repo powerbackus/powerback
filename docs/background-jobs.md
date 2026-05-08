@@ -66,6 +66,7 @@ All background jobs are orchestrated through the `runWatchers` system, which:
 - Tracks challenger status changes (appeared, disappeared, reappeared)
 - Tracks incumbent dropouts
 - Updates `has_stakes` flags based on competitive race status
+- **Policy note**: POWERBACK exclusions from the selectable roster use `Pol.roster_excluded`, not watcher toggles on `has_stakes` alone. See [`specs/pol-roster-exclusion.md`](../specs/pol-roster-exclusion.md).
 - Sends email alerts to users in affected districts
 
 **Email Alerts**:
@@ -295,3 +296,4 @@ await watcher.forceWarningEmails();
 - [Election Date Notifications](./election-dates.md) - Election date change notifications
 - [Email System](./email-system.md) - Email notifications sent by watchers
 - [Status Ledger System](./status-ledger-system.md) - Celebration status tracking
+- [Pol roster exclusion](../specs/pol-roster-exclusion.md) - Roster exclusion policy vs watcher `has_stakes`

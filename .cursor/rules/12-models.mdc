@@ -43,7 +43,7 @@ module.exports = mongoose.model('Model', ModelSchema);
 - `User.js` - User accounts and profiles
 - `Celebration.js` - Donation events
 - `Bill.js` - Congressional bills
-- `Pol.js` - Politicians and candidates
+- `Pol.js` - Politicians and candidates (includes `has_stakes` from watchers and policy `roster_excluded` / `roster_exclusion_*`; do not use `has_stakes` for policy exclusion — see `42-pol-roster-exclusion.mdc`)
 - `Applicant.js` - Users awaiting account verification
 - `ExUser.js` - Deleted users (prevent re-registration)
 - `Key.js` - API keys and credentials

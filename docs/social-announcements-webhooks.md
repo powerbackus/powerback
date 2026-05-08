@@ -66,7 +66,7 @@ All requests are `POST` with `Content-Type: application/json` and header `x-make
 **Celebration** (`celebration`):
 
 - `donation` – Donation amount in dollars.
-- `total_donations` – Total escrowed for this pol this election cycle (active only, has_stakes); omitted if aggregation fails.
+- `total_donations` – Total escrowed for this pol this election cycle (aggregation joins `Pol` and includes only active celebrations where linked `Pol.has_stakes`; distinct from selectable roster filtering which also applies `roster_excluded`). Omitted if aggregation fails.
 - `state`, `district`, `polName`, `handles` – Politician and district (no donor info).
 - `bill_id`, `bill_title` – Bill/condition for the celebration.
 

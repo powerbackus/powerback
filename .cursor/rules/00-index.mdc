@@ -52,6 +52,7 @@ This directory contains comprehensive cursor rules for the POWERBACK project. Th
 - **21-election-dates.mdc** - Election dates handling, snapshots, fallbacks
 - **22-logging-telemetry.mdc** - Logging patterns, PII handling, central logger
 - **26-copy-registry.mdc** - Copy text registry patterns (referenced in specs)
+- **42-pol-roster-exclusion.mdc** - Policy exclusions from roster and new Celebrations (`roster_excluded` vs watcher `has_stakes`)
 
 ## How to Use These Rules
 
@@ -65,6 +66,7 @@ This directory contains comprehensive cursor rules for the POWERBACK project. Th
 Some rules reference others:
 - `specs/frontend-ui.md` references `28-css-property-ordering.mdc` and `29-bootstrap-css-blending.mdc`
 - `specs/escrow-and-aggregate-limits.md` references `26-copy-registry.mdc`
+- `specs/pol-roster-exclusion.md` references `42-pol-roster-exclusion.mdc`
 
 ## Rule Maintenance
 

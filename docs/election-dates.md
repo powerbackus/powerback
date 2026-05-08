@@ -196,7 +196,7 @@ The system includes robust error handling:
 
 - `User` collection with `email`, `firstName`, `compliance`, `ocd_id` fields
 - `Celebration` collection with `donatedBy`, `pol_id`, `resolved`, `defunct`, `paused` fields
-- `Pol` collection with `id`, `roles.state`, `has_stakes` fields
+- `Pol` collection with `id`, `roles.state`, `has_stakes`, and optional policy fields `roster_excluded`, `roster_exclusion_*` ([`specs/pol-roster-exclusion.md`](../specs/pol-roster-exclusion.md))
 
 ## Testing
 

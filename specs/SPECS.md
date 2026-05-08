@@ -10,6 +10,7 @@ This directory captures domain specifications that guide implementation. Each sp
 - `frontend-ui.md` - UI/UX patterns, accessibility, navigation/state, and styling (including custom hooks)
 - `jobs-notifications.md` - Background jobs, election-date updater, and email notifications
 - `pac-limit-system.md` - PAC contribution limits, tipLimitReached field, and payment flow integration
+- `pol-roster-exclusion.md` - Policy exclusions for Pol (roster + new Celebrations); separate from `has_stakes` watchers
 - `webhook-optimization.md` - Webhook processing optimization for users at PAC limits
 - `quality-assessment.md` - Quality standards, current assessment (78/100), and improvement roadmap
 - `testing-strategy.md` - Comprehensive testing approach to achieve 80%+ coverage
@@ -29,6 +30,7 @@ This directory captures domain specifications that guide implementation. Each sp
 4. Update specs/rules to reflect shipped behavior
 
 ## Quality Checks
+
 - TypeScript errors typically caught by IDE/editor during development
 - ESLint validation via `npm run lint` when needed
 - Focus on editor feedback over terminal commands for type checking
@@ -38,4 +40,3 @@ This directory captures domain specifications that guide implementation. Each sp
 - Defer to code for source of truth; specs describe intended behavior
 - Keep specs concise and actionable
 - Link concrete files/APIs where relevant
-

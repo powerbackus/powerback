@@ -103,6 +103,7 @@ POWERBACK uses Stripe for payment processing, implementing an escrow-based syste
 ### Validation Before Payment
 
 - **Backend Validation**: FEC compliance checked before payment intent creation
+- **Roster exclusion (policy)**: Requests for a roster-excluded politician (`Pol.roster_excluded`) return HTTP **400** with `code: POL_ROSTER_EXCLUDED` and a user-facing `message` **before** any Stripe payment intent is created. Celebrations are gated the same way in `orchestrationService`. See [`specs/pol-roster-exclusion.md`](../specs/pol-roster-exclusion.md).
 - **Tier Limits**: Per-donation, annual, and per-election limits enforced
 - **PAC Limits**: Tip limits validated ($5,000 annual)
 - **Donor Validation**: Donor information validated per compliance tier
@@ -210,5 +211,6 @@ await setupIntent(req, res);
 - [Donation Limits](./donation-limits.md) - Donation limit system
 - [Webhook System](./webhooks.md) - Webhook processing
 - [API Documentation](./API.md) - Payment API endpoints
+- [Pol roster exclusion](../specs/pol-roster-exclusion.md) - Policy gate before payment and celebration create
 - [Celebration System](./defunct-celebrations-system.md) - Celebration lifecycle
 - [Client Utils](./utils.md) - Client logging and Stripe helpers (e.g. `logError` / `logWarn`, `loadStripeKey` from `@Utils`)

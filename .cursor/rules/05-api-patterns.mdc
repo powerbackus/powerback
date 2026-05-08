@@ -335,6 +335,11 @@ interface PaymentValidationResponse {
     message: string;
   };
 }
+
+// Roster exclusion (before Stripe): HTTP 400 body may be:
+// { code: 'POL_ROSTER_EXCLUDED', message: string } — not the shape above.
+
+// GET /api/congress roster: has_stakes true and roster_excluded not true
 ```
 
 ## Async/Await Pattern

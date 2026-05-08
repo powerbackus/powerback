@@ -72,7 +72,7 @@ priority: 1
   - Cookie security and route scoping
 
 ### Documentation Updates
-- **Update relevant docs**: When changing behavior, update all relevant docs (API, HOOKS, CONTEXTS, DONATION_LIMITS, ELECTION_DATE_NOTIFICATIONS)
+- **Update relevant docs**: When changing behavior, update all relevant docs (API, HOOKS, CONTEXTS, DONATION_LIMITS, ELECTION_DATE_NOTIFICATIONS, specs e.g. pol-roster-exclusion when roster policy changes)
 - **Timing**: Update docs at the "end" of a refactor (ask user if it's the right time)
 - **Link to docs**: Keep long process/flow explanations in docs/ and link from code comments
 

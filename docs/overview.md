@@ -129,7 +129,7 @@ The back end uses files kept in the following folders:
     - [`Bill.js`](../models/Bill.js) data describing a Bill introduced in Congress, compiled by the [Congress.GOV API](https://api.congress.gov/),
     - [`Celebration.js`](../models/Celebration.js) schema for a document storing the details of a user Celebration involving a donation amount, a political candidate recipient, etc.,
     - [`ExUser.js`](../models/ExUser.js) document outlining a user that has deleted their account to prevent signing up again with the same username,
-    - [`Pol.js`](../models/Pol.js) schema for a real politican in Congress, compiled by the [FEC API](https://api.open.fec.gov/developers/),
+    - [`Pol.js`](../models/Pol.js) schema for a real politican in Congress, compiled by the [FEC API](https://api.open.fec.gov/developers/); includes watcher-driven `has_stakes` and policy `roster_excluded` fields — see [`specs/pol-roster-exclusion.md`](../specs/pol-roster-exclusion.md),
     - [`User.js`](../models/User.js) an approved user
 
 ## Files
@@ -152,3 +152,4 @@ The back end uses files kept in the following folders:
 - [Background Jobs](./background-jobs.md) - Automated monitoring system
 - [Payment Processing](./payment-processing.md) - Stripe integration
 - [Email System](./email-system.md) - Email notifications
+- [Pol roster exclusion](../specs/pol-roster-exclusion.md) - Selectable roster and new-Celebration policy layer

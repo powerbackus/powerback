@@ -1,0 +1,41 @@
+---
+description: Pol roster exclusion policy (separate from has_stakes watcher logic)
+globs:
+  - 'models/Pol.js'
+  - 'services/congress/polRosterEligibility.js'
+  - 'controller/congress/pols.js'
+  - 'controller/congress/vest.js'
+  - 'services/celebration/orchestrationService.js'
+  - 'routes/api/payments.js'
+alwaysApply: false
+priority: 3
+---
+
+# Pol roster exclusion (policy layer)
+
+## Separation from has_stakes
+
+- `has_stakes` is computed by watcher jobs (e.g. `challengersWatcher`). Do not flip or overload it for policy exclusions (Speaker, left office, data holds, etc.).
+- Use `roster_excluded` and related fields on `Pol` for POWERBACK policy exclusions.
+
+## Pol schema (see `models/Pol.js`)
+
+- `roster_excluded` (Boolean, default false)
+- `roster_exclusion_reason` (String)
+- `roster_exclusion_category` (String; conventions listed in `ROSTER_EXCLUSION_CATEGORIES` in `services/congress/polRosterEligibility.js`)
+- `roster_exclusion_updated_at` (Date)
+
+## Enforcement
+
+- Selectable roster: `GET /api/congress` uses `controller/congress/pols.js` — query `has_stakes: true` and `roster_excluded: { $ne: true }`.
+- New celebrations: `services/celebration/orchestrationService.js` rejects excluded `pol_id` before DB write and side effects.
+- Payment intent: `routes/api/payments.js` rejects excluded `pol_id` before Stripe / `createPayment`.
+- `controller/congress/vest.js` requires both `has_stakes` and not `roster_excluded` for payment validation.
+
+## User-facing errors
+
+- HTTP 400 with `code: POL_ROSTER_EXCLUDED` and plain-language `message` from `polRosterEligibility.js`. Client surfaces via `usePaymentProcessing` rejection reasons.
+
+## Specs
+
+- `specs/pol-roster-exclusion.md`
