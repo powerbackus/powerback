@@ -371,15 +371,19 @@ server {
         try_files $uri $uri/ /index.html;
     }
 
+    # SPA shell: revalidate on every request so deploys pick up new index.html
+    location = /index.html {
+        add_header Cache-Control "no-cache, must-revalidate" always;
+    }
+
     # React SPA default
     location / {
         try_files $uri $uri/ /index.html;
     }
 
-    # Optional: cache immutable static assets
+    # Hashed and other static assets: long cache (CRA/Vite emit content-hashed JS/CSS)
     location ~* \.(js|css|png|webp|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
     }
 
 }

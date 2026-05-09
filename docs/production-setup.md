@@ -237,15 +237,19 @@ server {
         try_files $uri $uri/ /index.html;
     }
 
+    # SPA shell: revalidate on every request so deploys pick up new index.html
+    location = /index.html {
+        add_header Cache-Control "no-cache, must-revalidate" always;
+    }
+
     # React SPA default
     location / {
         try_files $uri $uri/ /index.html;
     }
 
-    # Optional: cache immutable static assets
+    # Hashed and other static assets: long cache (CRA/Vite emit content-hashed JS/CSS)
     location ~* \.(js|css|png|webp|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
+        add_header Cache-Control "public, max-age=31536000, immutable" always;
     }
 
 }
@@ -262,6 +266,22 @@ sudo nginx -t
 
 # Reload NGINX
 sudo systemctl reload nginx
+```
+
+### 3. Verify HTML metadata and cache headers (post-deploy)
+
+After nginx reload and a client deploy, confirm crawlers and browsers see the intended HTML and `Cache-Control` values.
+
+```bash
+curl -fsSL https://powerback.us/ | grep -E 'name="description"|property="og:description"|name="twitter:description"|rel="canonical"'
+
+curl -sI https://powerback.us/ | grep -i '^cache-control:'
+
+HASHED_JS=$(curl -fsSL https://powerback.us/ | grep -oE '/static/js/[^"]+\.js' | head -n1)
+curl -sI "https://powerback.us${HASHED_JS}" | grep -i '^cache-control:'
+
+HASHED_CSS=$(curl -fsSL https://powerback.us/ | grep -oE '/static/css/[^"]+\.css' | head -n1)
+curl -sI "https://powerback.us${HASHED_CSS}" | grep -i '^cache-control:'
 ```
 
 ## Email Configuration

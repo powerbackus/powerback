@@ -77,6 +77,8 @@ Or use an A record pointing to the same IP address.
 
 The web server (NGINX or equivalent) must serve the same static build and proxy `/api` to the Node backend for both the main site and the demo hostname.
 
+Use the same **`location = /index.html`** (revalidate) and **hashed static asset** `Cache-Control` patterns as in [Production Setup](./production-setup.md#nginx-configuration) so demo and prod behave consistently after deploys.
+
 **Important:** In NGINX, each `server { }` block has its own set of `location` directives. If you use a **separate** server block for `demo.powerback.us` (e.g. with its own `server_name demo.powerback.us`), that block must include its own `location /api` proxy. Requests to `https://demo.powerback.us/api/...` will not use the main site's `location /api`; without a matching location, they fall through to `location /` and `try_files` serves `index.html`, so the API returns HTML and the app (e.g. PolCarousel) fails.
 
 **Option A – Single server block (all hostnames share config):**
