@@ -215,15 +215,9 @@ ls -la .env
 cat .env
 ```
 
-### Deployment Issues
+### Deployment issues
 
-```bash
-# Test deployment without actually deploying
-npm run deploy:dry
-
-# Check deployment configuration
-cat dev/deploy.config.json
-```
+Production deploy configuration lives in **`scripts/deploy/deploy.remote.sh`** (variables at the top of the file) and in GitHub Actions secrets for CI. See [Deployment Automation](./deployment-automation.md) and [Production Setup](./production-setup.md). There is no `dev/deploy.config.json` in this repository.
 
 ### API Configuration Issues
 
@@ -239,7 +233,7 @@ curl -i http://localhost:3001/api/sys/constants
 
 1. **Keep `.env` files gitignored** - Never commit environment files
 2. **Use environment variables** - Never hardcode secrets
-3. **Test deployments** - Use `npm run deploy:dry` first
+3. **Test deployments** - Run smoke tests / CI before shipping; confirm `deploy.remote.sh` and Actions secrets match server paths
 4. **Runtime configuration** - Load sensitive config from API
 5. **Separate concerns** - Server-side vs client-side variables
 

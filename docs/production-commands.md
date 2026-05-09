@@ -22,10 +22,14 @@ sudo systemctl enable powerback.service
 sudo systemctl disable powerback.service
 ```
 
-## 🔄 **Deployment & Secrets**
+## **Deployment vs secrets-only restart**
+
+**Full deploy (new backend + frontend build on the server paths):** run from a local clone with SSH access, usually on branch `beta`—see [`scripts/deploy/deploy.remote.sh`](../scripts/deploy/deploy.remote.sh) (configure `REMOTE_HOST`, `REMOTE_USER`, `SSH_KEY`, `APP_ROOT`, etc. at the top of the file) and [Deployment Automation](./deployment-automation.md). Alternatively use **GitHub Actions** as described in [Production Setup](./production-setup.md#github-actions-cicd-deployment).
+
+**`launch` (secrets + restart only):** does **not** rsync code or run `npm ci`. It copies `/etc/powerback/secrets/powerback.env` into place, restarts `powerback.service`, then removes the temp file—use when secrets changed or you need a clean restart with the **already deployed** tree.
 
 ```bash
-# Deploy with fresh secrets (copies secrets, restarts, deletes temp file)
+# Secrets refresh + service restart (not a code deploy)
 launch
 
 # Or use the full path
@@ -138,7 +142,9 @@ echo 'alias powerback-logs="sudo journalctl -u powerback.service -f | grep --col
 source ~/.bashrc
 ```
 
-## 🔄 **Deployment Script Setup**
+## **`launch-powerback` setup (secrets helper)**
+
+Use this block to install the **`launch`** helper described above. It is separate from the **code** deploy script in the repo (`scripts/deploy/deploy.remote.sh`).
 
 ```bash
 # Create secure deployment script
@@ -170,18 +176,19 @@ source ~/.bashrc
 
 ## 📋 **Quick Reference**
 
-| Command | Purpose |
-|---------|---------|
-| `launch` | Deploy with fresh secrets |
-| `powerback-logs` | View colored live logs |
-| `sudo systemctl status powerback.service` | Check service status |
-| `sudo systemctl restart powerback.service` | Restart service |
-| `sudo nginx -t` | Test NGINX configuration |
-| `curl -I -k https://powerback.us/api/sys/constants` | Test API |
+| Command                                                 | Purpose                                                                                             |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `launch`                                                | Copy secrets into place, restart service, remove temp file (not a code deploy)                      |
+| `bash scripts/deploy/deploy.remote.sh` (from repo root) | Full deploy: rsync backend, build client, rsync static files, `npm ci`, restart (see script header) |
+| `powerback-logs`                                        | View colored live logs                                                                              |
+| `sudo systemctl status powerback.service`               | Check service status                                                                                |
+| `sudo systemctl restart powerback.service`              | Restart service                                                                                     |
+| `sudo nginx -t`                                         | Test NGINX configuration                                                                            |
+| `curl -I -k https://powerback.us/api/sys/constants`     | Test API                                                                                            |
 
 ## Related Documentation
 
-- [Production Setup](./production-setup.md) - Production setup guide
-- [Deployment Automation](./deployment-automation.md) - Deployment process
+- [Production Setup](./production-setup.md) - Production setup guide (includes GitHub Actions and deploy paths)
+- [Deployment Automation](./deployment-automation.md) - `deploy.remote.sh` flow and configuration
 - [Environment Management](./environment-management.md) - Environment configuration
 - [Development Guide](./development.md) - Development setup

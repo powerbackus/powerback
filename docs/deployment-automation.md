@@ -1,63 +1,81 @@
-# Deployment Automation (CI/CD Pipeline)
+# Deployment Automation
 
-This pipeline provides a mostly hands-off, repeatable deployment from local development to production server.
+This document describes how application code is pushed from a developer machine to production. It complements [Production Setup](./production-setup.md) (server bootstrap, systemd, nginx) and [Production Commands](./production-commands.md) (`launch` for secrets-only restarts).
+
+## Primary script: `scripts/deploy/deploy.remote.sh`
+
+The repo ships a bash driver: **[`scripts/deploy/deploy.remote.sh`](../scripts/deploy/deploy.remote.sh)**.
 
 ### Prerequisites
 
-- SSH access to the production server with key-based auth
-- `dev/deploy.remote.sh` hosted on the server at the path in `dev/deploy.config.json`
-- Non-destructive tests are separated from destructive tests (tag `@destructive` in Playwright; keep destructive suites out of `__tests__/` or match `ignorePatterns`)
+- SSH key access to the production host as the deploy user (see `SSH_KEY` and `REMOTE_USER` in the script)
+- Clean enough tree to pass `npm run lint` (the script enforces this)
 - Current dependency versions as specified in [Version Information](./version.md)
+- Non-destructive tests are separated from destructive tests (tag `@destructive` in Playwright; keep destructive suites out of default test runs where applicable)
 
 ### Configuration
 
-- Edit `dev/deploy.config.json`:
-  - `server.host`, `server.user`, `server.remoteAppDir`, `server.sshKeyPath`
-  - `build.env.API_BASEURL` set to production API URL
-  - Set `modes.codeEditsForProd` to `false` to avoid code changes; prefer env-driven behavior
+Edit the **CONFIG** block at the top of `deploy.remote.sh`:
 
-### Environmental Switches (preferred)
+- `REMOTE_HOST`, `REMOTE_USER`, `SSH_KEY`
+- `APP_ROOT` / `REMOTE_BACKEND_DIR` (backend deploy root, usually `/opt/powerback/app`)
+- `REMOTE_FRONTEND_DIR` (static build destination nginx serves, e.g. `/home/deploy/public_html`)
+- `SYSTEMD_SERVICE` (default `powerback.service`)
 
-- Client API base URL: `API_BASEURL`
-- Stripe publishable key: Loaded at runtime from `/api/config/stripe-key` endpoint (uses `STRIPE_PK_LIVE` or `STRIPE_PK_TEST` based on `NODE_ENV`)
-- Avoid hard-coding prod URLs/keys in `client/src/api/API.ts`. For secret keys, never bundle into the client. Use environment variables instead.
+Keep these paths aligned with **`ExecStart`** in `powerback.service` and with **GitHub Actions** secrets `PROD_APP_PATH` / `PROD_PUBLIC_HTML_PATH` if you use CI.
 
 ### Run
 
+From the **repository root** on your machine:
+
 ```bash
-powershell -ExecutionPolicy Bypass -File dev/deploy.ps1 -ConfigPath dev/deploy.config.json
+bash scripts/deploy/deploy.remote.sh
 ```
 
-### What the script does
+The script requires branch **`beta`** (see `git rev-parse` check at the top—adjust the script if your policy differs).
 
-1. Verifies clean git working directory
-2. Runs non-destructive tests (Jest; optional Playwright)
-3. Creates a temporary release branch via worktree, commits, pushes, cleans up
-4. Builds `client` with production env variables
-   - Automatically runs `scripts/build/build-content.js` via prebuild hook to generate FAQ JSON-LD schema and markdown docs
-5. Packages artifacts (client and backend subset)
-6. Uploads zips to the server via scp
-7. Runs remote helper to upsert build, sync backend, install deps, and restart the app
+### What the script does (high level)
+
+1. Verifies current git branch is `beta`
+2. Runs `npm run lint`
+3. `rsync`s backend files to `REMOTE_BACKEND_DIR` (excludes `client/`, `node_modules/`, large dev-only trees—see script)
+4. Writes a `.version.json` with commit metadata and uploads `package-lock.json`
+5. Runs remote `npm ci --omit=dev` as the `powerback` user (see script for cache dir and `sudo` usage)
+6. Builds **`client`** locally (`npm install` + `npm run build` in `client/`)
+7. `rsync`s `client/build/` to `REMOTE_FRONTEND_DIR`
+8. Ensures persistent data dirs and profile-photo symlink under `APP_ROOT`
+9. Installs **`scripts/deploy/gh-actions-wrapper.sh`** on the server under `/home/deploy/bin/` (for CI-style restarts)
+10. Patches `WorkingDirectory` / `ExecStart` in the systemd unit when present, then **`systemctl daemon-reload`** and **`restart`**
+11. Optional security-score logging and `curl` health check against production
+
+### GitHub Actions (alternative)
+
+Push-driven deploys use `.github/workflows/ci_cd.yml` with repository secrets (`PROD_APP_PATH`, `PROD_WRAPPER_SCRIPT`, etc.). See [Production Setup → GitHub Actions CI/CD Deployment](./production-setup.md#github-actions-cicd-deployment). **Manual script deploy and Actions should target the same paths** on the server.
+
+### `launch` / `launch-powerback`
+
+The **`launch`** helper copies secrets and restarts the service; it does **not** replace `deploy.remote.sh` or CI for shipping new code. See [Production Commands](./production-commands.md).
 
 ### Destructive tests policy
 
 - Tag destructive Playwright tests with `@destructive`
-- Keep destructive Jest suites out of default patterns or configure `ignorePatterns` in `dev/deploy.config.json`
+- Keep destructive Jest suites out of default patterns or exclude them in CI/script flows
 
 ### Rollback
 
-- Restart the app on the server (e.g. `sudo systemctl restart powerback.service`) to pick up a previous build.
-- Git-level rollback is manual. Consider keeping `releases/` with timestamped bundles in future refinement.
+- Restart the app (e.g. `sudo systemctl restart powerback.service`) to pick up a **previous** tree only if old artifacts are still on disk; there is no automatic release history in this script.
+- Git-level rollback is manual.
 
-### Future Enhancements
+### Future enhancements
 
 - Optional GitHub PR creation and checks gating
-- Release artifact retention on the server under `/var/www/powerback-beta/releases/`
+- Release artifact retention on the server with timestamped bundles
 - Hash-based cache busting checks and integrity verification
 
-## Related Documentation
+## Related documentation
 
 - [Production Setup](./production-setup.md) - Production server setup
+- [Production Commands](./production-commands.md) - `launch`, systemd, nginx commands
 - [Environment Management](./environment-management.md) - Environment configuration
 - [Version Information](./version.md) - Dependency versions
 - [Development Guide](./development.md) - Development setup

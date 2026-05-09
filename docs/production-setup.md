@@ -12,6 +12,25 @@ The production deployment uses:
 - **SSL certificates** for secure connections
 - **Hardened security** with secrets isolation
 
+### How code gets to the server (vs `launch`)
+
+These are different operations:
+
+| Mechanism                                                                                         | What it does                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[`scripts/deploy/deploy.remote.sh`](../scripts/deploy/deploy.remote.sh)**                       | From your dev machine: lint, `rsync` backend to the app dir, local `client` build, `rsync` static assets to the web root, remote `npm ci`, restart `powerback.service`, health check. Edit `REMOTE_HOST`, `REMOTE_USER`, `SSH_KEY`, `APP_ROOT`, and related paths at the top of the script to match your server. |
+| **GitHub Actions** (see [GitHub Actions CI/CD Deployment](#github-actions-cicd-deployment) below) | Push to `beta` / `main`: test, build, sync paths from repo secrets (`PROD_APP_PATH`, etc.), restart via the server wrapper.                                                                                                                                                                                      |
+| **`launch` / `launch-powerback`** (see [Production Commands](./production-commands.md))           | **Does not deploy code.** Copies `/etc/powerback/secrets/powerback.env` into the runtime env location, restarts the unit, then removes the temp file—use after secret rotation or when the service needs a restart with fresh secrets.                                                                           |
+
+### Application directory (deploy path)
+
+The **deploy root** is the directory that contains `server.js` on the server (same parent as `{{APP_SERVER_PATH}}` in [`powerback.service.template`](../powerback.service.template)).
+
+- **Confirm on a running server:** `systemctl show powerback.service -p ExecStart --value` — the path after `node` is `…/server.js`; the deploy root is its parent directory (commonly `/opt/powerback/app`).
+- **Repo / CI convention:** `scripts/deploy/deploy.remote.sh` uses `APP_ROOT="/opt/powerback/app"`; GitHub Actions secrets use `PROD_APP_PATH` for the same role ([Deployment Automation](./deployment-automation.md) summarizes the script-driven flow).
+
+If your paths differ, keep **systemd `ExecStart`**, **`deploy.remote.sh` `APP_ROOT`**, and **`PROD_APP_PATH`** in sync.
+
 ## Prerequisites
 
 - Production server with root access
@@ -28,8 +47,8 @@ The production deployment uses:
 # Update system
 sudo apt update && sudo apt upgrade -y
 
-# Install Node.js 18
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+# Install Node.js 20 (match repo [.nvmrc](../.nvmrc) / [Version Information](./version.md))
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
 # Install NGINX
@@ -47,10 +66,14 @@ sudo usermod -aG sudo fc
 sudo su - fc
 ```
 
-### 3. Deploy Application
+### 3. Deploy application code
+
+**Typical path today:** run the bash deploy driver from a checkout on your laptop or build host (see [`scripts/deploy/deploy.remote.sh`](../scripts/deploy/deploy.remote.sh) and [Deployment Automation](./deployment-automation.md)), or rely on **GitHub Actions** after secrets are set. Those flows populate **`APP_ROOT`** / **`PROD_APP_PATH`** (often `/opt/powerback/app`) and the static HTML directory nginx serves.
+
+**Bootstrap / recovery (manual clone on the server):** only needed if you are standing up a tree by hand instead of rsync from CI/script:
 
 ```bash
-# Clone repository
+# Clone repository (replace URL with your fork or upstream)
 git clone https://github.com/yourusername/powerback.git
 cd powerback
 
@@ -62,6 +85,8 @@ npm install
 # FAQ JSON-LD schema and markdown documentation before building
 cd client && npm install && npm run build && cd ..
 ```
+
+After the app files exist under the deploy root, point **`ExecStart`** in `powerback.service` at that tree’s `server.js` (see systemd template table below).
 
 ## Environment Configuration
 
@@ -529,26 +554,27 @@ The workflow uses restricted SSH commands via a wrapper script (`${{ secrets.PRO
    - Check systemd service file has correct `WorkingDirectory`
    - Verify dependencies were installed successfully
 
-### Manual Deployment vs GitHub Actions
+### Manual deployment vs GitHub Actions
 
 - **GitHub Actions**: Automated, runs on push, requires GitHub Secrets setup
-- **Manual Deployment**: Full control, can be run locally, uses local SSH keys
+- **`scripts/deploy/deploy.remote.sh`**: Full deploy from a local checkout (rsync, local client build, remote `npm ci`, restart)—see [Deployment Automation](./deployment-automation.md)
+- **`launch`**: Secrets refresh + restart only—see [Production Commands](./production-commands.md)
 
-Both methods deploy to the same production server and use the same deployment paths.
+Use the **same `PROD_APP_PATH` / static paths** for Actions and for `deploy.remote.sh` so both land code in the same tree.
 
 ## Deployment Commands
 
-### Secure Deployment
+### Secrets-only (`launch`)
 
 ```bash
-# Deploy with fresh secrets (copies secrets, restarts, deletes temp file)
+# Copy secrets, restart service, remove temp file (does not deploy new code)
 launch
 
 # Or use the full path
 /usr/local/bin/launch-powerback
 ```
 
-### Manual Deployment
+### Manual steps (without `deploy.remote.sh`)
 
 ```bash
 # Build client

@@ -1,92 +1,114 @@
 # POWERBACK.us Version Information
 
-This document tracks the current versions of major dependencies and development tools used in the POWERBACK.us project.
+This document tracks the major dependencies and tools used in the POWERBACK.us project. **Exact versions for Node are pinned** in [.nvmrc](../.nvmrc); npm package ranges live in [`package.json`](../package.json) and [`client/package.json`](../client/package.json).
 
-## Current Build Versions
+## Current build versions
 
-### Core Runtime
-- **Node.js**: v18.12.0 (recommended for development)
-- **npm**: 9.x (package manager)
-- **MongoDB**: 6.x (database)
+### Core runtime
 
-### Frontend Stack
+- **Node.js**: **20.19.6** pinned in [.nvmrc](../.nvmrc) for development (see [Development Setup](./development.md)); production often matches **20.x** (adjacent patch levels such as 20.19.5 are normal until the next deploy aligns the pin)
+- **npm**: 10.x (ships with Node 20)
+- **MongoDB (server)**: Version is whatever backs `MONGODB_URI`—query with `mongosh` (see below). Local installs are often **7.x** or **8.x** on current Ubuntu (see [Local MongoDB Setup](./local-mongodb-setup.md)); hosted clusters may be **5.x** or newer depending on when they were provisioned
+
+### Frontend stack
+
 - **React**: 18.x (UI framework)
-- **TypeScript**: 4.x (type system)
-- **Bootstrap**: 5.x (CSS framework)
-- **Webpack**: 5.x (bundler, via react-scripts)
+- **TypeScript**: 4.9.x (type system)
+- **Bootstrap**: 5.x and **React-Bootstrap**: 2.x (UI components)
+- **Bundling**: Webpack 5 via `react-scripts` and **CRACO** (`@craco/craco`) in `client/` (see [npm-scripts](./npm-scripts.md) / client `package.json` scripts)
 
-### Backend Stack
+### Backend stack
+
 - **Express**: 4.x (web framework)
-- **Mongoose**: 7.x (MongoDB ODM)
-- **Passport.js**: 0.6.x (authentication)
+- **Mongoose**: 6.x with **mongodb** Node driver 4.x (ODM / driver)
+- **Authentication**: JWT-based sessions (`jsonwebtoken`, HTTP-only cookies; see `auth/`)
 - **Joi**: 17.x (validation)
 
-### Payment & External Services
-- **Stripe**: Latest (payment processing)
+### Payment and external services
+
+- **Stripe**: 8.x (server SDK—see [`package.json`](../package.json))
 - **Congress.gov API**: v3 (legislative data)
 - **OpenFEC API**: v1 (campaign finance)
 - **Google Civics API**: v2 (representative lookup)
 
-### Development Tools
-- **Jest**: 29.x (testing framework)
-- **Playwright**: Latest (e2e testing)
-- **ESLint**: 8.x (code quality)
-- **Nodemon**: 3.x (dev server)
+### Development tools
 
-### Production Tools
-- **PM2**: Latest (process manager)
-- **MongoDB Atlas**: Cloud database hosting
+- **Jest**: 30.x root; client tests via **react-scripts**/CRACO
+- **Playwright**: 1.x (e2e)
+- **ESLint**: 8.x with TypeScript ESLint plugins
+- **Nodemon**: 2.x (backend dev reload)
+- **Prettier**: 3.x (formatting—often via ESLint integration)
 
-## Environment Requirements
+### Production operations
 
-### Development Setup
-- Node.js v18.12.0 or higher
-- MongoDB instance (local or Atlas)
-- Git for version control
-- Modern web browser for testing
+- **systemd**: `powerback.service` manages the Node process (see [`powerback.service.template`](../powerback.service.template) and [Production Setup](./production-setup.md), [Production Commands](./production-commands.md))
+- **nginx**: Reverse proxy / TLS termination in front of the app (same docs as above)
+- **MongoDB Atlas** or other hosted MongoDB: Common in production; alternatively self-hosted (see [Remote MongoDB Setup](./remote-mongodb-setup.md))
 
-### Production Deployment
-- Node.js v18.12.0+
-- PM2 for process management
-- SSH access to production server
-- SSL certificates for HTTPS
+## Verifying versions (dev machine vs VPS)
 
-## Version Update History
+Use these so results match what the repo and deployment actually use.
 
-### Last Updated
-- **Date**: January 2025
-- **Updated by**: Development Team
-- **Reason**: Documentation standardization and dependency audit
+| What                                 | Where to run it                                                                   | Command / note                                                                                                                                                                                                             |
+| ------------------------------------ | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Node**                             | Any shell                                                                         | `node -v`                                                                                                                                                                                                                  |
+| **`.nvmrc`**                         | **Repository root** (e.g. clone on laptop, or `/opt/powerback/app` on the server) | `cat .nvmrc` — not in `$HOME` unless you copied the repo there                                                                                                                                                             |
+| **npm**                              | Same                                                                              | `npm -v`                                                                                                                                                                                                                   |
+| **Installed npm deps** (e.g. Stripe) | Directory that contains **root** `package.json`                                   | `cd /path/to/powerback && npm ls stripe mongoose express --depth=0` — from `$HOME` without a project, `npm ls` shows nothing useful                                                                                        |
+| **MongoDB server version**           | Any host with `mongosh` and your URI                                              | `mongosh "$MONGODB_URI" --eval "db.version()"` — this is the version of the **database cluster** your app uses. Local `mongod --version` only applies if you run a server on that box and your user can execute the binary |
+| **App under systemd**                | VPS                                                                               | `systemctl status powerback.service --no-pager`, `systemctl show powerback.service -p ExecStart --value`                                                                                                                   |
+| **nginx**                            | VPS                                                                               | `nginx -v`, `sudo nginx -t`, `sudo systemctl status nginx --no-pager`                                                                                                                                                      |
 
-### Previous Updates
-- Node.js upgraded to v18.12.0 for LTS support
-- React 18 upgrade for improved performance
-- TypeScript 4.x for enhanced type safety
-- MongoDB 6.x for improved query performance
+## Environment requirements
 
-## Upgrade Considerations
+### Development
 
-### Breaking Changes
-- Node.js v18+ requires updated native modules
-- React 18 introduces new concurrent features
-- MongoDB 6.x has deprecated some query operators
+- Node.js **20.19.x** or compatible **20.x** (match `.nvmrc` when possible)
+- MongoDB (local recommended—see [Local MongoDB Setup](./local-mongodb-setup.md))
+- Git
+- Modern browser for manual testing
 
-### Compatibility Notes
-- All dependencies tested with Node.js v18.12.0
-- Frontend builds require modern bundler support
-- Backend APIs maintain backward compatibility
+### Production
 
-## Related Documentation
+- Node.js aligned with what you run in CI and on the server—**prefer the same major line as [.nvmrc](../.nvmrc)** for fewer surprises
+- **systemd** unit for the app (not PM2)
+- SSH access and secrets management as documented in ops guides
+- TLS (e.g., via nginx certificates)
 
-- [Development Setup Guide](./development.md) - Complete development environment setup
-- [Deployment Automation](./deployment-automation.md) - Production deployment process
-- [API Documentation](./API.md) - Backend API endpoints and integration
-- [Contributing Guidelines](../CONTRIBUTING.md) - How to contribute to the project
-- [NPM Scripts](./npm-scripts.md) - Available npm commands
+## Version update history
+
+### Last updated
+
+- **Date**: May 2026
+- **Reason**: Sync with `.nvmrc`, `package.json`, and systemd-based production docs; replace obsolete PM2 and incorrect stack notes (e.g., Mongoose 7, Passport.js as primary auth).
+
+### Earlier notes (historical)
+
+- Node upgraded over time toward current **20.x** line (see `.nvmrc`).
+- React 18 for concurrent features and ecosystem alignment.
+
+## Upgrade considerations
+
+### Breaking changes (check when bumping majors)
+
+- **Node**: Native addons and toolchain must support the chosen Node release.
+- **React**: Major upgrades follow the React migration guides.
+- **MongoDB**: Server upgrade paths and compatibility—not all query options behave the same across server versions.
+
+### Compatibility
+
+- Prefer running the same **Node major** in development (`nvm use`) as in production.
+- API routes aim for backward compatibility for existing clients within a release train.
+
+## Related documentation
+
+- [Development Setup Guide](./development.md)
+- [Production Setup](./production-setup.md) and [Production Commands](./production-commands.md)
+- [Deployment Automation](./deployment-automation.md)
+- [API Documentation](./API.md)
+- [Contributing Guidelines](../CONTRIBUTING.md)
+- [NPM Scripts](./npm-scripts.md)
 
 ## Support
 
-For version-specific issues or upgrade questions:
-- Check the [Development Setup Guide](./development.md)
-- Review [API Documentation](./API.md) for integration details
-- Contact support at [support@powerback.us](mailto:support@powerback.us)
+For version-specific or upgrade questions, start with [Development Setup](./development.md) and the linked ops docs above. Contact: [support@powerback.us](mailto:support@powerback.us)
