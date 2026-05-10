@@ -11,7 +11,11 @@ import { InfoTooltip } from '@Components/modals';
 import type { DisplayName } from '@Interfaces';
 import accounting from 'accounting';
 import PaymentForm from '../form';
-import { titleize } from '@Utils';
+import {
+  titleize,
+  formatHouseDistrictForDisplay,
+  HOUSE_AT_LARGE_LABEL,
+} from '@Utils';
 import './style.css';
 
 /**
@@ -94,6 +98,14 @@ const Checkout = ({
     );
   }, [serverConstants]);
 
+  const houseCheckoutSubtitle = useMemo(() => {
+    const pd = polData as PolData;
+    if (!pd?.district || !pd?.state) return '';
+    const dist = formatHouseDistrictForDisplay(pd.district, pd.state);
+    const prefix = dist === HOUSE_AT_LARGE_LABEL ? '' : 'District ';
+    return `${prefix}${dist} of ${pd.state}`;
+  }, [polData]);
+
   /**
    * Handles Patreon link click
    *
@@ -128,13 +140,9 @@ const Checkout = ({
                       : 'Sen. ') +
                       (displayName as unknown as DisplayName).value}
 
-                    <span className='subtitle pt-lg-1'>{`${
-                      (polData as PolData).district !== 'At-Large'
-                        ? 'District'
-                        : ''
-                    } ${(polData as PolData).district} of ${
-                      (polData as PolData).state
-                    }`}</span>
+                    <span className='subtitle pt-lg-1'>
+                      {houseCheckoutSubtitle}
+                    </span>
                   </>
                 )}
               </Row>

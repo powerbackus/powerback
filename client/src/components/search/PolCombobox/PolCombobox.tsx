@@ -15,7 +15,9 @@ import {
   logWarn,
   handleKeyDown,
   transformPolData,
+  HOUSE_AT_LARGE_LABEL,
   trackGoogleAnalyticsEvent,
+  formatHouseDistrictForDisplay,
 } from '@Utils';
 import { Form, Badge, Spinner, InputGroup } from 'react-bootstrap';
 import { useDevice, useSearch, useDonationState } from '@Contexts';
@@ -29,6 +31,7 @@ import {
   type Location,
   type RepState,
 } from '@Interfaces';
+import { POLSTATES } from '@Tuples';
 import './style.css';
 
 type SearchType = 'name' | 'state' | 'district' | 'mixed' | 'unknown';
@@ -48,8 +51,19 @@ type SearchAnalyticsParams = {
 };
 
 const STATE_ABBREV_REGEX = /^[A-Za-z]{2}$/;
-const DISTRICT_WITH_STATE_REGEX = /^([A-Za-z]{2})\s*[- ]\s*(\d{1,2})$/;
-const DISTRICT_ONLY_REGEX = /^\d{1,2}$/;
+const DISTRICT_WITH_STATE_REGEX = /^([A-Za-z]{2})\s*[- ]?\s*([0-9]{1,2})$/;
+const DISTRICT_ONLY_REGEX = /^[0-9]{1,2}$/;
+
+/**
+ * OCD `/cd:N` digits for labels only; strips leading zeros (e.g. 07 → 7).
+ * At-large callers should classify via {@link formatHouseDistrictForDisplay} first.
+ */
+const stripLeadingZerosDistrictDisplay = (digits: string): string =>
+  digits.replace(/^0+/, '') || '0';
+
+/** Prose only: POLSTATES `full` title case (e.g. AK → Alaska); unknown abbrev unchanged. */
+const stateAbbrevToDisplayName = (abbrev: string): string =>
+  POLSTATES.find((s: RepState) => s.abbrev === abbrev)?.full ?? abbrev;
 
 const normalizeSearchTerm = (value: string): string =>
   value
@@ -479,23 +493,33 @@ const PolCombobox = ({
         // Incumbent exists - search by location
         (searchPolsByLocation as (ocd_id: string) => void)(ocd_id);
       } else {
-        // No incumbent - parse district info and show alert
-        function parseOcdId(ocd_id: string) {
-          const stateMatch = ocd_id.match(/state:([a-z]{2})/);
-          const districtMatch = ocd_id.match(/cd:(\d+)/);
-
+        // No incumbent — parse district for this alert only (not shared with APIs).
+        function parseOcdId(ocd_id: string): {
+          state: string;
+          /** Raw `cd` digits, or empty when OCD is state-only (at-large). */
+          district: string;
+        } {
+          const stateMatch = ocd_id.match(/state:([a-z]{2})/i);
+          const districtMatch = ocd_id.match(/cd:([0-9]+)/i);
+          if (!stateMatch) {
+            return { state: '', district: '' };
+          }
           return {
-            state: (stateMatch as RegExpMatchArray)[1].toUpperCase(),
-            district: Number((districtMatch as RegExpMatchArray)[1]),
+            state: stateMatch[1].toUpperCase(),
+            district: districtMatch ? districtMatch[1] : '',
           };
         }
-        const { state, district } = parseOcdId(ocd_id);
-
-        function makeAlert(MSG_ARR: string[]) {
-          let msg = `${MSG_ARR[0]} ${district} ${MSG_ARR[1]} ${state} ${MSG_ARR[2]}`;
-          return alert(msg);
-        }
-        makeAlert(SEARCH_COPY.SEARCH.DISTRICT.NO_CHALLENGER);
+        const { state, district: districtRaw } = parseOcdId(ocd_id);
+        const stateDisplayName = stateAbbrevToDisplayName(state);
+        const districtLabel = formatHouseDistrictForDisplay(districtRaw, state);
+        const isAtLargeSeat = districtLabel === HOUSE_AT_LARGE_LABEL;
+        const tail = SEARCH_COPY.SEARCH.DISTRICT.NO_CHALLENGER_TAIL;
+        const numberedIntroDistrict =
+          stripLeadingZerosDistrictDisplay(districtRaw);
+        const intro = isAtLargeSeat
+          ? `The incumbent for the ${HOUSE_AT_LARGE_LABEL} seat in ${stateDisplayName} `
+          : `The incumbent for District ${numberedIntroDistrict} of ${stateDisplayName} `;
+        alert(intro + tail);
       }
     },
     [polsOnParade, searchPolsByLocation]
@@ -843,13 +867,21 @@ const PolCombobox = ({
                 bg={'dark'}
               >
                 <span className='selected-candidate-name'>{candidateName}</span>
-                {polData?.district && polData?.state && (
-                  <span className='selected-candidate-district'>
-                    &nbsp;
-                    {polData.district !== 'At-Large' ? 'District ' : ''}
-                    {polData.district} of {polData.state}
-                  </span>
-                )}
+                {polData?.district &&
+                  polData?.state &&
+                  (() => {
+                    const distLabel = formatHouseDistrictForDisplay(
+                      polData.district,
+                      polData.state
+                    );
+                    return (
+                      <span className='selected-candidate-district'>
+                        &nbsp;
+                        {distLabel === HOUSE_AT_LARGE_LABEL ? '' : 'District '}
+                        {distLabel} of {polData.state}
+                      </span>
+                    );
+                  })()}
                 {/* Close button on badge */}
                 <button
                   type='button'

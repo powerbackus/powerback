@@ -26,7 +26,7 @@ const contactInfoSchema = Joi.object({
     .optional(),
   ocd_id: Joi.string()
     .allow('')
-    .pattern(/^ocd-division\/country:[a-zA-Z]+\/state:[a-zA-Z]+\/cd:\d+$/)
+    .pattern(/^ocd-division\/country:[a-zA-Z]+\/state:[a-zA-Z]{2}(\/cd:\d+)?$/i)
     .optional(),
 });
 

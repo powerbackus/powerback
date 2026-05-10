@@ -103,6 +103,8 @@ const {
   // sendSMS,
   fixPolName,
   normalizeHouseDistrictKeyPart,
+  resolveHouseDistrictForPolRole,
+  isNonVotingHouseJurisdiction,
 } = require('../services/utils');
 
 const { requireLogger } = require('../services/logger');
@@ -170,6 +172,10 @@ async function runIntegrityChecks(db, sendEmail, logger) {
       missingOcd: {
         query: { 'roles.0.ocd_id': '' },
         label: 'Missing OCD division ID',
+      },
+      malformedOcd: {
+        query: { 'roles.0.ocd_id': /cd:undefined/i },
+        label: 'OCD id contains cd:undefined',
       },
     };
 
@@ -428,25 +434,22 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
    */
   async function fetchFecCandidateId(state, district, lastName, firstName) {
     try {
-      // Non-voting delegates and undefined districts
-      if (
-        !district ||
-        district === '0' ||
-        state === 'DC' ||
-        state === 'PR' ||
-        state === 'GU' ||
-        state === 'VI' ||
-        state === 'AS' ||
-        state === 'MP'
-      ) {
+      if (isNonVotingHouseJurisdiction(state)) {
         logger.info(
-          `Skipping non-voting delegate or invalid district for ${firstName} ${lastName} (${state}-${district})`
+          `Non-voting House jurisdiction ${state}; FEC id not resolved via House race matching for ${firstName} ${lastName}`
         );
         return 'NON_VOTING_DELEGATE';
       }
 
+      const normDistrict = normalizeHouseDistrictKeyPart(district, state);
+      if (!normDistrict) {
+        logger.warn(
+          `No normalized district for FEC lookup: ${firstName} ${lastName} (${state}-${district})`
+        );
+        return '';
+      }
+
       const stateKey = `${state}-${ELECTION_YEAR}`;
-      const normDistrict = normalizeHouseDistrictKeyPart(district);
       const yearNum = Number(ELECTION_YEAR);
       const fecRowMatchesCycle = (c) =>
         Number(c.active_through) === yearNum &&
@@ -460,7 +463,8 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
         const candidate = cached.find(
           (c) =>
             c.state === state &&
-            normalizeHouseDistrictKeyPart(c.district) === normDistrict &&
+            normalizeHouseDistrictKeyPart(c.district, c.state) ===
+              normDistrict &&
             matchByName((c.name || '').toUpperCase(), firstName, lastName) &&
             fecRowMatchesCycle(c) &&
             !c.candidate_inactive
@@ -507,7 +511,7 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
       const candidate = results.find(
         (c) =>
           c.state === state &&
-          normalizeHouseDistrictKeyPart(c.district) === normDistrict &&
+          normalizeHouseDistrictKeyPart(c.district, c.state) === normDistrict &&
           matchByName((c.name || '').toUpperCase(), firstName, lastName) &&
           fecRowMatchesCycle(c) &&
           !c.candidate_inactive
@@ -539,9 +543,10 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
    * @function shapeToHouseMember
    * @param {Object} m - Raw member data from Congress.gov API
    * @param {string} [fecCandidateId=''] - FEC candidate ID (optional)
+   * @param {{ district: string, ocd_id: string }} resolved - From resolveHouseDistrictForPolRole
    * @returns {Object} Shaped data object ready for database insertion
    */
-  function shapeToHouseMember(m, fecCandidateId = '') {
+  function shapeToHouseMember(m, fecCandidateId = '', resolved) {
     const lastName = fixPolName(m.lastName ?? '');
     const fixedLastName = fixPolName(lastName);
 
@@ -552,19 +557,7 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
     }
 
     const term = m.terms[m.terms.length - 1];
-    const rawDistrict = term?.district;
-    let districtStr = '';
-    let ocdCd = '0';
-    if (rawDistrict != null && rawDistrict !== '') {
-      const d = String(rawDistrict).trim();
-      if (/^\d+$/.test(d)) {
-        districtStr = normalizeHouseDistrictKeyPart(d);
-        ocdCd = districtStr;
-      } else {
-        districtStr = d;
-        ocdCd = d;
-      }
-    }
+    const districtStr = resolved.district;
 
     return {
       id: m.bioguideId,
@@ -596,11 +589,7 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
             })) || [],
           fec_candidate_id: fecCandidateId,
           district: districtStr,
-          ocd_id:
-            'ocd-division/country:us/state:' +
-            (term?.stateCode ?? '').toLowerCase() +
-            '/cd:' +
-            ocdCd,
+          ocd_id: resolved.ocd_id,
           state: (term?.stateCode ?? '').toUpperCase(),
         },
       ],
@@ -637,24 +626,35 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
         return null;
       }
 
-      const state =
-        memberData.terms[memberData.terms.length - 1].stateCode.toUpperCase();
-      const district = memberData.terms[memberData.terms.length - 1].district;
+      const term = memberData.terms[memberData.terms.length - 1];
+      const state = term.stateCode.toUpperCase();
       const firstName = fixPolName(memberData.firstName ?? '');
       const lastName = fixPolName(memberData.lastName ?? '');
 
-      // Fetch FEC candidate ID
+      const resolved = resolveHouseDistrictForPolRole(term.district, state);
+      if (!resolved) {
+        logger.warn(
+          `Skipping new pol ${bioguideId}: could not resolve House district (state=${state}, rawDistrict=${term?.district})`
+        );
+        return null;
+      }
+
+      // Fetch FEC candidate ID (uses normalized district; at-large is 00)
       logger.info(
-        `Fetching FEC candidate ID for ${firstName} ${lastName} in ${state}-${district}`
+        `Fetching FEC candidate ID for ${firstName} ${lastName} in ${state}-${resolved.district}`
       );
       const fecCandidateId = await fetchFecCandidateId(
         state,
-        district,
+        resolved.district,
         lastName,
         firstName
       );
 
-      const shapedData = shapeToHouseMember(memberData, fecCandidateId);
+      const shapedData = shapeToHouseMember(
+        memberData,
+        fecCandidateId,
+        resolved
+      );
 
       // Upsert to DOCKING database
       const result = await DockingPol.findOneAndUpdate(
@@ -802,11 +802,15 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
       typeof stateRaw === 'string' && stateRaw.trim() && stateRaw !== 'NaN'
         ? stateRaw.trim()
         : null;
-    const districtStr =
-      districtRaw != null && !Number.isNaN(Number(districtRaw))
-        ? String(districtRaw)
+    if (!state) return null;
+
+    const resolved = resolveHouseDistrictForPolRole(districtRaw, state);
+    const districtStr = resolved
+      ? resolved.district
+      : districtRaw != null && String(districtRaw).trim() !== ''
+        ? String(districtRaw).trim()
         : null;
-    if (!state || !districtStr) return null;
+    if (!districtStr) return null;
     const fullName = [pol.first_name, pol.middle_name, pol.last_name]
       .filter(Boolean)
       .join(' ');

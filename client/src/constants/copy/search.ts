@@ -18,7 +18,7 @@ interface SearchCopy {
       NOTFOUND: string;
       TOOSHORT: string;
       SPLIT: string;
-      NO_CHALLENGER: [string, string, string];
+      NO_CHALLENGER_TAIL: string;
       PLACEHOLDERS: string;
     };
     DROPDOWN: {
@@ -58,11 +58,8 @@ export const SEARCH_COPY: SearchCopy = {
         'District not found. Please try again with a complete 5-digit ZIP code in your query.',
       SPLIT:
         'Your area may be split across multiple districts. Please try again with a more complete address, and/or a different ZIP code.',
-      NO_CHALLENGER: [
-        'The incumbent for District',
-        'of',
-        "has no serious, financed challenger. (In other words, they don't need anyone's money!) See the FAQ for more information about why we don't include such candidates.",
-      ],
+      NO_CHALLENGER_TAIL:
+        "has no serious, financed challenger. (In other words, they don't need your money!) See the FAQ for more information about why we don't include such candidates.",
       PLACEHOLDERS: 'Type address+/ZIP code, then click "Find" or press ENTER.',
     },
     DROPDOWN: {

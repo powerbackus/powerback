@@ -21,7 +21,8 @@
  * - Returns ocd_id for district identification
  *
  * OCD_ID FORMAT
- * - Format: "ocd-division/country:us/state:XX/cd:YY"
+ * - Numbered House district: "ocd-division/country:us/state:XX/cd:YY"
+ * - At-large House: "ocd-division/country:us/state:xx" (no cd segment)
  * - Used to identify user's congressional district
  * - Links to local representatives
  *

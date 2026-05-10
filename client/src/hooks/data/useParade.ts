@@ -31,6 +31,7 @@
  * DISTRICT
  * - Filters by specific congressional district (OCD ID)
  * - Matches politicians with matching ocd_id in roles[0]
+ * - At-large Pols use state-only ocd_id (no cd); internal district is 00
  * - Used for location-based searches
  *
  * RESTORE

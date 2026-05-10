@@ -21,7 +21,8 @@
  *
  * getUsersInDistrict({ state, district })
  * - Finds all users in a specific congressional district
- * - Uses ocd_id pattern matching (state:XX/cd:YY)
+ * - Uses ocd_id: numbered districts match `state:xx/cd:NN`; at-large (`00`) matches
+ *   state-only ids `ocd-division/country:us/state:xx` or legacy `cd:0` / `cd:00`
  * - Returns array of User documents
  *
  * getUsersWithActiveCelebration(fec_candidate_id)
@@ -46,9 +47,9 @@
  * BUSINESS LOGIC
  *
  * DISTRICT LOOKUP
- * - Uses ocd_id pattern: "ocd-division/country:us/state:XX/cd:YY"
- * - Pads district numbers to 2 digits for matching
- * - Case-insensitive matching
+ * - Numbered House: "ocd-division/country:us/state:XX/cd:YY"
+ * - At-large House: "ocd-division/country:us/state:XX" (no cd segment)
+ * - Pads district numbers to 2 digits for cd matching; case-insensitive
  *
  * HAS_STAKES FLAG
  * - Indicates politician is seeking re-election, has raised funds, and has
@@ -72,6 +73,7 @@
  */
 
 const { User, Pol, Celebration } = require('../../models');
+const { HOUSE_AT_LARGE_STORAGE } = require('../utils/normalizeHouseDistrict');
 const logger = require('../utils/logger')(__filename);
 
 /**
@@ -139,10 +141,20 @@ async function getUsersInDistrict({ state, district }) {
   if (!state || !district) return [];
 
   const paddedDistrict = Number(district).toString().padStart(2, '0');
-  const regex = new RegExp(
-    `state:${state.toLowerCase()}/cd:${paddedDistrict}$`,
-    'i'
-  );
+  const st = state.toLowerCase();
+
+  if (paddedDistrict === HOUSE_AT_LARGE_STORAGE) {
+    const stateOnly = `ocd-division/country:us/state:${st}`;
+    const legacyCd = new RegExp(`state:${st}/cd:(?:0|00)$`, 'i');
+    return User.find({
+      $or: [
+        { ocd_id: { $regex: new RegExp(`^${stateOnly}$`, 'i') } },
+        { ocd_id: { $regex: legacyCd } },
+      ],
+    }).exec();
+  }
+
+  const regex = new RegExp(`state:${st}/cd:${paddedDistrict}$`, 'i');
 
   return User.find({
     ocd_id: { $regex: regex },

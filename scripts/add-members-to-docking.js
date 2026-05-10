@@ -35,7 +35,10 @@ else require('dotenv').config();
 const mongoose = require('mongoose');
 const { connect } = require('../services/utils/db');
 const { Pol } = require('../models');
-const { fixPolName } = require('../services/utils');
+const {
+  fixPolName,
+  resolveHouseDistrictForPolRole,
+} = require('../services/utils');
 const { requireLogger } = require('../services/logger');
 
 const logger = requireLogger(__filename);
@@ -81,6 +84,15 @@ async function fetchMemberDetails(bioguideId) {
  * @returns {Object} Shaped data matching the Pol schema
  */
 function shapeToHouseMember(m) {
+  const term = m.terms[m.terms.length - 1];
+  const state = term.stateCode.toUpperCase();
+  const resolved = resolveHouseDistrictForPolRole(term.district, state);
+  if (!resolved) {
+    throw new Error(
+      `Cannot resolve House district for ${m.bioguideId} (state=${state}, district=${term.district})`
+    );
+  }
+
   const shaped = {
     id: m.bioguideId,
     last_name: fixPolName(m.lastName ?? ''),
@@ -94,14 +106,10 @@ function shapeToHouseMember(m) {
       {
         chamber: CHAMBER,
         congress: CONGRESS,
-        short_title: m.terms[m.terms.length - 1]?.shortTitle || '',
-        district: m.terms[m.terms.length - 1].district,
-        ocd_id:
-          'ocd-division/country:us/state:' +
-          m.terms[m.terms.length - 1].stateCode.toLowerCase() +
-          '/cd:' +
-          m.terms[m.terms.length - 1].district,
-        state: m.terms[m.terms.length - 1].stateCode.toUpperCase(),
+        short_title: term?.shortTitle || '',
+        district: resolved.district,
+        ocd_id: resolved.ocd_id,
+        state,
         committees:
           m.committees?.map((c) => ({ name: c.name, code: c.code })) || [],
         fec_candidate_id: '',

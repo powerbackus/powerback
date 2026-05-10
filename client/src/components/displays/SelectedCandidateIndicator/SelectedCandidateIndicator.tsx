@@ -1,6 +1,7 @@
 import React from 'react';
 import { PolName, Constituency } from '@Components/displays';
 import { useDonationState } from '@Contexts';
+import { formatHouseDistrictForDisplay, HOUSE_AT_LARGE_LABEL } from '@Utils';
 import './style.css';
 
 /**
@@ -30,8 +31,22 @@ const SelectedPolIndicator = () => {
     polData.name ||
     `${polData.first_name || ''} ${polData.last_name || ''}`.trim();
 
+  const districtLabel = formatHouseDistrictForDisplay(
+    polData.district,
+    polData.state
+  );
+  const constituencyTitle =
+    districtLabel === HOUSE_AT_LARGE_LABEL
+      ? `${HOUSE_AT_LARGE_LABEL} of ${polData.state}`
+      : districtLabel
+        ? `District ${districtLabel} of ${polData.state}`
+        : polData.state;
+
   return (
-    <div className='selected-candidate-indicator' aria-live='polite'>
+    <div
+      className='selected-candidate-indicator'
+      aria-live='polite'
+    >
       <div className='selected-candidate-content'>
         <PolName
           title={`Selected candidate: ${candidateName}`}
@@ -40,9 +55,9 @@ const SelectedPolIndicator = () => {
           headingSize={5}
         />
         <Constituency
-          title={`District ${polData.district} of ${polData.state}`}
+          title={constituencyTitle}
           cls={'selected-candidate-constituency'}
-          district={polData.district}
+          district={districtLabel || polData.district}
           state={polData.state}
           headingSize={6}
         />

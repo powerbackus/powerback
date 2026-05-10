@@ -289,7 +289,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
         if (idx === -1 || dist == null || dist === '') {
           return [];
         }
-        return [`${c.state}-${normalizeHouseDistrictKeyPart(dist)}`];
+        return [`${c.state}-${normalizeHouseDistrictKeyPart(dist, c.state)}`];
       })
     );
     logger.info(
@@ -319,7 +319,10 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
         continue;
       }
 
-      const key = `${info.state}-${normalizeHouseDistrictKeyPart(info.district)}`;
+      const key = `${info.state}-${normalizeHouseDistrictKeyPart(
+        info.district,
+        info.state
+      )}`;
       if (challengerDistricts.has(key)) {
         finalIds.push(incId);
       }

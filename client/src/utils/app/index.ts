@@ -1,3 +1,9 @@
+export const {
+  formatHouseDistrictForDisplay,
+  isHouseDistrictAtLargeDisplay,
+  HOUSE_AT_LARGE_LABEL,
+} = require('./houseDistrictDisplay');
+
 export const { transformPolData } = require('./transformPolData'),
   { donationFailure } = require('./donationFailure'),
   { activation } = require('./activation'),

@@ -1,5 +1,7 @@
 // converts the old ProPublica-based db schema to the React app state object shape
 
+const { formatHouseDistrictForDisplay } = require('./houseDistrictDisplay');
+
 export const transformPolData = (choice) => {
   return {
     name: choice.first_name + ' ' + choice.last_name,
@@ -11,7 +13,10 @@ export const transformPolData = (choice) => {
     bluesky: choice.bluesky_account ?? '',
     middle_name: choice.middle_name ?? '',
     youtube: choice.youtube_account ?? '',
-    district: choice.roles[0].district,
+    district: formatHouseDistrictForDisplay(
+      choice.roles[0].district,
+      choice.roles[0].state
+    ),
     chamber: choice.roles[0].chamber,
     twitter: choice.twitter_account,
     first_name: choice.first_name,

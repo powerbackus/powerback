@@ -42,9 +42,11 @@
  *   - fec_candidate_id: FEC candidate identifier for this role
  *   - short_title: Title (e.g., "Rep.", "Sen.")
  *   - congress: Congress number (e.g., 118 for 118th Congress)
- *   - district: Congressional district (for House members)
+ *   - district: House district string; numeric seats use two digits (`01`–`53`);
+ *     voting at-large uses `00` (see `services/utils/normalizeHouseDistrict.js`)
  *   - chamber: "house" or "senate"
- *   - ocd_id: Open Civic Data identifier for district/state
+ *   - ocd_id: Open Civic Data division id; House at-large is state-only
+ *     (`ocd-division/country:us/state:xx`, no `cd`); numbered districts use `/cd:NN`
  *   - state: State code (e.g., "CA", "NY")
  *   - committees: Array of committee assignments with code and name
  *

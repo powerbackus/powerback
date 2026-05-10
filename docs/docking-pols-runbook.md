@@ -19,7 +19,7 @@ node scripts/add-members-to-docking.js V000139 G000606
 This script:
 
 - Fetches member details from Congress.gov API
-- Shapes data to the Pol schema
+- Shapes data to the Pol schema (same House `district` / `ocd_id` resolution as `houseWatcher`, via `services/utils/normalizeHouseDistrict.js`)
 - Preserves existing social media handles (never overwrites non-null with null)
 - Upserts into `docking_pols`
 

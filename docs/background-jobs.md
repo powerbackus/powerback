@@ -202,6 +202,17 @@ There is **no stable shared identifier** between Congress.gov (member data) and 
 
 See `dev/update-fec-ids.js` (file header and `fetchFecIdByIncumbent` / `fetchFecCandidateId`) and `jobs/houseWatcher.js` (`fetchFecCandidateId`) for the implementation.
 
+### House district and OCD IDs (House roles)
+
+House `roles[].district` and `roles[].ocd_id` are normalized in `services/utils/normalizeHouseDistrict.js` and applied by `jobs/houseWatcher.js`, `jobs/challengersWatcher.js`, and `scripts/add-members-to-docking.js`:
+
+- **Numeric districts**: two-digit strings `01`–`53` (aligned with OpenFEC padding).
+- **Voting at-large**: internal district string `00`; `ocd_id` is **state-only**: `ocd-division/country:us/state:xx` (no `/cd:` segment; matches Google Civics-style at-large division ids).
+- **Non-voting jurisdictions** (DC, PR, GU, VI, AS, MP): textual at-large labels (including Unicode hyphens and phrases like “Congressional District (At Large)”) resolve to district **`0`** with the same **state-only** `ocd_id` when the seat is whole-area; numbered territorial seats (e.g. `98`) still use `/cd:98`. Voting at-large **`00`** is never used for delegates. FEC resolution uses the delegate path where applicable.
+- **Challenger keys**: state–district keys pass the optional state argument into `normalizeHouseDistrictKeyPart` so numeric `0` in a territory does not collide with at-large `00`.
+
+Celebration **`getUsersInDistrict`** (`services/celebration/dataService.js`) matches at-large (`00`) users by **state-only** `ocd_id` or legacy `cd:0` / `cd:00` suffixes.
+
 ## Snapshot Management
 
 ### Snapshot System (`snapshotManager.js`)

@@ -51,7 +51,7 @@ const router = require('express').Router(),
  *   "address": "123 Main St, New York, NY 10001"
  * }
  *
- * // Success response
+ * // Success response (numbered district); at-large is state-only, no /cd
  * {
  *   "ocd_id": "ocd-division/country:us/state:ny/cd:14",
  *   "district": "14",
@@ -81,8 +81,7 @@ router.route('/').put(validate(schemas.address), async (req, res) => {
   const ocd_id = await Controller.getLocalPols(address);
 
   // Return error if district not found
-  if (!ocd_id)
-    return res.status(404).json({ error: 'District not found' });
+  if (!ocd_id) return res.status(404).json({ error: 'District not found' });
 
   // Return district information
   res.json(ocd_id);

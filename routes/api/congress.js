@@ -136,6 +136,8 @@ router.route('/').get((req, res) => Controller.getPols(req, res, Pol));
  * @throws {401} Unauthorized - Authentication required
  * @throws {404} Politician not found
  *
+ * At-large House roles use `ocd_id` `ocd-division/country:us/state:xx` (no `/cd` segment).
+ *
  * @example
  * ```javascript
  * GET /api/congress/members/A000055

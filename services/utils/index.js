@@ -87,7 +87,13 @@ const { sendSMS } = require('./sendSMS');
 const { ...dbServices } = require('./db');
 const { ...csrfServices } = require('./csrf');
 const { fixPolName } = require('./fixPolName');
-const { normalizeHouseDistrictKeyPart } = require('./normalizeHouseDistrict');
+const {
+  normalizeHouseDistrictKeyPart,
+  resolveHouseDistrictForPolRole,
+  buildHouseRoleOcdId,
+  HOUSE_AT_LARGE_STORAGE,
+  isNonVotingHouseJurisdiction,
+} = require('./normalizeHouseDistrict');
 const DockingManager = require('./dockingManager');
 const { ...cookieServices } = require('./cookies');
 const { postToSocial, resetSocialPostRunCount } = require('./socialPoster');
@@ -102,6 +108,10 @@ module.exports = {
   isLocalhost,
   fixPolName,
   normalizeHouseDistrictKeyPart,
+  resolveHouseDistrictForPolRole,
+  buildHouseRoleOcdId,
+  HOUSE_AT_LARGE_STORAGE,
+  isNonVotingHouseJurisdiction,
   sendSMS,
   rateLimiters,
   ...dbServices,

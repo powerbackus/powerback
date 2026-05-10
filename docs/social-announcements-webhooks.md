@@ -34,7 +34,7 @@ All requests are `POST` with `Content-Type: application/json` and header `x-make
 - `event_type` – One of the event types above.
 - `dedupe_key` – Unique per occurrence; automation uses this to avoid duplicate posts (e.g. retries, same run).
 - `state` – Two-letter state code when applicable.
-- `district` – Congressional district (string) when applicable.
+- `district` – Congressional district (string) when applicable. Internal storage uses **`00`** for voting at-large House seats; the in-app UI shows **At-Large**. Webhook automations that format copy may map `00` (or `state` + `00`) to human-readable at-large text if needed.
 - `polName` – Display name of the politician when applicable.
 - `handles` – Object with optional social handles: `bluesky`, `twitter`, `mastodon`, `facebook`, `instagram`, `youtube`, `truth`.
 
@@ -67,7 +67,7 @@ All requests are `POST` with `Content-Type: application/json` and header `x-make
 
 - `donation` – Donation amount in dollars.
 - `total_donations` – Total escrowed for this pol this election cycle (aggregation joins `Pol` and includes only active celebrations where linked `Pol.has_stakes`; distinct from selectable roster filtering which also applies `roster_excluded`). Omitted if aggregation fails.
-- `state`, `district`, `polName`, `handles` – Politician and district (no donor info).
+- `state`, `district`, `polName`, `handles` – Politician and district (no donor info). `district` uses the same internal convention as other events (`00` at-large when applicable).
 - `bill_id`, `bill_title` – Bill/condition for the celebration.
 
 **Deploy** (`deploy`):
@@ -231,7 +231,7 @@ https://powerback.us
 
 - `action` – `"added"` or `"removed"`.
 - `state` – Two-letter state code.
-- `district` – Congressional district (string).
+- `district` – Congressional district (string); at-large is `00` internally (see common fields above).
 - `polName` – Display name of the incumbent.
 - `handles` – Same handle shape as `challengers`/`house_membership`.
 

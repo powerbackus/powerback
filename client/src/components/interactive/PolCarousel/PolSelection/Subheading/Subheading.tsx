@@ -1,5 +1,6 @@
 import React from 'react';
 import { Constituency } from '@Components/displays';
+import { formatHouseDistrictForDisplay } from '@Utils';
 import './style.css';
 
 type SubheadingProps = {
@@ -11,7 +12,7 @@ type SubheadingProps = {
 const Subheading = ({ state, district, highlight }: SubheadingProps) => (
   <Constituency
     cls={'district' + (highlight ? ' highlight' : '')}
-    district={district as string}
+    district={formatHouseDistrictForDisplay(district, state)}
     state={state as string}
     headingSize={6}
   />

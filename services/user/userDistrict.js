@@ -16,7 +16,7 @@
  * DISTRICT EXTRACTION
  * - Extracts division ID (OCD ID) from API response
  * - Parses district number from division ID
- * - Format: "ocd-division/country:us/state:XX/cd:YY"
+ * - Format: "ocd-division/country:us/state:XX/cd:YY" or state-only for at-large
  *
  * REPRESENTATIVE INFORMATION
  * - Extracts representative name, party, phones, URLs
@@ -77,8 +77,7 @@ async function updateUserDistrict(userId, address) {
     // find House office entry
     const houseOffice = offices.find(
       (o) =>
-        o.name.includes('United States House') ||
-        o.divisionId.includes('cd:')
+        o.name.includes('United States House') || o.divisionId.includes('cd:')
     );
 
     if (!houseOffice) {
@@ -92,7 +91,8 @@ async function updateUserDistrict(userId, address) {
     // extract division ID for district (e.g. "ocd-division/country:us/state:tx/cd:05")
     const division = houseOffice.divisionId;
     const cdMatch = division.match(/cd:(\d+)/);
-    const districtNumber = cdMatch ? parseInt(cdMatch[1], 10) : null;
+    // At-large / whole-state House divisions omit `cd:`; treat as district 0 for address.district.
+    const districtNumber = cdMatch ? parseInt(cdMatch[1], 10) : 0;
 
     // prepare update object
     const update = {
@@ -112,10 +112,7 @@ async function updateUserDistrict(userId, address) {
 
     return { district: districtNumber, representative };
   } catch (err) {
-    logger.error(
-      `Failed to update district for user ${userId}`,
-      err.message
-    );
+    logger.error(`Failed to update district for user ${userId}`, err.message);
     throw err;
   }
 }

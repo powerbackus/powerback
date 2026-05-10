@@ -15,8 +15,8 @@
  * 4. Falls back to city/state lookup if full address fails
  *
  * OCD_ID PATTERN
- * - Format: "ocd-division/country:us/state:XX/cd:YY"
- * - Example: "ocd-division/country:us/state:ny/cd:14"
+ * - Numbered district: "ocd-division/country:us/state:XX/cd:YY" (e.g. NY cd:14)
+ * - At-large: "ocd-division/country:us/state:xx" (no cd segment; state is the division tail)
  * - Used to identify user's congressional district
  *
  * RETRY LOGIC
@@ -29,7 +29,9 @@
  * - services/utils/logger: Logging
  * - process.env.GOOGLE_CIVICS_API_ENDPOINT: API endpoint URL
  * - process.env.GOOGLE_CIVICS_API_KEY: API key
- * - process.env.GOOGLE_CIVICS_DISTRICT_PATTERN: Regex pattern for district matching
+ * - process.env.GOOGLE_CIVICS_DISTRICT_PATTERN: Optional legacy regex; used only if
+ *   automatic picking finds no division. State-only matches require an at-large state
+ *   (same set as internal district `00`). Tight example: `^ocd-division/country:us/state:[a-z]{2}(/cd:[0-9]{1,2})?$`
  *
  * @module controller/civics/getLocalPols
  * @requires superagent
@@ -38,6 +40,94 @@
 
 const superagent = require('superagent');
 const logger = require('../../services/utils/logger')(__filename);
+const {
+  SINGLE_HOUSE_AT_LARGE_STATES,
+} = require('../../services/utils/normalizeHouseDistrict');
+
+/**
+ * @param {string} key - Civics division id
+ * @returns {string|null} Two-letter state if `.../state:xx` with no further path
+ */
+function stateCodeFromStateOnlyOcd(key) {
+  const m = String(key).match(/^ocd-division\/country:us\/state:([a-z]{2})$/i);
+  return m ? m[1].toUpperCase() : null;
+}
+
+/**
+ * True for state-only ids (no `/cd:`), i.e. at-large shape.
+ * @param {string} key
+ * @returns {boolean}
+ */
+function isStateOnlyHouseOcd(key) {
+  return /^ocd-division\/country:us\/state:[a-z]{2}$/i.test(String(key));
+}
+
+/**
+ * Picks the U.S. House congressional division OCD id from Google Civics `divisions` keys.
+ * Numbered districts use `.../state:xx/cd:NN`. At-large states use `.../state:xx` only
+ * (no `cd`); if Civics only returns `.../cd:0` or `cd:00`, normalizes to state-only
+ * to match POWERBACK Pol `ocd_id` storage.
+ *
+ * @param {string[]} divisionKeys - `Object.keys(response.divisions)`
+ * @returns {string|undefined} Lowercased division id, or undefined
+ */
+function pickHouseCongressionalDivisionId(divisionKeys) {
+  if (!divisionKeys?.length) return undefined;
+  const keys = [...divisionKeys];
+
+  const cdKeys = keys.filter((k) =>
+    /^ocd-division\/country:us\/state:[a-z]{2}\/cd:\d+$/i.test(k)
+  );
+  const substantiveCd = cdKeys.filter(
+    (k) => !/\/cd:0$/i.test(k) && !/\/cd:00$/i.test(k)
+  );
+
+  let chosen;
+  if (substantiveCd.length > 0) {
+    chosen = substantiveCd[0];
+  } else if (cdKeys.length > 0) {
+    const m = cdKeys[0].match(
+      /^(ocd-division\/country:us\/state:[a-z]{2})\/cd:/i
+    );
+    chosen = m ? m[1] : cdKeys[0];
+  } else {
+    const stateOnly = keys.filter((k) =>
+      /^ocd-division\/country:us\/state:[a-z]{2}$/i.test(k)
+    );
+    if (stateOnly.length === 1) {
+      const st = stateCodeFromStateOnlyOcd(stateOnly[0]);
+      // State-only House divisions match internal at-large (`00`); reject for multi-CD states.
+      if (st && SINGLE_HOUSE_AT_LARGE_STATES.has(st)) {
+        chosen = stateOnly[0];
+      }
+    }
+  }
+
+  if (chosen) {
+    return chosen.toLowerCase();
+  }
+
+  if (process.env.GOOGLE_CIVICS_DISTRICT_PATTERN) {
+    try {
+      const re = new RegExp(process.env.GOOGLE_CIVICS_DISTRICT_PATTERN, 'i');
+      const fromEnv = keys.find((k) => re.test(k));
+      if (!fromEnv) return undefined;
+      if (isStateOnlyHouseOcd(fromEnv)) {
+        const st = stateCodeFromStateOnlyOcd(fromEnv);
+        if (!st || !SINGLE_HOUSE_AT_LARGE_STATES.has(st)) {
+          return undefined;
+        }
+      }
+      return fromEnv.toLowerCase();
+    } catch (err) {
+      logger.warn('Invalid GOOGLE_CIVICS_DISTRICT_PATTERN', {
+        message: err.message,
+      });
+    }
+  }
+
+  return undefined;
+}
 
 /**
  * Gets congressional district information for an address
@@ -54,15 +144,10 @@ const logger = require('../../services/utils/logger')(__filename);
  * ```javascript
  * const { getLocalPols } = require('./controller/civics/getLocalPols');
  * const ocd_id = await getLocalPols('123 Main St, New York, NY 10001');
- * // Returns: 'ocd-division/country:us/state:ny/cd:14'
+ * // Returns: 'ocd-division/country:us/state:ny/cd:14' or state-only for at-large (e.g. AK)
  * ```
  */
 async function getLocalPols(address) {
-  // Matches congressional district OCD IDs (e.g. ocd-division/country:us/state:ny/cd:19)
-  const CONGRESSIONAL_DISTRICT_PATTERN = new RegExp(
-    process.env.GOOGLE_CIVICS_DISTRICT_PATTERN
-  );
-
   const baseURI = process.env.GOOGLE_CIVICS_API_ENDPOINT,
     encodedAddress = encodeURIComponent(address),
     CIVICS_API_KEY = process.env.GOOGLE_CIVICS_API_KEY,
@@ -75,11 +160,7 @@ async function getLocalPols(address) {
     const json = JSON.parse(response.text);
 
     if (json.divisions) {
-      const ocd_id = Object.keys(json.divisions).find((k) => {
-        return CONGRESSIONAL_DISTRICT_PATTERN.test(k);
-      });
-
-      return ocd_id;
+      return pickHouseCongressionalDivisionId(Object.keys(json.divisions));
     }
 
     const { normalizedInput } = json;
@@ -101,11 +182,9 @@ async function getLocalPols(address) {
       .get(retryURI)
       .set({ Accept: 'application/json' });
     const retryJson = JSON.parse(retryResponse.text);
-    const ocd_id = Object.keys(retryJson.divisions).find((k) => {
-      return CONGRESSIONAL_DISTRICT_PATTERN.test(k);
-    });
-
-    return ocd_id;
+    return retryJson.divisions
+      ? pickHouseCongressionalDivisionId(Object.keys(retryJson.divisions))
+      : undefined;
   } catch (err) {
     logger.error('Failed to get local pols:', err);
     return undefined;
