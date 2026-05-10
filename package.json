@@ -7,7 +7,7 @@
     "test": "jest --runInBand",
     "test:watch": "jest --watch --runInBand",
     "test:coverage": "jest --coverage --runInBand",
-    "test:client": "npm test --prefix client",
+    "test:client": "CI=true npm test --prefix client -- --watchAll=false",
     "test:all": "npm run test && npm run test:client",
     "smoke": "bash scripts/deploy/smoke.sh",
     "smoke:fast": "bash scripts/deploy/smoke.sh --no-build",

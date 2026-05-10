@@ -98,9 +98,7 @@ lib-cov/
 /blob-report/
 /playwright/.cache/
 __mocks__/
-__tests__/
 client/src/__mocks__/
-client/src/__tests__/
 scripts/tests/
 scripts/build/.temp-*.cjs
 tests/
