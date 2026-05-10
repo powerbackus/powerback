@@ -1,12 +1,18 @@
 # Project-specific
 worktrees/
 dev/
-/.scripts
-/secrets
+.scripts/
+secrets/
 static/
+docs/issues/
+
+# Keep constants tracked even if broader rules might catch them
 !client/src/constants/
+
+# Ignore scratch/temp files that start with underscore
 _*.*
 __*.*
+
 # snapshots: keep dir, ignore runtime files
 snapshots/*
 !snapshots/.gitkeep
@@ -86,7 +92,6 @@ lib-cov/
 .cursor/mcp.json
 .cursor/worktrees.json
 
-
 # Testing
 /test-results/
 /playwright-report/
@@ -123,4 +128,3 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .yarn/unplugged
 .yarn/build-state.yml
 .yarn/install-state.gz
-docs/issues/
