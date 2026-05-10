@@ -24,7 +24,7 @@ The POWERBACK authentication system uses JWT (JSON Web Tokens) with HTTP-only co
 ### Login Process
 
 1. User submits credentials via `/api/users/login`
-2. Server validates credentials directly (no Passport.js)
+2. Server validates credentials in the route handler: loads the user by username, verifies password via the user model (`comparePassword`), applies rate-limit checks, then issues tokens through `tokenizer` (`auth/tokenizer.js`)
 3. JWT access token generated for immediate use
 4. JWT refresh token generated and stored in HTTP-only cookie
 5. Refresh token saved to in-memory token store

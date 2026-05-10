@@ -34,6 +34,15 @@ Define POWERBACK policy for politicians who must not receive **new** Celebration
 | Payment route           | `routes/api/payments.js` (`POST .../celebrations/:customer_id`)      |
 | Schema                  | `models/Pol.js`                                                      |
 | Client types            | `client/src/interfaces/pols/HouseMember.ts` (optional fields)        |
+| Admin Mongo updates     | `scripts/roster-exclude-pol.js` (interactive TUI; see below)         |
+
+## Operations: roster exclusion script
+
+Operators with DB access can set or clear `roster_excluded` (and `roster_exclusion_*` fields) on a `Pol` document via the **interactive TUI** in `scripts/roster-exclude-pol.js`. The script uses `inquirer` (lists and confirms); it connects to MongoDB **only after** you confirm an action, so canceling early does not require a valid `MONGODB_URI`.
+
+**Step-by-step usage, environment order, and troubleshooting:** [scripts/USAGE-roster-exclude-pol.md](../scripts/USAGE-roster-exclude-pol.md)
+
+**Entry point (from repo root):** `node scripts/roster-exclude-pol.js` (optional bioguide positional to prefill the first prompt; `node scripts/roster-exclude-pol.js --help` for a short summary).
 
 ## Invariants
 
@@ -48,5 +57,6 @@ Define POWERBACK policy for politicians who must not receive **new** Celebration
 
 ## Links
 
+- Script usage: `scripts/USAGE-roster-exclude-pol.md`, `scripts/README.md` (root scripts list)
 - Docs: `docs/API.md` (Congress + Celebrations + Payments), `docs/payment-processing.md`, `docs/background-jobs.md`, `docs/hooks.md`
 - Cursor: `.cursor/rules/42-pol-roster-exclusion.mdc`, `.cursor/rules/12-models.mdc` (Pol bullet)

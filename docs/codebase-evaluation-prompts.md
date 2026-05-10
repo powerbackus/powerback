@@ -3,6 +3,7 @@
 This document contains optimized prompts for conducting comprehensive codebase evaluations of the POWERBACK project. These prompts are designed to be cost-effective while providing thorough analysis across different domains.
 
 > **📖 Related Documentation:**
+>
 > - [Project Overview](./overview.md) - Architecture overview
 > - [Development Guide](./development.md) - Development setup
 > - [Quality Assessment](../specs/quality-assessment.md) - Quality standards
@@ -26,7 +27,7 @@ This document contains optimized prompts for conducting comprehensive codebase e
 **Scope**: Authentication, authorization, financial security, FEC compliance
 
 **Evaluate ONLY**:
-1. Authentication mechanisms (Passport.js, JWT, session management)
+1. Authentication mechanisms (JWT access tokens, HTTP-only refresh cookies, tokenizer.guard(), token store, session invalidation on password change)
 2. Input validation and sanitization (XSS, injection prevention)
 3. Financial transaction security (Stripe integration, PCI compliance)
 4. FEC compliance implementation (donation limits, reporting)

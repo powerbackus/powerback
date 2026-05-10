@@ -80,7 +80,7 @@ Use these so results match what the repo and deployment actually use.
 ### Last updated
 
 - **Date**: May 2026
-- **Reason**: Sync with `.nvmrc`, `package.json`, and systemd-based production docs; replace obsolete PM2 and incorrect stack notes (e.g., Mongoose 7, Passport.js as primary auth).
+- **Reason**: Sync with `.nvmrc`, `package.json`, and systemd-based production docs; replace obsolete PM2 and incorrect stack notes (e.g., Mongoose 7, outdated auth stack descriptions).
 
 ### Earlier notes (historical)
 

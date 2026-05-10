@@ -1,23 +1,27 @@
 /**
  * @fileoverview Interactive TUI to set or clear Pol roster_excluded policy by bioguide ID.
  *
- * Separate from has_stakes / watchers. Uses inquirer prompts (arrow keys + Enter).
- *
- * Usage:
- *   node scripts/roster-exclude-pol.js
- *   node scripts/roster-exclude-pol.js J000299
- *
- * Optional first argument prefills Bioguide ID; you still confirm action, category,
- * and reason via prompts. MongoDB connects only after you confirm (cancel skips DB).
- *
- * Environment: MONGODB_URI via .env.cli, .env.local, or .env (same as other scripts).
+ * Policy is separate from `has_stakes` / watchers. Uses `inquirer` (arrow keys + Enter).
+ * MongoDB connects only after the user confirms a plan so cancel/help never requires URI.
  *
  * @module scripts/roster-exclude-pol
+ * @requires inquirer
+ * @requires dotenv
+ * @see {@link ./USAGE-roster-exclude-pol.md} Step-by-step TUI walkthrough
+ * @see {@link ../specs/pol-roster-exclusion.md} Policy, API gates, schema fields
+ *
+ * @example
+ * ```bash
+ * node scripts/roster-exclude-pol.js
+ * node scripts/roster-exclude-pol.js J000299
+ * node scripts/roster-exclude-pol.js --help
+ * ```
  */
 
 const path = require('path');
 const fs = require('fs');
 
+// Match other root scripts: prefer operator-specific .env.cli, then local, then default.
 const envCliPath = path.resolve(__dirname, '../.env.cli');
 const envLocalPath = path.resolve(__dirname, '../.env.local');
 if (fs.existsSync(envCliPath)) require('dotenv').config({ path: envCliPath });
@@ -35,7 +39,12 @@ const {
 
 const logger = requireLogger(__filename);
 
-/** Readable labels for TUI choices (value stays canonical category string). */
+/**
+ * List choices for the exclusion category prompt (`value` is stored on `Pol`).
+ * Filtered at runtime by {@link ROSTER_EXCLUSION_CATEGORIES} so the TUI cannot pick a
+ * category the server does not treat as valid.
+ * @type {ReadonlyArray<{ value: string; name: string }>}
+ */
 const CATEGORY_CHOICES = [
   {
     value: 'speaker_of_house',
@@ -61,6 +70,10 @@ const CATEGORY_CHOICES = [
   },
 ];
 
+/**
+ * Prints CLI usage to stdout and exits the help path without DB or prompts.
+ * @returns {void}
+ */
 function printHelp() {
   process.stdout.write(`Pol roster exclusion (interactive TUI via inquirer)
 
@@ -68,10 +81,15 @@ function printHelp() {
 
   Omit bioguideId to type it when prompted; optional arg prefills that step only.
 
-  Categories align with specs/pol-roster-exclusion.md.
+  Full walkthrough: scripts/USAGE-roster-exclude-pol.md
+  Categories / policy: specs/pol-roster-exclusion.md
 `);
 }
 
+/**
+ * @param {string} [v] Raw input from inquirer
+ * @returns {true|string} `true` if valid; error string for inquirer to display
+ */
 function validateBioguide(v) {
   const s = String(v || '').trim();
   if (!s) return 'Bioguide ID is required.';
@@ -79,11 +97,11 @@ function validateBioguide(v) {
 }
 
 /**
- * Apply EXCLUDE update.
- * @param {string} bioguideId
- * @param {string} category
- * @param {string} reason
- * @returns {Promise<boolean>} false if Pol missing
+ * Persists roster exclusion for an existing Pol.
+ * @param {string} bioguideId - `Pol.id` (bioguide)
+ * @param {string} category - Canonical value from `ROSTER_EXCLUSION_CATEGORIES`
+ * @param {string} reason - Optional note; empty string falls back to category label
+ * @returns {Promise<boolean>} `true` if updated; `false` if no Pol document
  */
 async function applyExclude(bioguideId, category, reason) {
   const existing = await Pol.findOne({ id: bioguideId })
@@ -126,9 +144,9 @@ async function applyExclude(bioguideId, category, reason) {
 }
 
 /**
- * Apply CLEAR update.
- * @param {string} bioguideId
- * @returns {Promise<boolean>} false if Pol missing
+ * Clears roster exclusion flags on an existing Pol.
+ * @param {string} bioguideId - `Pol.id` (bioguide)
+ * @returns {Promise<boolean>} `true` if updated; `false` if no Pol document
  */
 async function applyClear(bioguideId) {
   const existing = await Pol.findOne({ id: bioguideId }).select('id').lean();
@@ -159,9 +177,27 @@ async function applyClear(bioguideId) {
 }
 
 /**
- * Runs prompts without touching Mongo. Returns null when the user cancels.
- * @param {string} prefillBioguide
- * @returns {Promise<{ kind: 'CLEAR'|'EXCLUDE'; bioguideId: string; category?: string; reason?: string }|null>}
+ * @typedef {Object} RosterExcludePlanClear
+ * @property {'CLEAR'} kind
+ * @property {string} bioguideId
+ */
+
+/**
+ * @typedef {Object} RosterExcludePlanExclude
+ * @property {'EXCLUDE'} kind
+ * @property {string} bioguideId
+ * @property {string} category
+ * @property {string} reason
+ */
+
+/**
+ * @typedef {RosterExcludePlanClear|RosterExcludePlanExclude} RosterExcludePlan
+ */
+
+/**
+ * Runs all inquirer steps without touching MongoDB.
+ * @param {string} prefillBioguide - Optional CLI positional; default for first prompt only
+ * @returns {Promise<RosterExcludePlan|null>} Plan to execute, or `null` if user cancelled
  */
 async function collectPlan(prefillBioguide) {
   const answersStart = await inquirer.prompt([
@@ -246,7 +282,9 @@ async function collectPlan(prefillBioguide) {
 }
 
 /**
- * @param {{ kind: 'CLEAR'|'EXCLUDE'; bioguideId: string; category?: string; reason?: string }} plan
+ * Applies a confirmed plan (caller must have connected Mongoose already).
+ * @param {RosterExcludePlan} plan - From {@link collectPlan}
+ * @returns {Promise<void>}
  */
 async function executePlan(plan) {
   if (plan.kind === 'CLEAR') {
@@ -256,6 +294,10 @@ async function executePlan(plan) {
   await applyExclude(plan.bioguideId, plan.category, plan.reason || '');
 }
 
+/**
+ * Parses argv, runs prompts then DB, or prints help.
+ * @returns {Promise<void>}
+ */
 async function main() {
   const argv = process.argv.slice(2);
   if (argv.includes('--help') || argv.includes('-h')) {

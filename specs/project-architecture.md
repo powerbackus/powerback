@@ -139,14 +139,16 @@ models/
 
 ```
 1. User submits credentials via /api/users/login
-2. Passport.js validates credentials using local strategy
-3. JWT access token generated for immediate use
+2. Server loads the user and verifies password (Mongoose user model; no external auth middleware)
+3. JWT access token generated for immediate use (auth/tokenizer.js, jsonwebtoken)
 4. JWT refresh token generated and stored in HTTP-only cookie
-5. Refresh token saved to in-memory token store
+5. Refresh token saved to in-memory token store (auth/tokenStore.js)
 6. User data and access token returned to frontend
 7. Frontend AuthContext manages authentication state
 8. Protected routes become accessible via tokenizer.guard() middleware
 ```
+
+See [Authentication System](../docs/authentication-system.md) and [JWT authentication system](./jwt-authentication-system.md) for endpoint and token details.
 
 ### Donation Processing Flow
 
@@ -187,7 +189,7 @@ models/
 - **Express**: Web application framework
 - **MongoDB**: Document database
 - **Mongoose**: MongoDB object modeling
-- **Passport.js**: Authentication middleware
+- **JWT authentication**: `jsonwebtoken`, `auth/authbase.js`, `auth/tokenizer.js`, HTTP-only refresh cookies, in-memory refresh tracking (`auth/tokenStore.js`); see `docs/authentication-system.md`
 - **Joi**: Data validation library
 
 ### Development Tools
