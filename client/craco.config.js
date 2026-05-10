@@ -242,13 +242,21 @@ module.exports = {
     },
   },
   jest: {
-    configure: {
+    /**
+     * Merge path aliases and allow Jest to transform react-bootstrap ESM deps
+     * (see transformIgnorePatterns from react-scripts createJestConfig).
+     */
+    configure: (jestConfig) => ({
+      ...jestConfig,
       moduleNameMapper: {
+        ...(jestConfig.moduleNameMapper || {}),
         '^@Components/(.*)$': path.resolve(__dirname, 'src/components/$1'),
         '^@Hooks/(.*)$': path.resolve(__dirname, 'src/hooks/$1'),
+        '^@Hooks$': path.resolve(__dirname, 'src/hooks/index'),
         '^@CONSTANTS/(.*)$': path.resolve(__dirname, 'src/constants/$1'),
         '^@CONSTANTS$': path.resolve(__dirname, 'src/constants'),
         '^@Tuples/(.*)$': path.resolve(__dirname, 'src/tuples/$1'),
+        '^@Tuples$': path.resolve(__dirname, 'src/tuples/index'),
         '^@Contexts/(.*)$': path.resolve(__dirname, 'src/contexts/$1'),
         '^@Contexts$': path.resolve(__dirname, 'src/contexts'),
         '^@Utils/(.*)$': path.resolve(__dirname, 'src/utils/$1'),
@@ -256,11 +264,18 @@ module.exports = {
         '^@API/(.*)$': path.resolve(__dirname, 'src/api/$1'),
         '^@API$': path.resolve(__dirname, 'src/api'),
         '^@Interfaces/(.*)$': path.resolve(__dirname, 'src/interfaces/$1'),
+        '^@Interfaces$': path.resolve(__dirname, 'src/interfaces/index'),
         '^@Types/(.*)$': path.resolve(__dirname, 'src/types/$1'),
+        '^@Types$': path.resolve(__dirname, 'src/types/index'),
         '^@Pages/(.*)$': path.resolve(__dirname, 'src/pages/$1'),
         '^@Pages$': path.resolve(__dirname, 'src/pages'),
         '^@Shared$': path.resolve(__dirname, '../shared'),
+        '^axios$': path.resolve(__dirname, 'src/__mocks__/axios.js'),
       },
-    },
+      transformIgnorePatterns: [
+        '[/\\\\]node_modules[/\\\\](?!(react-bootstrap|@restart/ui|react-bootstrap-icons|uncontrollable)([/\\\\]|$)).+\\.(js|jsx|mjs|cjs|ts|tsx)$',
+        '^.+\\.module\\.(css|sass|scss)$',
+      ],
+    }),
   },
 };
