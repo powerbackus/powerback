@@ -122,6 +122,7 @@ jobs:
       - name: Deploy frontend to public_html (no sudo)
         run: |
           rsync -az --delete \
+            --exclude "/pfp/***" \
             --no-perms --no-owner --no-group \
             --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r \
             -e "ssh -p ${{ secrets.PROD_SSH_PORT }} -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes" \
