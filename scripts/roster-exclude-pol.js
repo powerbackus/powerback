@@ -35,40 +35,22 @@ const { Pol } = require('../models');
 const { requireLogger } = require('../services/logger');
 const {
   ROSTER_EXCLUSION_CATEGORIES,
+  ROSTER_EXCLUSION_LABELS,
 } = require('../services/congress/polRosterEligibility');
 
 const logger = requireLogger(__filename);
 
 /**
- * List choices for the exclusion category prompt (`value` is stored on `Pol`).
- * Filtered at runtime by {@link ROSTER_EXCLUSION_CATEGORIES} so the TUI cannot pick a
- * category the server does not treat as valid.
+ * Inquirer list choices: `value` is stored on `Pol.roster_exclusion_category`;
+ * `name` comes from {@link ROSTER_EXCLUSION_LABELS} (same module as categories).
  * @type {ReadonlyArray<{ value: string; name: string }>}
  */
-const CATEGORY_CHOICES = [
-  {
-    value: 'speaker_of_house',
-    name: 'Speaker of the House',
-  },
-  {
-    value: 'left_office',
-    name: 'Left office',
-  },
-  { value: 'deceased', name: 'Deceased' },
-  { value: 'resigned', name: 'Resigned' },
-  {
-    value: 'delegate_or_non_voting',
-    name: 'Delegate or non-voting',
-  },
-  {
-    value: 'manual_admin_exclusion',
-    name: 'Manual admin exclusion',
-  },
-  {
-    value: 'data_integrity_hold',
-    name: 'Data integrity hold',
-  },
-];
+const CATEGORY_CHOICES = Object.freeze(
+  ROSTER_EXCLUSION_CATEGORIES.map((value) => ({
+    value,
+    name: ROSTER_EXCLUSION_LABELS[value] || value,
+  }))
+);
 
 /**
  * Prints CLI usage to stdout and exits the help path without DB or prompts.
@@ -115,9 +97,7 @@ async function applyExclude(bioguideId, category, reason) {
   }
 
   const resolvedReason =
-    reason.trim() ||
-    CATEGORY_CHOICES.find((c) => c.value === category)?.name ||
-    category.replace(/_/g, ' ');
+    reason.trim() || ROSTER_EXCLUSION_LABELS[category] || category;
 
   await Pol.updateOne(
     { id: bioguideId },
@@ -246,9 +226,7 @@ async function collectPlan(prefillBioguide) {
       type: 'list',
       name: 'category',
       message: 'Exclusion category:',
-      choices: CATEGORY_CHOICES.filter((c) =>
-        ROSTER_EXCLUSION_CATEGORIES.includes(c.value)
-      ),
+      choices: [...CATEGORY_CHOICES],
       default:
         CATEGORY_CHOICES.find((c) => c.value === 'manual_admin_exclusion')
           ?.value ?? 'manual_admin_exclusion',

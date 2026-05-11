@@ -21,14 +21,24 @@ const POL_ROSTER_EXCLUDED_USER_MESSAGE =
  * @type {readonly string[]}
  */
 const ROSTER_EXCLUSION_CATEGORIES = Object.freeze([
+  'delegate_or_non_voting',
+  'manual_admin_exclusion',
+  'data_integrity_hold',
   'speaker_of_house',
   'left_office',
   'deceased',
   'resigned',
-  'delegate_or_non_voting',
-  'manual_admin_exclusion',
-  'data_integrity_hold',
 ]);
+
+const ROSTER_EXCLUSION_LABELS = Object.freeze({
+  delegate_or_non_voting: 'Non-voting delegate',
+  manual_admin_exclusion: 'Unavailable by platform review',
+  data_integrity_hold: 'Pending data review',
+  speaker_of_house: 'Speaker of the House',
+  left_office: 'No longer in office',
+  deceased: 'No longer serving',
+  resigned: 'Resigned from office',
+});
 
 /**
  * Whether a Pol document is roster-excluded for new celebrations.
@@ -68,6 +78,7 @@ async function isPolRosterExcludedByBioguide(Pol, bioguideId) {
 module.exports = {
   POL_ROSTER_EXCLUDED_USER_MESSAGE,
   ROSTER_EXCLUSION_CATEGORIES,
+  ROSTER_EXCLUSION_LABELS,
   isPolDocumentRosterExcluded,
   isPolRosterExcludedByBioguide,
 };

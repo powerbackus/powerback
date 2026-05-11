@@ -56,7 +56,7 @@ module.exports = [
       },
       {
         q: "Why isn't my Representative/State listed?",
-        a: 'We only list Representatives that are facing serious, financed challengers to their seat according to campaign filings with the Federal Election Commission. In other words, your Representative is virtually unopposed this election. Run against them!',
+        a: 'We only list Representatives that are facing serious, financed challengers to their seat according to campaign filings with the Federal Election Commission. In other words, your Representative is virtually unopposed this election. Run against them! (In some cases, a member may also be unavailable because of procedural, data integrity, or platform safety rules.)',
         key: 3,
       },
       {

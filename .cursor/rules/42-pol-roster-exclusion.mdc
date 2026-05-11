@@ -31,6 +31,7 @@ priority: 3
 - New celebrations: `services/celebration/orchestrationService.js` rejects excluded `pol_id` before DB write and side effects.
 - Payment intent: `routes/api/payments.js` rejects excluded `pol_id` before Stripe / `createPayment`.
 - `controller/congress/vest.js` requires both `has_stakes` and not `roster_excluded` for payment validation.
+- Labels & categories: Exclusion categories and user-facing labels must come from `services/congress/polRosterEligibility.js` and `specs/pol-roster-exclusion.md`. Do not invent new labels in components, routes, emails, or scripts.
 
 ## User-facing errors
 
