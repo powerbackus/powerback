@@ -237,7 +237,10 @@ interface PowerbackAPI {
 
   // System Utilities
   getBTCAddress: () => Promise<AxiosResponse<{ address: string }>>;
-  notifyImgErr: (pol: string) => Promise<AxiosResponse<boolean>>;
+  notifyImgErr: (
+    pol: string,
+    report?: 'missing_local_webp' | 'no_usable_image'
+  ) => Promise<AxiosResponse<boolean>>;
   logFrontendError: (errorData: {
     message: string;
     stack?: string;
@@ -830,19 +833,23 @@ const API: PowerbackAPI = {
   // ===== SYSTEM UTILITIES =====
 
   /**
-   * Reports broken politician image to system administrators
-   * @param pol - Politician identifier with broken image
+   * Reports politician image issues to administrators (two-tier optional `report`).
+   * @param pol - Bioguide ID
+   * @param report - `missing_local_webp`: bundled webp failed (ops: add webp). `no_usable_image`: webp and JPG both failed.
    * @returns Promise indicating successful error report
    * @example
    * ```typescript
-   * const reported = await API.notifyImgErr('K000367');
-   * if (reported) {
-   *   console.log('Image error reported to administrators');
-   * }
+   * await API.notifyImgErr('K000367', 'missing_local_webp');
    * ```
    */
-  notifyImgErr: (pol: string): Promise<AxiosResponse<boolean>> => {
-    return axiosClient.put('sys/errors/img', { pol });
+  notifyImgErr: (
+    pol: string,
+    report?: 'missing_local_webp' | 'no_usable_image'
+  ): Promise<AxiosResponse<boolean>> => {
+    return axiosClient.put('sys/errors/img', {
+      pol,
+      ...(report ? { report } : {}),
+    });
   },
 
   /**

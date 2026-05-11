@@ -62,6 +62,48 @@ Promotion process:
 
 **Environment:** Ensure `MONGODB_URI` points to the correct database. Use `.env.cli` or `.env.local` for credentials.
 
+## House headshot files (`pfp` WebP sync)
+
+After new House members exist in live `pols`, bundled headshots should appear as `{BIOGUIDE_ID}.webp` where the app serves `pfp/` (locally `client/public/pfp/`; on the VPS use your **persistent** directory, e.g. `/var/lib/powerback/pfp` or the path nginx serves).
+
+**Script:** `scripts/pfp-sync.js` (also `npm run pfp-sync`)
+
+- Reads **`pols`** with `roles.0.chamber` = `House`, `has_stakes: true`, and `roster_excluded` not true (aligned with selectable House roster / donation funnel).
+- For each bioguide, if `{id}.webp` is missing or zero-byte (unless `--force`), downloads the official House Clerk **`POL_IMG_FALLBACK_URL`** JPG (default matches the client clerk base), resizes to **227×277** (cover), encodes **WebP** with a quality sweep targeting **≤ 10 KB** (may exceed slightly at lowest quality; see logs), then writes **`{id}.webp`** atomically.
+- **Rate limit:** ~400 ms between downloads toward `clerk.house.gov`.
+
+**Environment**
+
+| Variable                                                   | Purpose                                                                                                       |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `MONGODB_URI`                                              | Required (same as other CLI tools).                                                                           |
+| `PFP_SYNC_OUT_DIR`                                         | Output directory (absolute path on VPS). Default: repo `client/public/pfp`.                                   |
+| `POL_IMG_FALLBACK_URL` or `REACT_APP_POL_IMG_FALLBACK_URL` | JPG base URL (must end with `/` or the script normalizes). Default: `https://clerk.house.gov/images/members/` |
+
+**Examples**
+
+```bash
+# Preview actions (no writes, no JPG download for encoding — logs would-fetch only)
+npm run pfp-sync -- --dry-run
+
+# Sync missing WebPs for all has_stakes House pols (writes under PFP_SYNC_OUT_DIR or client/public/pfp)
+npm run pfp-sync
+
+# Only specific bioguides (must still be House + has_stakes + not roster_excluded in DB)
+npm run pfp-sync -- M001246 F000485
+
+# Regenerate even when .webp exists; exit 1 if any download/encode failed (for cron alerting)
+npm run pfp-sync -- --force --strict
+```
+
+**Cron (VPS):** Run on the host that **owns** the persistent `pfp` tree, e.g. hourly after `houseWatcher` or after you promote docking pols:
+
+`15 * * * * cd /opt/powerback/app && PFP_SYNC_OUT_DIR=/var/lib/powerback/pfp /usr/bin/npm run pfp-sync -- --strict >> /var/log/powerback-pfp-sync.log 2>&1`
+
+**GitHub Actions (production deploy):** `.github/workflows/ci_cd.yml` runs `npm run pfp-sync -- --strict` on the deploy runner after the client build. Add repository secret **`MONGODB_URI`** (production). Optional secret **`PFP_SYNC_OUT_DIR`**: if unset, the script defaults to `client/public/pfp`; if set, it overrides. A follow-up step rsyncs `./client/public/pfp/` to the same host as the static site, at `PROD_PUBLIC_HTML_PATH` from secrets with `/pfp/` appended.
+
+New members promoted from `docking_pols` are picked up on the next run; no manual copy step is required once this job is scheduled.
+
 ## Rollback
 
 If a promotion causes issues, restore from the most recent backup:
@@ -88,6 +130,7 @@ If Senators appear in the docking collection, the Congress.gov API's `currentMem
 ## Related Files
 
 - `scripts/add-members-to-docking.js` -- Staging script for specific members
+- `scripts/pfp-sync.js` -- House headshot WebP sync (see [House headshot files](#house-headshot-files-pfp-webp-sync))
 - `services/utils/dockingManager.js` -- DockingManager class and CLI
 - `jobs/houseWatcher.js` -- Background job that auto-stages new members
 - `models/Pol.js` -- Pol schema definition (`has_stakes`, policy `roster_excluded`; see [`specs/pol-roster-exclusion.md`](../specs/pol-roster-exclusion.md))

@@ -59,8 +59,17 @@ span.celebration-condition {
   min-height: 41.08px;
 }
 
-.checkout-card .body-top img.card-img-top {
+.checkout-card .body-top img.card-img-top,
+.checkout-card .body-top .headshot-container img.headshot {
   border: 1px solid var(--primary);
+}
+
+.checkout-card .body-top .headshot-container .checkout-headshot.headshot {
+  cursor: default;
+}
+
+.checkout-card .body-top .headshot-container .checkout-headshot.headshot:active {
+  padding: 0;
 }
 
 .checkout-card .list-group-item {
@@ -213,7 +222,8 @@ span.celebration-condition {
     min-width: 25vh;
   }
 
-  .checkout-card .body-top img.card-img-top {
+  .checkout-card .body-top img.card-img-top,
+  .checkout-card .body-top .headshot-container img.headshot {
     width: 20.6vh;
   }
 

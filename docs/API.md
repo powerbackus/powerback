@@ -71,7 +71,7 @@ Each category is a link to its [`Routes`](../routes/) or relevant folder.
 
 ### **[`Sys`](../routes/api/sys.js)**
 
-- [`notifyImgErr`](../controller/sys/notifyImageErr.js) sends an internal system email if a Politician's profile picture is broken/missing (uses refactored email system)
+- [`notifyImgErr`](../controller/sys/notifyImageErr.js) sends an internal system email for politician headshots; optional body `report` of `missing_local_webp` (add bundled webp) or `no_usable_image` (webp and Congress JPG fallback both failed)
 - [`getConstants`](../controller/sys/pullConstants.js) retrieves private constant values stored on the server
 
 ### **[`Webhooks`](../routes/api/webhooks.js)**

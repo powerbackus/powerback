@@ -42,19 +42,14 @@ const router = require('express').Router(),
  * or other image assets.
  *
  * @param {Object} req.body - Error report data
- * @param {string} req.body.imageUrl - URL of the failed image
- * @param {string} req.body.error - Error message or description
- * @param {string} req.body.context - Additional context about the error
+ * @param {string} req.body.pol - Bioguide ID (validated pattern)
+ * @param {'missing_local_webp'|'no_usable_image'} [req.body.report] - Optional: email subject/body tier
  * @returns {Object} Error report confirmation
  *
  * @example
  * ```javascript
  * PUT /api/sys/errors/img
- * {
- *   "imageUrl": "https://example.com/politician-image.jpg",
- *   "error": "404 Not Found",
- *   "context": "Politician profile image failed to load"
- * }
+ * { "pol": "M001246", "report": "missing_local_webp" }
  * ```
  */
 
