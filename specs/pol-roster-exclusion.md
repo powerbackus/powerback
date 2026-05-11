@@ -80,6 +80,24 @@ Operators with DB access can set or clear `roster_excluded` (and `roster_exclusi
 
 **Entry point (from repo root):** `node scripts/roster-exclude-pol.js` (optional bioguide positional to prefill the first prompt; `node scripts/roster-exclude-pol.js --help` for a short summary).
 
+## Event-triggered eligibility communications
+
+POWERBACK may notify affected users when a politician’s eligibility or visibility changes in a way that affects new Celebrations.
+
+These communications must distinguish between:
+
+1. `has_stakes` changes  
+   Race-status changes derived from public FEC data, such as no longer detecting a qualifying active challenger.
+
+2. `roster_excluded` changes  
+   Platform-policy changes, such as Speaker exclusion, left office, resignation, death, manual exclusion, or data integrity hold.
+
+These emails should be neutral status updates. They must not imply that POWERBACK is judging the politician, resolving an existing Celebration, or changing previously accepted Celebration rules unless a separate resolution process actually applies.
+
+Default safety line:
+
+> This affects new Celebrations only. Any existing Celebration continues to follow the rules shown when it was confirmed unless POWERBACK sends a separate resolution notice.
+
 ## Invariants
 
 - Watchers may continue to set `has_stakes` globally; they must not be required to implement policy exclusions.
