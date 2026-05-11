@@ -13,7 +13,7 @@ module.exports = {
       )}
       
       ${emailUtils.createParagraph(
-        'This is an automated notification about an image loading issue. The system will attempt to resolve this automatically.'
+        'This is an automated notification about an image loading issue. Scheduled jobs sync missing House headshots when eligible; excluded or non-stakes members may not have a local WebP.'
       )}
     `;
 

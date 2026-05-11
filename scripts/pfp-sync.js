@@ -2,10 +2,11 @@
  * @fileoverview Sync House member headshots to local WebP files under pfp/.
  *
  * Queries live `pols` for House carousel roster (`has_stakes`, not
- * `roster_excluded`), downloads the
- * official House Clerk JPG per bioguide ID, resizes/covers to carousel dimensions,
- * encodes WebP (target size cap with quality sweep), and writes `{id}.webp`
- * atomically. Intended for VPS cron after docking promotion or on a schedule.
+ * `roster_excluded`), downloads the official House Clerk JPG per bioguide ID,
+ * resizes/covers to carousel dimensions, encodes WebP (target size cap with
+ * quality sweep), and writes `{id}.webp` atomically. Invoked via
+ * `npm run pfp-sync`, and from the server watcher chain (`jobs/runWatchers.js`)
+ * after `challengersWatcher` so `has_stakes` is fresh.
  *
  * @module scripts/pfp-sync
  */
@@ -17,17 +18,8 @@ const axios = require('axios');
 const sharp = require('sharp');
 const mongoose = require('mongoose');
 
-const envCliPath = path.resolve(__dirname, '../.env.cli');
-const envLocalPath = path.resolve(__dirname, '../.env.local');
-if (fs.existsSync(envCliPath)) {
-  require('dotenv').config({ path: envCliPath });
-} else if (fs.existsSync(envLocalPath)) {
-  require('dotenv').config({ path: envLocalPath });
-} else {
-  require('dotenv').config();
-}
-
 const { connect, disconnect } = require('../services/utils/db');
+const { getResolvedPfpOutDir } = require('../services/utils/pfpOutDir');
 const { Pol } = require('../models');
 const { requireLogger } = require('../services/logger');
 
@@ -42,13 +34,29 @@ const ROSTER_PFP_QUERY = {
   has_stakes: true,
 };
 const DEFAULT_CLERK_BASE = 'https://clerk.house.gov/images/members/';
-const DEFAULT_OUT_DIR = path.resolve(__dirname, '../client/public/pfp');
 const WIDTH = 227;
 const HEIGHT = 277;
 const MAX_WEBP_BYTES = 10 * 1024;
 const DOWNLOAD_GAP_MS = 400;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Loads dotenv for CLI runs only (does not override server env when required in-process).
+ *
+ * @returns {void}
+ */
+function loadCliDotenv() {
+  const envCliPath = path.resolve(__dirname, '../.env.cli');
+  const envLocalPath = path.resolve(__dirname, '../.env.local');
+  if (fs.existsSync(envCliPath)) {
+    require('dotenv').config({ path: envCliPath });
+  } else if (fs.existsSync(envLocalPath)) {
+    require('dotenv').config({ path: envLocalPath });
+  } else {
+    require('dotenv').config();
+  }
+}
 
 /**
  * @param {string} base
@@ -185,15 +193,28 @@ function parseArgs(argv) {
   return { flags, ids };
 }
 
-async function main() {
-  const [, , ...argv] = process.argv;
+/**
+ * Sync WebP headshots for eligible House pols (and optional CLI bioguide subset).
+ *
+ * @param {object} [options]
+ * @param {string[]} [options.argv] - Args after script name (flags + optional bioguides)
+ * @param {boolean} [options.manageConnection=true] - When false, skip connect/disconnect/dotenv (in-process / watchers).
+ * @returns {Promise<{ counts: object, total: number, flags: object }>}
+ */
+async function runPfpSync(options = {}) {
+  const { argv = [], manageConnection = true } = options;
+
+  if (manageConnection) {
+    loadCliDotenv();
+  }
+
   const { flags, ids: cliIds } = parseArgs(argv);
 
   const clerkBase =
     process.env.POL_IMG_FALLBACK_URL ||
     process.env.REACT_APP_POL_IMG_FALLBACK_URL ||
     DEFAULT_CLERK_BASE;
-  const outDir = path.resolve(process.env.PFP_SYNC_OUT_DIR || DEFAULT_OUT_DIR);
+  const outDir = getResolvedPfpOutDir();
 
   await fsp.mkdir(outDir, { recursive: true });
 
@@ -205,65 +226,80 @@ async function main() {
   };
   logger.info('pfp-sync starting', loggerMeta);
 
-  await connect(logger);
+  if (manageConnection) {
+    await connect(logger);
+  }
 
-  const query =
-    cliIds.length > 0
-      ? { id: { $in: cliIds }, ...ROSTER_PFP_QUERY }
-      : { ...ROSTER_PFP_QUERY };
+  try {
+    const query =
+      cliIds.length > 0
+        ? { id: { $in: cliIds }, ...ROSTER_PFP_QUERY }
+        : { ...ROSTER_PFP_QUERY };
 
-  const docs = await Pol.find(query).select('id').lean().exec();
-  const idList = [
-    ...new Set(docs.map((d) => d.id).filter((id) => BIOGUIDE_RE.test(id))),
-  ].sort();
+    const docs = await Pol.find(query).select('id').lean().exec();
+    const idList = [
+      ...new Set(docs.map((d) => d.id).filter((id) => BIOGUIDE_RE.test(id))),
+    ].sort();
 
-  if (cliIds.length > 0) {
-    const missing = cliIds.filter((id) => !idList.includes(id));
-    for (const m of missing) {
-      logger.warn(
-        `Bioguide ${m} not found as House has_stakes pol with roster_excluded clear (skipped)`
+    if (cliIds.length > 0) {
+      const missing = cliIds.filter((id) => !idList.includes(id));
+      for (const m of missing) {
+        logger.warn(
+          `Bioguide ${m} not found as House has_stakes pol with roster_excluded clear (skipped)`
+        );
+      }
+    }
+
+    const counts = {
+      written: 0,
+      skipped: 0,
+      dry_run: 0,
+      download_failed: 0,
+      encode_failed: 0,
+    };
+
+    let first = true;
+    for (const id of idList) {
+      if (!first) {
+        await sleep(DOWNLOAD_GAP_MS);
+      }
+      first = false;
+      const result = await syncOneBioguide(
+        {
+          outDir,
+          clerkBase,
+          dryRun: flags.dryRun,
+          force: flags.force,
+        },
+        id
       );
+      counts[result] += 1;
     }
-  }
 
-  const counts = {
-    written: 0,
-    skipped: 0,
-    dry_run: 0,
-    download_failed: 0,
-    encode_failed: 0,
-  };
+    logger.info('pfp-sync finished', { ...counts, total: idList.length });
 
-  let first = true;
-  for (const id of idList) {
-    if (!first) {
-      await sleep(DOWNLOAD_GAP_MS);
+    if (manageConnection && flags.strict) {
+      const failures = counts.download_failed + counts.encode_failed;
+      if (failures > 0) {
+        process.exitCode = 1;
+      }
     }
-    first = false;
-    const result = await syncOneBioguide(
-      {
-        outDir,
-        clerkBase,
-        dryRun: flags.dryRun,
-        force: flags.force,
-      },
-      id
-    );
-    counts[result] += 1;
-  }
 
-  await disconnect();
-
-  logger.info('pfp-sync finished', { ...counts, total: idList.length });
-
-  const failures = counts.download_failed + counts.encode_failed;
-  if (flags.strict && failures > 0) {
-    process.exitCode = 1;
+    return { counts, total: idList.length, flags };
+  } finally {
+    if (manageConnection) {
+      await disconnect();
+    }
   }
 }
 
-main().catch((err) => {
-  logger.error(`pfp-sync fatal: ${err.message}`);
-  process.exitCode = 1;
-  mongoose.disconnect().catch(() => {});
-});
+if (require.main === module) {
+  const [, , ...argv] = process.argv;
+  runPfpSync({ manageConnection: true, argv }).catch((err) => {
+    logger.error(`pfp-sync fatal: ${err.message}`);
+    process.exitCode = 1;
+    mongoose.disconnect().catch(() => {});
+  });
+}
+
+module.exports = { runPfpSync, getResolvedPfpOutDir };

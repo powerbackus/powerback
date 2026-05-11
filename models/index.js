@@ -5,4 +5,5 @@ module.exports = {
   ExUser: require('./ExUser'),
   Applicant: require('./Applicant'),
   Celebration: require('./Celebration'),
+  PfpImageErrorAlert: require('./PfpImageErrorAlert'),
 };

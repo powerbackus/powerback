@@ -1,36 +1,25 @@
 /**
- * @fileoverview Image Error Notification Controller
+ * @fileoverview Image error notification controller
  *
- * This controller handles reporting image loading errors from the frontend.
- * It sends error notifications to administrators when politician profile images
- * or other image assets fail to load, helping identify and fix image issues.
- *
- * BUSINESS LOGIC
- *
- * ERROR REPORTING
- * - Receives image error reports from frontend
- * - Sends notification email to administrator
- * - Includes politician information for context
- * - Helps identify broken image URLs or missing assets
- *
- * EMAIL NOTIFICATION
- * - Sends to FIRST_CITIZEN (primary admin email)
- * - Uses Image error email template
- * - Includes politician ID/name for reference
- *
- * DEPENDENCIES
- * - controller/comms: Email sending
- * - controller/comms/emails: Email templates
- * - process.env.EMAIL_JONATHAN_USER: Administrator email address
+ * Reports client-side pfp load failures (bioguide) to admins with throttling:
+ * skips email when the WebP already exists on disk, and dedupes alerts per
+ * bioguide within a 24h window using `PfpImageErrorAlert`.
  *
  * @module controller/sys/notifyImageErr
- * @requires ../comms
- * @requires ../comms/emails
  */
 
 const path = require('path');
+const fs = require('fs');
+const fsp = fs.promises;
+const mongoose = require('mongoose');
+
 const { emails } = require('../comms/emails');
 const { sendEmail } = require('../comms');
+const { requireLogger } = require('../../services/logger');
+const { getResolvedPfpOutDir } = require('../../services/utils/pfpOutDir');
+const { PfpImageErrorAlert } = require('../../models');
+
+const logger = requireLogger(__filename);
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config({
@@ -40,28 +29,126 @@ if (process.env.NODE_ENV !== 'production') {
 
 const FIRST_CITIZEN = process.env.EMAIL_JONATHAN_USER;
 
+/** Duplicate image-error emails for the same bioguide are suppressed within this window. */
+const ALERT_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+
+const BIOGUIDE_RE = /^[A-Z]\d{6}$/;
+
+/**
+ * @param {string} raw
+ * @returns {string|null} Uppercase bioguide or null if invalid
+ */
+function normalizePolId(raw) {
+  const s = String(raw || '')
+    .trim()
+    .toUpperCase();
+  if (!BIOGUIDE_RE.test(s)) {
+    return null;
+  }
+  return s;
+}
+
+/**
+ * @param {string} polId
+ * @param {string} pfpDir
+ * @returns {Promise<boolean>}
+ */
+async function servedWebpExists(polId, pfpDir) {
+  try {
+    const st = await fsp.stat(path.join(pfpDir, `${polId}.webp`));
+    return st.size > 0;
+  } catch {
+    return false;
+  }
+}
+
 module.exports = {
   /**
-   * Sends image error notification to administrator
+   * Sends image error notification to administrator when appropriate.
    *
-   * This function receives image loading error reports from the frontend and
-   * sends a notification email to the administrator with the politician information
-   * to help identify and fix the image issue.
-   *
-   * @param {Object} req - Express request object
-   * @param {Object} req.body - Error report data
-   * @param {string} req.body.pol - Politician ID or name that failed to load image
-   * @param {Object} res - Express response object
-   * @returns {Promise<void>} Resolves when notification is sent
-   *
-   * @example
-   * ```javascript
-   * const { notifyImageErr } = require('./controller/sys/notifyImageErr');
-   * await notifyImageErr(req, res);
-   * ```
+   * @param {Object} req - Express request
+   * @param {Object} req.body
+   * @param {string} req.body.pol - Bioguide ID (validated by Joi)
+   * @param {Object} res - Express response
+   * @returns {Promise<void>}
    */
-  notifyImageErr: (req, res) => {
-    const sent = sendEmail(FIRST_CITIZEN, emails.Image, req.body.pol);
-    if (sent) res.json(true);
+  notifyImageErr: async (req, res, next) => {
+    try {
+      const polId = normalizePolId(req.body.pol);
+      if (!polId) {
+        logger.warn(
+          'notifyImageErr: invalid or missing pol id after normalize',
+          {
+            raw: req.body.pol,
+          }
+        );
+        res.json(true);
+        return;
+      }
+
+      const pfpDir = getResolvedPfpOutDir();
+
+      if (await servedWebpExists(polId, pfpDir)) {
+        logger.info(
+          'notifyImageErr: suppressed (webp already exists on disk)',
+          {
+            polId,
+            pfpDir,
+          }
+        );
+        res.json(true);
+        return;
+      }
+
+      const dbReady = mongoose.connection.readyState === 1;
+      if (dbReady) {
+        const prior = await PfpImageErrorAlert.findOne({ polId })
+          .select('lastSentAt')
+          .lean()
+          .exec();
+        if (
+          prior?.lastSentAt &&
+          Date.now() - new Date(prior.lastSentAt).getTime() < ALERT_COOLDOWN_MS
+        ) {
+          logger.info('notifyImageErr: suppressed (cooldown)', {
+            polId,
+            lastSentAt: prior.lastSentAt,
+          });
+          res.json(true);
+          return;
+        }
+      } else {
+        logger.warn(
+          'notifyImageErr: MongoDB not connected; skipping cooldown dedupe'
+        );
+      }
+
+      if (!FIRST_CITIZEN) {
+        logger.warn('notifyImageErr: EMAIL_JONATHAN_USER not set; skip send');
+        res.json(true);
+        return;
+      }
+
+      await sendEmail(FIRST_CITIZEN, emails.Image, polId);
+
+      if (dbReady) {
+        try {
+          await PfpImageErrorAlert.findOneAndUpdate(
+            { polId },
+            { $set: { lastSentAt: new Date() } },
+            { upsert: true, new: true }
+          );
+        } catch (persistErr) {
+          logger.error('notifyImageErr: failed to persist alert cooldown row', {
+            polId,
+            error: persistErr.message,
+          });
+        }
+      }
+
+      res.json(true);
+    } catch (err) {
+      next(err);
+    }
   },
 };

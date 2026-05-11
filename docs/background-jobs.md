@@ -20,9 +20,10 @@ All background jobs are orchestrated through the `runWatchers` system, which:
 
 1. **houseWatcher** - House membership monitoring
 2. **challengersWatcher** - Challenger status tracking
-3. **checkHJRes54** - Bill status monitoring
-4. **electionDatesUpdater** - Election dates synchronization
-5. **defunctCelebrationWatcher** - Defunct celebration conversion
+3. **pfpSync** - House headshot WebP sync (`scripts/pfp-sync`, after stakes are fresh)
+4. **checkHJRes54** - Bill status monitoring
+5. **electionDatesUpdater** - Election dates synchronization
+6. **defunctCelebrationWatcher** - Defunct celebration conversion
 
 ## Individual Jobs
 
@@ -85,6 +86,12 @@ All background jobs are orchestrated through the `runWatchers` system, which:
 - Updates celebration status via StatusService
 
 **Social announcements**: Posts `challengers` (new challenger) and `incumbents` (incumbent dropout) events to the social webhook (see [Social Announcements Webhooks](./social-announcements-webhooks.md)).
+
+### House headshot WebP sync (`pfpSync` / `scripts/pfp-sync.js`)
+
+**Purpose**: Writes missing `{bioguide}.webp` files for House members on the selectable roster (`has_stakes`, not `roster_excluded`), using the same logic as `npm run pfp-sync`.
+
+**Scheduling**: Invoked from `jobs/runWatchers.js` after `challengersWatcher` so `has_stakes` is up to date. Output directory: `PFP_SYNC_OUT_DIR` if set, else `STATIC_PUBLIC_DIR/pfp`, else `client/public/pfp`. Failures are logged and do not block later watchers.
 
 ### H.J.Res.54 Bill Watcher (`checkHJRes54.js`)
 
