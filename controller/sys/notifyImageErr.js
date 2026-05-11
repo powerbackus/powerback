@@ -50,8 +50,7 @@ module.exports = {
    *
    * @param {Object} req - Express request object
    * @param {Object} req.body - Error report data
-   * @param {string} req.body.pol - Bioguide ID (e.g. M001246)
-   * @param {'missing_local_webp'|'no_usable_image'} [req.body.report] - Optional tier for email copy
+   * @param {string} req.body.pol - Politician ID or name that failed to load image
    * @param {Object} res - Express response object
    * @returns {Promise<void>} Resolves when notification is sent
    *
@@ -62,8 +61,7 @@ module.exports = {
    * ```
    */
   notifyImageErr: (req, res) => {
-    const { pol, report } = req.body;
-    const sent = sendEmail(FIRST_CITIZEN, emails.Image, pol, report);
+    const sent = sendEmail(FIRST_CITIZEN, emails.Image, req.body.pol);
     if (sent) res.json(true);
   },
 };

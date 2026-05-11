@@ -8,7 +8,6 @@ import { useProfile, useDonationState, type PolData } from '@Contexts';
 import { APP, CELEBRATE_COPY, ACCOUNT_COPY } from '@CONSTANTS';
 import type { PaymentProps, ProfileProp } from '@Types';
 import { InfoTooltip } from '@Components/modals';
-import Headshot from '@Components/interactive/PolCarousel/PolSelection/Headshot';
 import type { DisplayName } from '@Interfaces';
 import accounting from 'accounting';
 import PaymentForm from '../form';
@@ -178,12 +177,15 @@ const Checkout = ({
                 className={'checkout-headshot'}
               />
             ) : (
-              <Headshot
-                cls={'checkout-headshot'}
-                id={(polData as PolData).id}
-                imgClassName={'card-img-top'}
-                name={(polData as PolData).name}
-                src={(polData as PolData).id}
+              <Card.Img
+                title={`pending celebration - politician selection ${polData.name}`}
+                alt={`The official Congressional headshot of ${polData.name}.`}
+                aria-label={'Pending celebration - politician profile picture'}
+                className={'checkout-headshot pol-headshot-selected'}
+                src={`../pfp/${(polData as PolData).id}.webp`}
+                loading={'lazy'}
+                variant={'top'}
+                as={Image}
               />
             )}
           </Col>

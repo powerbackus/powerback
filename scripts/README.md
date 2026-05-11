@@ -19,7 +19,6 @@ Utility and automation scripts for the POWERBACK repo. Run from the **project ro
 - **audit-annotations.js** – Audit JSDoc/TSDoc and similar annotations.
 - **devXpub.js** – Generate a test extended public key for Bitcoin (see [Bitcoin Donations](../docs/bitcoin-donations.md)).
 - **add-members-to-docking.js** – Stage specific members for docking. See [Docking runbook](../docs/docking-pols-runbook.md).
-- **pfp-sync.js** – Download House Clerk JPGs for live `pols` (House, `has_stakes`, not `roster_excluded`), write optimized `{bioguide}.webp` under `PFP_SYNC_OUT_DIR` (default `client/public/pfp`). Flags: `--dry-run`, `--force`, `--strict`. See [Docking runbook – House headshot files](../docs/docking-pols-runbook.md#house-headshot-files-pfp-webp-sync). Run via `npm run pfp-sync`.
 - **roster-exclude-pol.js** – Interactive TUI (`inquirer`: lists and confirms) to set or clear `Pol.roster_excluded` by bioguide ID. Optional first argument prefills bioguide; no `--category` / `--reason` flags. Loads `MONGODB_URI` from `.env.cli` / `.env.local` / `.env` **only after** you confirm—cancel exits without connecting. **Walkthrough:** [USAGE-roster-exclude-pol.md](./USAGE-roster-exclude-pol.md). Policy: [Pol roster exclusion spec](../specs/pol-roster-exclusion.md).
 
 ## build/

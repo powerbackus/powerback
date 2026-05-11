@@ -79,15 +79,6 @@ jobs:
           npm ci
           CI=false npm run build
 
-      - name: Generate House pfp WebPs
-        env:
-          MONGODB_URI: ${{ secrets.MONGODB_URI }}
-        run: |
-          if [ -n "${{ secrets.PFP_SYNC_OUT_DIR }}" ]; then
-            export PFP_SYNC_OUT_DIR="${{ secrets.PFP_SYNC_OUT_DIR }}"
-          fi
-          npm run pfp-sync -- --strict
-
       - name: Install rsync + ssh
         run: sudo apt-get update && sudo apt-get install -y rsync openssh-client
 
@@ -136,15 +127,6 @@ jobs:
             -e "ssh -p ${{ secrets.PROD_SSH_PORT }} -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes" \
             ./client/build/ \
             ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }}:${{ secrets.PROD_PUBLIC_HTML_PATH }}
-
-      - name: Sync pfp WebPs to public_html/pfp
-        run: |
-          rsync -az \
-            --no-perms --no-owner --no-group \
-            --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r \
-            -e "ssh -p ${{ secrets.PROD_SSH_PORT }} -i ~/.ssh/id_ed25519 -o IdentitiesOnly=yes" \
-            ./client/public/pfp/ \
-            ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_HOST }}:${{ secrets.PROD_PUBLIC_HTML_PATH }}/pfp/
 
       - name: Install server deps (via SSH wrapper)
         run: |

@@ -1,6 +1,6 @@
 import React, { useMemo, useReducer } from 'react';
 import { Image } from 'react-bootstrap';
-import { polHeadshotCongressJpgSrc, polHeadshotLocalWebpSrc } from '@Utils';
+import { BACKUP_IMG } from '@CONSTANTS';
 import './style.css';
 
 type IconProps = {
@@ -19,9 +19,7 @@ const Icon = ({ donee, onHoldStatus }: IconProps) => {
 
   const imgsrc = useMemo(() => {
     if (!donee?.id) return undefined;
-    return backup
-      ? polHeadshotCongressJpgSrc(donee.id)
-      : polHeadshotLocalWebpSrc(donee.id);
+    return backup ? BACKUP_IMG + donee.id + '.jpg' : `../pfp/${donee.id}.webp`;
   }, [donee, backup]);
 
   return (
