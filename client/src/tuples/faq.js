@@ -18,8 +18,8 @@ module.exports = [
     topic: 'How It Works',
     questions: [
       {
-        q: 'What is POWERBACK.us?',
-        a: `POWERBACK.us ("POWERBACK") is a donation platform that gives small-dollar donors real leverage. Instead of giving money directly to campaigns, your donations are kept in a segregated account and only forwarded to the campaign when the conditional rules you agreed to are satisfied. This creates accountability and ensures your money goes to politicians who actually represent your interests.`,
+        q: 'What is a Celebration?',
+        a: `A Celebration is your conditional donation. It is kept in a segregated account under rules you accept before confirming. The money is only delivered to a candidate's campaign if the required public event is verified in the official record, such as a recorded vote or another specific legislative action. POWERBACK does not consider motives, promises, bill merits, or later political outcomes.`,
         key: 1,
       },
       {

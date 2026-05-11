@@ -29,15 +29,8 @@
       "id": "typescript-frontend",
       "description": "TypeScript patterns for frontend TypeScript files",
       "files": [".cursor/rules/09-typescript-patterns.mdc"],
-      "globs": [
-        "client/src/**/*.ts",
-        "client/src/**/*.tsx"
-      ],
-      "excludeGlobs": [
-        "**/*.test.ts",
-        "**/*.test.tsx",
-        "**/*.spec.ts"
-      ],
+      "globs": ["client/src/**/*.ts", "client/src/**/*.tsx"],
+      "excludeGlobs": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts"],
       "alwaysApply": false,
       "priority": 2
     },
@@ -113,10 +106,7 @@
       "id": "api-routes",
       "description": "API route patterns for backend",
       "files": [".cursor/rules/05-api-patterns.mdc"],
-      "globs": [
-        "routes/api/**/*",
-        "routes/api/**/*.js"
-      ],
+      "globs": ["routes/api/**/*", "routes/api/**/*.js"],
       "alwaysApply": false,
       "priority": 3
     },
@@ -124,10 +114,7 @@
       "id": "backend-services",
       "description": "Backend service layer patterns",
       "files": [".cursor/rules/06-backend-services.mdc"],
-      "globs": [
-        "services/**/*",
-        "services/**/*.js"
-      ],
+      "globs": ["services/**/*", "services/**/*.js"],
       "alwaysApply": false,
       "priority": 3
     },
@@ -135,10 +122,7 @@
       "id": "controllers",
       "description": "Controller patterns",
       "files": [".cursor/rules/13-controllers.mdc"],
-      "globs": [
-        "controller/**/*",
-        "controller/**/*.js"
-      ],
+      "globs": ["controller/**/*", "controller/**/*.js"],
       "alwaysApply": false,
       "priority": 3
     },
@@ -146,10 +130,7 @@
       "id": "models",
       "description": "Mongoose model patterns",
       "files": [".cursor/rules/12-models.mdc"],
-      "globs": [
-        "models/**/*",
-        "models/**/*.js"
-      ],
+      "globs": ["models/**/*", "models/**/*.js"],
       "alwaysApply": false,
       "priority": 3
     },
@@ -157,11 +138,7 @@
       "id": "validation-backend",
       "description": "Backend validation patterns",
       "files": [".cursor/rules/08-validation.mdc"],
-      "globs": [
-        "validation/**/*",
-        "validation/**/*.js",
-        "validation/joi/**/*"
-      ],
+      "globs": ["validation/**/*", "validation/**/*.js", "validation/joi/**/*"],
       "alwaysApply": false,
       "priority": 3
     },
@@ -235,10 +212,7 @@
       "id": "testing-e2e",
       "description": "E2E testing patterns",
       "files": [".cursor/rules/11-testing.mdc"],
-      "globs": [
-        "tests/**/*.spec.ts",
-        "tests/**/*.spec.js"
-      ],
+      "globs": ["tests/**/*.spec.ts", "tests/**/*.spec.js"],
       "alwaysApply": false,
       "priority": 4
     },
@@ -279,6 +253,27 @@
         "models/Celebration.js",
         "client/src/pages/**/Celebrate/**/*",
         "client/src/pages/**/Lobby/**/*"
+      ],
+      "alwaysApply": false,
+      "priority": 3
+    },
+    {
+      "id": "domain-celebration-trigger-compliance",
+      "description": "Celebration trigger compliance rules for conditional public-record verification",
+      "files": [".cursor/rules/43-celebration-trigger-rules.mdc"],
+      "globs": [
+        "routes/api/celebrations.js",
+        "controller/celebrations/**/*",
+        "controller/payments/**/*",
+        "services/celebration/**/*",
+        "models/Celebration.js",
+        "client/src/pages/**/Celebrate/**/*",
+        "client/src/pages/**/Lobby/**/*",
+        "client/src/pages/**/Payment/**/*",
+        "client/src/pages/**/TipAsk/**/*",
+        "client/src/**/faq*",
+        "client/src/**/FAQ/**/*",
+        "docs/compliance/**/*"
       ],
       "alwaysApply": false,
       "priority": 3
@@ -362,10 +357,7 @@
         "package.json",
         "webpack.config.js"
       ],
-      "excludeGlobs": [
-        "node_modules/**/*",
-        "package-lock.json"
-      ],
+      "excludeGlobs": ["node_modules/**/*", "package-lock.json"],
       "alwaysApply": false,
       "priority": 2
     }

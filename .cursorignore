@@ -40,7 +40,14 @@ ecosystem.*.config
 
 # Git and Cursor internals
 .git/
-.cursor/
+
+# Ignore Cursor internals by default, but keep project rules/skills visible
+.cursor/*
+!.cursor/rules/
+!.cursor/rules/**
+!.cursor/skills/
+!.cursor/skills/**
+!.cursor/rules.json
 
 # Project-specific: runtime snapshots/deltas (keep dirs, ignore contents)
 snapshots/*

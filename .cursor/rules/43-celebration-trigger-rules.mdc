@@ -1,0 +1,26 @@
+---
+description: Use when editing POWERBACK Celebration, checkout, payment, trigger verification, condition, FAQ, or compliance-related code/copy.
+globs:
+  - 'client/src/**/*'
+  - 'controllers/**/*'
+  - 'controller/**/*'
+  - 'services/**/*'
+  - 'models/**/*'
+  - 'jobs/**/*'
+  - 'docs/compliance/**/*'
+alwaysApply: false
+---
+
+# POWERBACK Celebration Trigger Rules
+
+When editing Celebration, checkout, payment, trigger verification, condition, FAQ, or compliance-related code/copy:
+
+- A Celebration resolves only by checking whether the required public event appears in the official public record.
+- POWERBACK does not evaluate motives, promises, bill merits, political strategy, or later political outcomes.
+- Do not describe Celebration funds as going to a politician personally. Use "candidate's campaign" or "campaign committee."
+- Avoid the word "escrow" unless the user explicitly asks for legal comparison language.
+- Prefer: segregated account, conditional rules, public trigger, official record, required public event.
+- Do not add private-bargaining, reward, intent-evaluation, or subjective-merit language.
+
+Reference spec:
+`docs/compliance/celebration-trigger-rules.md`
