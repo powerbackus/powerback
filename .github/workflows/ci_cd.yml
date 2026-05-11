@@ -194,20 +194,23 @@ jobs:
     if: github.ref == 'refs/heads/main'
     steps:
       - name: Notify Social (Bluesky + other)
+        continue-on-error: true
+        env:
+          SOCIAL_WEBHOOK_URL: ${{ secrets.SOCIAL_WEBHOOK_URL }}
+          SOCIAL_WEBHOOK_API_KEY: ${{ secrets.SOCIAL_WEBHOOK_API_KEY }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
         run: |
           SHORT_SHA="${GITHUB_SHA::7}"
-          COMMIT_MSG="${{ github.event.head_commit.message }}"
           RUN_URL="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           DEDUPE_KEY="deploy:${GITHUB_RUN_ID}"
 
-          # first line of commit message only
-          COMMIT_ONELINE=$(printf "%s" "$COMMIT_MSG" | head -n 1)
+          COMMIT_ONELINE=$(printf '%s\n' "$COMMIT_MSG" | head -n 1)
 
           TEXT="Deploy ${SHORT_SHA}: ${COMMIT_ONELINE} | ${RUN_URL}"
           PAYLOAD=$(jq -n --arg t "$TEXT" --arg dk "$DEDUPE_KEY" '{event_type:"deploy", text:$t, dedupe_key:$dk}')
 
           curl -sS -X POST \
             -H "Content-Type: application/json" \
-            -H "x-make-apikey: ${{ secrets.SOCIAL_WEBHOOK_API_KEY }}" \
+            -H "x-make-apikey: ${SOCIAL_WEBHOOK_API_KEY}" \
             -d "$PAYLOAD" \
-            "${{ secrets.SOCIAL_WEBHOOK_URL }}"
+            "$SOCIAL_WEBHOOK_URL"
