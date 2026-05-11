@@ -71,7 +71,7 @@ Each category is a link to its [`Routes`](../routes/) or relevant folder.
 
 ### **[`Sys`](../routes/api/sys.js)**
 
-- [`notifyImgErr`](../controller/sys/notifyImageErr.js) sends an internal system email if a Politician's profile picture is broken/missing (uses refactored email system)
+- [`notifyImgErr`](../controller/sys/notifyImageErr.js) (`PUT` body `{ pol }`, bioguide): may send an internal email when a roster WebP is still missing; suppresses send if `{pol}.webp` already exists on the served pfp tree or the same bioguide was alerted within 24 hours (`pfp_image_error_alerts`)
 - [`getConstants`](../controller/sys/pullConstants.js) retrieves private constant values stored on the server
 
 ### **[`Webhooks`](../routes/api/webhooks.js)**

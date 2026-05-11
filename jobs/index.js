@@ -11,6 +11,7 @@
  * The watcher system includes:
  * - houseWatcher: Monitors House membership changes
  * - challengersWatcher: Monitors challenger status for competitive races
+ * - pfpSync: Syncs House headshot WebP files for the selectable roster
  * - checkHJRes54: Monitors H.J.Res.54 bill status
  * - electionDatesUpdater: Updates election dates from OpenFEC API
  * - defunctCelebrationWatcher: Converts celebrations to defunct when sessions end

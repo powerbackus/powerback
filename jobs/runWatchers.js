@@ -20,6 +20,10 @@
  * - Updates has_stakes flags
  * - Sends email alerts to users in affected districts
  *
+ * pfpSync
+ * - Writes House headshot WebPs for selectable roster (`has_stakes`, not roster_excluded)
+ * - Runs after challengersWatcher so stakes flags are fresh; failures do not block later jobs
+ *
  * checkHJRes54
  * - Monitors H.J.Res.54 (We The People Amendment) bill status
  * - Tracks bill changes and updates database
@@ -45,9 +49,10 @@
  * EXECUTION ORDER
  * 1. houseWatcher (House membership)
  * 2. challengersWatcher (Challenger status)
- * 3. checkHJRes54 (Bill status)
- * 4. electionDatesUpdater (Election dates)
- * 5. defunctCelebrationWatcher (Defunct celebrations)
+ * 3. pfpSync (House WebP headshots for roster)
+ * 4. checkHJRes54 (Bill status)
+ * 5. electionDatesUpdater (Election dates)
+ * 6. defunctCelebrationWatcher (Defunct celebrations)
  *
  * ERROR HANDLING
  * - Each watcher runs independently
@@ -72,6 +77,7 @@
  * - ./challengersWatcher: Challenger status watcher
  * - ./checkHJRes54: Bill watcher
  * - ./houseWatcher: House membership watcher
+ * - ../scripts/pfp-sync: House WebP sync (lazy-required in pfpSync step only)
  *
  * @module jobs/runWatchers
  * @requires node-cron
@@ -132,7 +138,7 @@ function runWatchers() {
     resetSocialPostRunCount();
 
     logger.info(
-      'running houseWatcher -> challengersWatcher -> checkHJRes54 -> electionDatesUpdater -> defunctCelebrationWatcher'
+      'running houseWatcher -> challengersWatcher -> pfpSync -> checkHJRes54 -> electionDatesUpdater -> defunctCelebrationWatcher'
     );
 
     const watchers = [
@@ -140,6 +146,13 @@ function runWatchers() {
       {
         name: 'challengersWatcher',
         fn: () => challengersWatcher(POLL_SCHEDULE),
+      },
+      {
+        name: 'pfpSync',
+        fn: async () => {
+          const { runPfpSync } = require('../scripts/pfp-sync');
+          await runPfpSync({ manageConnection: false, argv: [] });
+        },
       },
       { name: 'checkHJRes54', fn: () => checkHJRes54(POLL_SCHEDULE) },
       { name: 'electionDatesUpdater', fn: () => electionDatesUpdater() },

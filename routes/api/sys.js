@@ -41,27 +41,21 @@ const router = require('express').Router(),
  * which helps identify and fix issues with politician profile images
  * or other image assets.
  *
- * @param {Object} req.body - Error report data
- * @param {string} req.body.imageUrl - URL of the failed image
- * @param {string} req.body.error - Error message or description
- * @param {string} req.body.context - Additional context about the error
- * @returns {Object} Error report confirmation
+ * @param {Object} req.body - Error report data (validated by `schemas.pol`)
+ * @param {string} req.body.pol - Bioguide ID (e.g. K000367) whose `../pfp/{pol}.webp` failed in the client
+ * @returns {Object} `{ true }` on success (email may be suppressed if file exists or cooldown applies)
  *
  * @example
  * ```javascript
  * PUT /api/sys/errors/img
- * {
- *   "imageUrl": "https://example.com/politician-image.jpg",
- *   "error": "404 Not Found",
- *   "context": "Politician profile image failed to load"
- * }
+ * { "pol": "K000367" }
  * ```
  */
 
 router
   .route('/errors/img')
-  .put(validate(schemas.pol), (req, res) =>
-    Controller.notifyImageErr(req, res)
+  .put(validate(schemas.pol), (req, res, next) =>
+    Controller.notifyImageErr(req, res, next)
   );
 
 /**
