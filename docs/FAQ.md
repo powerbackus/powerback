@@ -6,9 +6,9 @@
 
 ## General
 
-### What is POWERBACK.us?
+### What is a Celebration?
 
-POWERBACK.us ("POWERBACK") is a donation platform that gives small-dollar donors real leverage. Instead of giving money directly to campaigns, your donations are kept in a segregated account and only forwarded to the campaign when the conditional rules you agreed to are satisfied. This creates accountability and ensures your money goes to politicians who actually represent your interests.
+A Celebration is your conditional donation. It is kept in a segregated account under rules you accept before confirming. The money is only delivered to a candidate's campaign if the required public event is verified in the official record, such as a recorded vote or another specific legislative action. POWERBACK does not consider motives, promises, bill merits, or later political outcomes.
 
 ### Why should I only use POWERBACK for my political contributions, and not other platforms?
 
@@ -34,7 +34,7 @@ No. Refunds would erase the stakes. Although Celebrations are irreversible, if t
 
 ### Why isn't my Representative/State listed?
 
-We only list Representatives that are facing serious, financed challengers to their seat according to campaign filings with the Federal Election Commission. In other words, your Representative is virtually unopposed this election. Run against them!
+We only list Representatives that are facing serious, financed challengers to their seat according to campaign filings with the Federal Election Commission. In other words, your Representative is virtually unopposed this election. Run against them! (In some cases, a member may also be unavailable because of procedural, data integrity, or platform safety rules.)
 
 ### Does POWERBACK cover any other bills, or the Senate, or local elections?
 
