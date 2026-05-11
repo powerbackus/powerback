@@ -62,6 +62,50 @@ Promotion process:
 
 **Environment:** Ensure `MONGODB_URI` points to the correct database. Use `.env.cli` or `.env.local` for credentials.
 
+## House headshot files (`pfp` WebP sync)
+
+After new House members exist in live `pols`, bundled headshots should appear as `{BIOGUIDE_ID}.webp` where the app serves `pfp/` (locally `client/public/pfp/`; on the VPS use your **persistent** directory, e.g. `/var/lib/powerback/pfp` or the path nginx serves).
+
+**Script:** `scripts/pfp-sync.js` (also `npm run pfp-sync`)
+
+- Reads **`pols`** with `roles.0.chamber` = `House`, `has_stakes: true`, and `roster_excluded` not true (aligned with selectable House roster / donation funnel).
+- For each bioguide, if `{id}.webp` is missing or zero-byte (unless `--force`), downloads the official House Clerk **`POL_IMG_FALLBACK_URL`** JPG (default matches the client clerk base), resizes to **227×277** (cover), encodes **WebP** with a quality sweep targeting **≤ 10 KB** (may exceed slightly at lowest quality; see logs), then writes **`{id}.webp`** atomically.
+- **Rate limit:** ~400 ms between downloads toward `clerk.house.gov`.
+
+**Environment**
+
+| Variable                                                   | Purpose                                                                                                       |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `MONGODB_URI`                                              | Required (same as other CLI tools).                                                                           |
+| `PFP_SYNC_OUT_DIR`                                         | Output directory (absolute path on VPS). Default: repo `client/public/pfp`.                                   |
+| `POL_IMG_FALLBACK_URL` or `REACT_APP_POL_IMG_FALLBACK_URL` | JPG base URL (must end with `/` or the script normalizes). Default: `https://clerk.house.gov/images/members/` |
+
+**Examples**
+
+```bash
+# Preview actions (no writes, no JPG download for encoding — logs would-fetch only)
+npm run pfp-sync -- --dry-run
+
+# Sync missing WebPs for all has_stakes House pols (writes under PFP_SYNC_OUT_DIR or client/public/pfp)
+npm run pfp-sync
+
+# Only specific bioguides (must still be House + has_stakes + not roster_excluded in DB)
+npm run pfp-sync -- M001246 F000485
+
+# Regenerate even when .webp exists; exit 1 if any download/encode failed (for cron alerting)
+npm run pfp-sync -- --force --strict
+```
+
+**Production (VPS only):** Run `pfp-sync` on the **same host** as MongoDB and the real `pfp` directory (e.g. under `public_html/pfp` or `/var/lib/powerback/pfp`). **GitHub Actions deploy does not run `pfp-sync`** so you do not store `MONGODB_URI` in GitHub for this job, and the runner never needs to reach a local-only Mongo URL.
+
+After deploy, root `node_modules` on the server must include `sharp` (via your existing `pbnpminstall` / `npm ci` on the app tree).
+
+**Cron (VPS):** Example hourly (adjust `cd`, `.env` path, and `PFP_SYNC_OUT_DIR`):
+
+`15 * * * * cd /opt/powerback/app && set -a && . ./.env && set +a && export PFP_SYNC_OUT_DIR=/home/deploy/public_html/pfp && /usr/bin/npm run pfp-sync -- --strict >> /var/log/powerback-pfp-sync.log 2>&1`
+
+New members promoted from `docking_pols` are picked up on the next cron run once they match the script query (`has_stakes`, etc.).
+
 ## Rollback
 
 If a promotion causes issues, restore from the most recent backup:

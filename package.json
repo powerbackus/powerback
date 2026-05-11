@@ -22,6 +22,7 @@
     "format:check": "eslint . --ext .js,.jsx,.ts,.tsx",
     "clean": "node scripts/clean.js",
     "validate:env": "node scripts/validate-environment.js",
+    "pfp-sync": "node scripts/pfp-sync.js",
     "setup:remote-dev": "node dev/setup-remote-dev-env.js"
   },
   "repository": {
@@ -83,6 +84,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^5.5.0",
+    "sharp": "^0.33.5",
     "stripe": "^8.193.0",
     "superagent": "^7.1.1",
     "tiny-secp256k1": "^2.2.4",
