@@ -36,16 +36,12 @@ All background jobs are orchestrated through the `runWatchers` system, which:
 - Fetches current House members from Congress.gov API
 - Compares with previous snapshot to detect changes
 - Automatically adds new members to database
-- Updates `has_stakes` flags based on competitive race status
+- Sets `has_stakes: false` on newly shaped House Pols; **competitive** `has_stakes` is recomputed by `challengersWatcher`, not here
 - Sends email/SMS alerts for membership changes
 
 **FEC Integration**:
 
-- Fetches FEC candidate data for competitive races
-- Determines `has_stakes` flag based on:
-  - Seeking re-election
-  - Has raised funds
-  - Has serious challenger
+- Resolves FEC candidate IDs for new members (state, district, name, election year)
 - Uses in-memory cache to reduce API calls
 - Rate limiting to prevent API abuse
 
@@ -69,6 +65,28 @@ All background jobs are orchestrated through the `runWatchers` system, which:
 - Updates `has_stakes` flags based on competitive race status
 - **Policy note**: POWERBACK exclusions from the selectable roster use `Pol.roster_excluded`, not watcher toggles on `has_stakes` alone. See [`specs/pol-roster-exclusion.md`](../specs/pol-roster-exclusion.md).
 - Sends email alerts to users in affected districts
+
+**End-to-end pipeline (each `checkChallengers` run)**
+
+1. **Election year** — `ELECTION_YEAR` is derived from `nextStart()` (see `jobs/challengersWatcher.js`).
+2. **OpenFEC fetches** — Paginated `/candidates/`: House (`office=H`), active candidates who have raised funds, filtered by `election_year=ELECTION_YEAR` — one pass with `incumbent_challenge=I` (incumbent FEC candidate ids), one with `C` and `O` (challengers and open-seat rows).
+3. **Challenger district keys** — For each challenger row, find the index in `election_years` for the target cycle (values may be **numbers or strings**). Read the same index in `election_districts`. Require a non-empty two-letter `state` and a normalizable district via `normalizeHouseDistrictKeyPart(district, state)` from `services/utils/normalizeHouseDistrict.js`; otherwise skip that row (never emit keys with a missing state prefix).
+4. **Competitive incumbent FEC ids** — For each incumbent FEC id from OpenFEC, load the `Pol` whose **`roles` array** contains that id (any index) and build the state–district key from **that** role row. If the key is in the challenger set, the incumbent is a **district match**. **Committed `finalIds`** (used for `has_stakes` and the challenger snapshot) include the id only when `roles[0].fec_candidate_id === incId` — **`roles[0]` is the current House role**; later entries are historical. If the district match uses a historical role only, the watcher logs structured diagnostics and **does not** add that id to `finalIds`.
+5. **`Pol.has_stakes` writes** — Two `updateMany` calls: set `has_stakes: true` where `roles[0].fec_candidate_id` is in `finalIds`; set `has_stakes: false` where `roles[0].fec_candidate_id` is not in `finalIds`. Full recompute each run.
+6. **Snapshot and notifications** — `diffSnapshot` compares the committed competitive set to `challengers.snapshot.json` and drives email/SMS/social and celebration side effects. Bootstrap (empty snapshot) still updates the DB and snapshot but skips bulk alerts.
+
+**Carousel alignment**
+
+- `has_stakes` reflects only **current-role** (`roles[0]`) competitive FEC ids.
+- `GET /api/congress` serves Pols with `has_stakes: true` and `roster_excluded` not true (`controller/congress/pols.js`). A gap between `Pol.countDocuments({ has_stakes: true })` and OpenFEC “incumbents with challengers” can be **roster exclusions**, **district match on a historical FEC id only** (skipped for `has_stakes`), or other data drift — see diagnostic log line `has_stakes competitive FEC diagnostics`.
+
+**Diagnostics (309 vs 308 style checks)**
+
+Each run logs, in one line: `committed_finalIds` (length of `finalIds` used for DB), `matching_roles0` (same count when the invariant holds), `matching_any_role` (district match using whichever role carries the FEC id), and `later_role_only_stale` (district match on a non-`roles[0]` row only). When `later_role_only_stale > 0`, each case emits a **warn** with `pol_id`, `fec_incumbent_id`, `roles0`, and `matching_later_role` (FEC id, congress, state, district, chamber) for Compass follow-up. Personal names are omitted from logs (PII policy).
+
+**District email lookup**
+
+- Challenger alerts resolve users via `getUsersInDistrict({ state, district })` (object argument), matching the service signature in `services/celebration/dataService.js`.
 
 **Email Alerts**:
 

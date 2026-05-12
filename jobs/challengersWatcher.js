@@ -48,9 +48,14 @@
  *
  * 1. Fetch FEC House incumbents (I) and challengers (C, O) for ELECTION_YEAR.
  * 2. Build a Set of state-district keys where a challenger exists; keys use
- *    normalizeHouseDistrictKeyPart so DB "4" and FEC "04" match.
- * 3. For each incumbent FEC id with a Pol row, if that pol's state-district key
- *    is in the Set, add id to finalIds → competitive race for carousel/has_stakes.
+ *    normalizeHouseDistrictKeyPart so DB "4" and FEC "04" match. Skip rows with
+ *    no state, no district for the target election year, or malformed district
+ *    (never emit undefined-state keys). election_years may be numbers or strings.
+ * 3. For each incumbent FEC id from FEC, find Pol with that id on any role;
+ *    if that role's state-district key is in the Set, the race is competitively
+ *    matched. Only ids where roles[0].fec_candidate_id equals that id are
+ *    committed to finalIds (roles[0] is the current role; later roles are history).
+ *    District matches on historical roles only are logged and skipped for has_stakes.
  * 4. updateMany: has_stakes true for roles[0].fec_candidate_id in finalIds;
  *    has_stakes false for everyone else (full recompute each run).
  * 5. diffSnapshot compares current competitive incumbents vs file snapshot;
@@ -102,7 +107,6 @@ const { StatusService } = require('../services/celebration/statusService');
 const {
   sendSMS,
   getUsersInDistrict,
-  getDistrictForCandidate,
   getUsersWithActiveCelebration,
   cancelCelebrationsForCandidate,
 } = require('../services');
@@ -130,6 +134,36 @@ const runCheck = require('./runCheck');
 
 const FROM_ADDRESS = getEmailAddress(6);
 const PAGE_SIZE = 100;
+
+/**
+ * True when an FEC election_years entry refers to the configured House cycle.
+ * OpenFEC sometimes returns years as strings.
+ * @param {unknown} y
+ * @param {number} year
+ * @returns {boolean}
+ */
+function fecElectionYearMatches(y, year) {
+  if (y == null || y === '') return false;
+  const n = Number(y);
+  if (Number.isFinite(n)) return n === year;
+  return String(y).trim() === String(year);
+}
+
+/**
+ * House role fields for operational diagnostics (no personal names).
+ * @param {Object|null|undefined} role
+ * @returns {Object|null}
+ */
+function summarizeHouseRoleForLog(role) {
+  if (!role) return null;
+  return {
+    fec_candidate_id: role.fec_candidate_id,
+    congress: role.congress,
+    state: role.state,
+    district: role.district,
+    chamber: role.chamber,
+  };
+}
 
 /**
  * Loads persisted challenger snapshot from disk (FEC ids we last treated as
@@ -181,7 +215,7 @@ async function fetchIncumbents() {
   // For testing: use snapshot
   if (process.env.NODE_ENV === 'test') {
     const snapshot = loadSnapshot();
-    return snapshot;
+    return snapshot.map((e) => e.fec_candidate_id).filter(Boolean);
   }
 
   const ids = [];
@@ -205,8 +239,8 @@ async function fetchChallengers() {
   // For testing: use snapshot
   if (process.env.NODE_ENV === 'test') {
     const snapshot = loadSnapshot();
-    return snapshot.map((id) => ({
-      candidate_id: id,
+    return snapshot.map((entry) => ({
+      candidate_id: entry.fec_candidate_id,
       election_years: [ELECTION_YEAR],
       election_districts: ['26'],
       state: 'TX',
@@ -282,52 +316,123 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
     }
 
     // --- Competitive districts: any House district with a C/O FEC row this cycle
+    let challengerRowsSkipped = 0;
     const challengerDistricts = new Set(
       challengers.flatMap((c) => {
-        const idx = c.election_years.findIndex((y) => y === ELECTION_YEAR);
-        const dist = c.election_districts[idx];
-        if (idx === -1 || dist == null || dist === '') {
+        const years = Array.isArray(c.election_years) ? c.election_years : [];
+        const idx = years.findIndex((y) =>
+          fecElectionYearMatches(y, ELECTION_YEAR)
+        );
+        const districts = Array.isArray(c.election_districts)
+          ? c.election_districts
+          : [];
+        const dist = districts[idx];
+        const st = String(c.state || '')
+          .trim()
+          .toUpperCase();
+        if (idx === -1 || dist == null || String(dist).trim() === '') {
+          challengerRowsSkipped += 1;
           return [];
         }
-        return [`${c.state}-${normalizeHouseDistrictKeyPart(dist, c.state)}`];
+        if (!st) {
+          challengerRowsSkipped += 1;
+          return [];
+        }
+        const part = normalizeHouseDistrictKeyPart(dist, st);
+        if (!part) {
+          challengerRowsSkipped += 1;
+          return [];
+        }
+        return [`${st}-${part}`];
       })
     );
     logger.info(
-      `matching ${incumbents.length} incumbents against ${challengerDistricts.size} districts`
+      `challenger FEC rows=${challengers.length} districtKeys=${
+        challengerDistricts.size
+      } skippedNoYearDistrictOrState=${challengerRowsSkipped}`
     );
 
-    // --- Incumbent FEC ids that map to a Pol in a district with a challenger
+    // --- Incumbent FEC ids: district match vs challengers; roles[0] is current role
     const finalIds = [];
+    /** FEC ids where OpenFEC+Pol district matches a challenger district (any role). */
+    const competitiveDistrictMatchIds = [];
+    let incumbentSkippedNoPol = 0;
+    let incumbentSkippedDistrict = 0;
+    let incumbentSkippedNoDistrictMatch = 0;
     for (const incId of incumbents) {
-      // Only treat FEC incumbents as incumbents in our universe
-      // when there is a corresponding Pol record wired up.
-      const polExists = await Pol.exists({
+      const polLean = await Pol.findOne({
         'roles.fec_candidate_id': incId,
-      });
-      if (!polExists) {
+      }).lean();
+      if (!polLean) {
+        incumbentSkippedNoPol += 1;
         logger.debug(
           `skipping ${incId}: no Pol record for incumbent candidate`
         );
         continue;
       }
 
-      let info;
-      try {
-        info = await getDistrictForCandidate(incId);
-      } catch (err) {
-        logger.warn(`skipping ${incId}: ${err.message}`);
+      const matchRole = polLean.roles.find((r) => r.fec_candidate_id === incId);
+      if (!matchRole) {
+        incumbentSkippedDistrict += 1;
+        logger.warn(`skipping ${incId}: role row missing after Pol find`);
         continue;
       }
 
-      const key = `${info.state}-${normalizeHouseDistrictKeyPart(
-        info.district,
-        info.state
-      )}`;
-      if (challengerDistricts.has(key)) {
+      const st = String(matchRole.state || '')
+        .trim()
+        .toUpperCase();
+      const part = normalizeHouseDistrictKeyPart(matchRole.district, st);
+      if (!st || !part) {
+        incumbentSkippedDistrict += 1;
+        logger.warn(
+          `skipping ${incId}: missing or non-normalizable state/district on Pol role`
+        );
+        continue;
+      }
+      const key = `${st}-${part}`;
+      if (!challengerDistricts.has(key)) {
+        incumbentSkippedNoDistrictMatch += 1;
+        continue;
+      }
+
+      competitiveDistrictMatchIds.push(incId);
+      const r0 = polLean.roles[0];
+      if (r0 && r0.fec_candidate_id === incId) {
         finalIds.push(incId);
+      } else {
+        logger.warn(
+          'has_stakes: skip FEC incumbent id matched on historical role only (roles[0] is current)',
+          {
+            pol_id: polLean.id,
+            fec_incumbent_id: incId,
+            roles0: summarizeHouseRoleForLog(r0),
+            matching_later_role: summarizeHouseRoleForLog(matchRole),
+          }
+        );
       }
     }
-    logger.info(`found ${finalIds.length} incumbents with challengers`);
+
+    const matchingRoles0Count = finalIds.length;
+    const matchingAnyRoleCount = competitiveDistrictMatchIds.length;
+    const laterRoleOnlyCount = matchingAnyRoleCount - matchingRoles0Count;
+
+    const polsWithCompetitiveFecRoles0 = await Pol.countDocuments({
+      'roles.0.fec_candidate_id': { $in: finalIds },
+    });
+    logger.info(
+      `has_stakes competitive FEC diagnostics: committed_finalIds=${finalIds.length} ` +
+        `matching_roles0=${matchingRoles0Count} matching_any_role=${matchingAnyRoleCount} ` +
+        `later_role_only_stale=${laterRoleOnlyCount}`
+    );
+    logger.info(
+      `incumbents FEC=${incumbents.length} skippedNoPol=${incumbentSkippedNoPol} skippedDistrictOrRole=${incumbentSkippedDistrict}`
+    );
+    logger.debug(
+      `FEC incumbents with Pol+district but no challenger key match: ${incumbentSkippedNoDistrictMatch}`
+    );
+    logger.info(
+      `Pol.countDocuments roles[0] in committed finalIds: ${polsWithCompetitiveFecRoles0}`
+    );
 
     // --- Mirror competitive set onto Pol.has_stakes (carousel + donation targeting)
     const resultTrue = await Pol.updateMany(
@@ -345,14 +450,22 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
       { $set: { has_stakes: false } }
     );
 
+    const trueMatched = resultTrue.matchedCount ?? resultTrue.n;
+    const trueModified = resultTrue.modifiedCount ?? resultTrue.nModified;
+    const falseMatched = resultFalse.matchedCount ?? resultFalse.n;
+    const falseModified = resultFalse.modifiedCount ?? resultFalse.nModified;
+    const trueNote =
+      finalIds.length === 0
+        ? 'no competitive incumbents'
+        : trueMatched === 0
+          ? 'all matching Pols already had has_stakes true'
+          : 'applied true flips where needed';
+    const falseNote =
+      falseMatched === 0
+        ? 'no Pols needed false flip'
+        : 'applied false flips where needed';
     logger.info(
-      `updateHasStakes → true: matched=${
-        resultTrue.matchedCount ?? resultTrue.n
-      } modified=${
-        resultTrue.modifiedCount ?? resultTrue.nModified
-      } | false: matched=${
-        resultFalse.matchedCount ?? resultFalse.n
-      } modified=${resultFalse.modifiedCount ?? resultFalse.nModified}`
+      `updateHasStakes true: matched=${trueMatched} modified=${trueModified} (${trueNote}) | false: matched=${falseMatched} modified=${falseModified} (${falseNote})`
     );
 
     // Shape expected by diffSnapshot (key = fec_candidate_id, value = has_stakes)
@@ -512,7 +625,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
           }
         } else if (!isBootstrapRun) {
           // Handle new challenger appearance (existing code)
-          const districtUsers = await getUsersInDistrict(state, district);
+          const districtUsers = await getUsersInDistrict({ state, district });
           logger.info(
             `Found ${districtUsers.length} users in district ${state}-${district}`
           );

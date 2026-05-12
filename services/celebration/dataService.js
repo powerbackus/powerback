@@ -14,10 +14,9 @@
  * - Returns district and state information
  *
  * updateHasStakes(finalIds)
- * - Atomically updates has_stakes flag on Pol documents
- * - Sets has_stakes: true for politicians with FEC IDs in finalIds array
- * - Sets has_stakes: false for all other politicians
- * - Uses atomic updateMany to avoid transitional states
+ * - Updates has_stakes on Pol documents from a competitive FEC id list
+ * - Sets has_stakes: true when `roles[0].fec_candidate_id` is in finalIds
+ * - Sets has_stakes: false for all other Pols (second updateMany)
  *
  * getUsersInDistrict({ state, district })
  * - Finds all users in a specific congressional district
@@ -55,7 +54,7 @@
  * - Indicates politician is seeking re-election, has raised funds, and has
  *   serious challenger
  * - Used for donation targeting and prioritization
- * - Updated atomically to prevent race conditions
+ * - Updated from `roles[0].fec_candidate_id` competitive set (current House role)
  *
  * ACTIVE CELEBRATION FILTERING
  * - Excludes resolved, defunct, and paused celebrations
@@ -99,23 +98,21 @@ async function getDistrictForCandidate(fec_candidate_id) {
 
 /**
  * Atomically sets the `has_stakes` flag on every Pol document.
- * Documents whose roles array contains a `fec_candidate_id` in `finalIds`
- * will have `has_stakes: true`; all others will have `has_stakes: false`.
- * This uses a single aggregation-pipeline `updateMany` to avoid transitional states.
+ * Documents whose **current** House role (`roles[0]`) has `fec_candidate_id` in
+ * `finalIds` get `has_stakes: true`; all others get `has_stakes: false`.
+ * Uses two `updateMany` calls (true then false) for a full recompute.
  *
- * @param {string[]} finalIds - Array of FEC candidate IDs to flag
- * @returns {Promise<Object>} - update result (matchedCount, modifiedCount)
+ * @param {string[]} finalIds - Array of FEC candidate IDs to flag (current role only)
+ * @returns {Promise<Object>} - update result (matchedCount, modifiedCount) for the true pass
  */
 async function updateHasStakes(finalIds) {
-  // diagnostic: count docs where any role matches
+  // diagnostic: count docs where current role matches
   const toFlagCount = await Pol.countDocuments({
-    'roles.fec_candidate_id': { $in: finalIds },
+    'roles.0.fec_candidate_id': { $in: finalIds },
   });
   logger.info(`CelebrationDataService: ${toFlagCount} documents to flag true`);
 
-  // atomic pipeline: set has_stakes based on array filter
-  // Only update Pols where has_stakes is not already true
-  const result = await Pol.updateMany(
+  const resultTrue = await Pol.updateMany(
     {
       'roles.0.fec_candidate_id': { $in: finalIds },
       has_stakes: { $ne: true },
@@ -123,14 +120,27 @@ async function updateHasStakes(finalIds) {
     { $set: { has_stakes: true } }
   );
 
-  // normalize result fields for logging
-  const matched = result.matchedCount ?? result.n;
-  const modified = result.modifiedCount ?? result.nModified;
-  logger.info(
-    `CelebrationDataService: updateHasStakes completed (matched=${matched}, modified=${modified})`
+  await Pol.updateMany(
+    {
+      'roles.0.fec_candidate_id': { $nin: finalIds },
+      has_stakes: { $ne: false },
+    },
+    { $set: { has_stakes: false } }
   );
 
-  return result;
+  const matched = resultTrue.matchedCount ?? resultTrue.n;
+  const modified = resultTrue.modifiedCount ?? resultTrue.nModified;
+  const note =
+    finalIds.length === 0
+      ? 'no competitive ids'
+      : matched === 0
+        ? 'all targets already has_stakes true'
+        : 'applied true flips';
+  logger.info(
+    `CelebrationDataService: updateHasStakes completed (matched=${matched}, modified=${modified}; ${note})`
+  );
+
+  return resultTrue;
 }
 
 /**
