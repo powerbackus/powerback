@@ -21,6 +21,15 @@ Utility and automation scripts for the POWERBACK repo. Run from the **project ro
 - **add-members-to-docking.js** – Stage specific members for docking. See [Docking runbook](../docs/docking-pols-runbook.md).
 - **pfp-sync.js** – Download House Clerk JPGs for live `pols` (House, `has_stakes`, not `roster_excluded`), write optimized `{bioguide}.webp` under `PFP_SYNC_OUT_DIR` or `STATIC_PUBLIC_DIR/pfp` or `client/public/pfp`. Flags: `--dry-run`, `--force`, `--strict`. Exported `runPfpSync()` is used by **`jobs/runWatchers.js`** (`pfpSync` step after `challengersWatcher`) when `START_WATCHERS=1`; CLI uses `npm run pfp-sync`. Not GitHub Actions deploy. See [Docking runbook – House headshot files](../docs/docking-pols-runbook.md#house-headshot-files-pfp-webp-sync).
 - **roster-exclude-pol.js** – Interactive TUI (`inquirer`: lists and confirms) to set or clear `Pol.roster_excluded` by bioguide ID. Optional first argument prefills bioguide; no `--category` / `--reason` flags. Loads `MONGODB_URI` from `.env.cli` / `.env.local` / `.env` **only after** you confirm—cancel exits without connecting. **Walkthrough:** [USAGE-roster-exclude-pol.md](./USAGE-roster-exclude-pol.md). Policy: [Pol roster exclusion spec](../specs/pol-roster-exclusion.md).
+- **cleanup-duplicate-adjacent-roles.js** – Data integrity tool: finds `Pol` docs where `roles[1]` is **deeply** identical to `roles[0]` (lodash `isEqual`). **Dry-run by default** (no writes). **`--apply`** removes only `roles[1]`, leaves `roles[0]` and `roles[2+]` unchanged, and updates **no other fields**. Loads env like other root scripts (`.env.cli` → `.env.local` → `.env`). Guardrails: warns when the duplicate count differs from `--expected-duplicates` (default 148); **`--apply` aborts** if duplicates exceed `--max-apply` (default 220) unless **`--allow-excess`**. **Backup `pols` (or full DB) before `--apply`.** Does **not** change `has_stakes`, roster exclusion, payments, or Celebrations.
+
+  **Verification flow**
+  1. `node scripts/cleanup-duplicate-adjacent-roles.js` — note the “deeply identical” count and listed bioguides.
+  2. After a DB backup/export: `node scripts/cleanup-duplicate-adjacent-roles.js --apply` (add `--allow-excess` only if the count is above `--max-apply` and you accept the risk).
+  3. Run step 1 again; duplicate count should be **0**.
+  4. Optionally run your usual watcher smoke (e.g. `challengersWatcher`) and any A5 / Compass diagnostics you use for `roles[0]` vs FEC.
+
+  **Help:** `node scripts/cleanup-duplicate-adjacent-roles.js --help`
 
 ## build/
 

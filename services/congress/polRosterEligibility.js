@@ -76,9 +76,9 @@ async function isPolRosterExcludedByBioguide(Pol, bioguideId) {
 }
 
 module.exports = {
+  isPolDocumentRosterExcluded,
+  isPolRosterExcludedByBioguide,
   POL_ROSTER_EXCLUDED_USER_MESSAGE,
   ROSTER_EXCLUSION_CATEGORIES,
   ROSTER_EXCLUSION_LABELS,
-  isPolDocumentRosterExcluded,
-  isPolRosterExcludedByBioguide,
 };
