@@ -53,9 +53,17 @@ module.exports = async function runCheck(logger, check) {
   try {
     await check();
   } catch (err) {
+    const e = err && typeof err === 'object' ? err : {};
     logger.error('runCheck error:', {
-      message: err.message,
-      stack: err.stack,
+      message: err && err.message,
+      stack: err && err.stack,
+      code: 'code' in e ? e.code : undefined,
+      httpStatus:
+        e.response && typeof e.response === 'object'
+          ? e.response.status
+          : undefined,
+      reqUrl:
+        e.config && typeof e.config === 'object' ? e.config.url : undefined,
     });
   }
 };

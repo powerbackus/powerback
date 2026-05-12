@@ -166,6 +166,29 @@ function summarizeHouseRoleForLog(role) {
 }
 
 /**
+ * Winston-safe error summary (avoids Axios request/response cycles in meta).
+ * @param {unknown} err
+ * @returns {Record<string, unknown>}
+ */
+function serializeErr(err) {
+  if (err == null) return { errMessage: String(err) };
+  if (typeof err !== 'object') return { errMessage: String(err) };
+  const e = /** @type {Record<string, unknown>} */ (err);
+  const cfg = /** @type {{ url?: string; method?: string }|undefined} */ (
+    e.config
+  );
+  const res = /** @type {{ status?: number }|undefined} */ (e.response);
+  return {
+    errName: e.name,
+    errMessage: e.message,
+    errCode: e.code,
+    httpStatus: res?.status,
+    reqUrl: cfg?.url,
+    reqMethod: cfg?.method,
+  };
+}
+
+/**
  * Loads persisted challenger snapshot from disk (FEC ids we last treated as
  * has_stakes competitive). Empty file or parse error yields [] (bootstrap).
  * @returns {{ fec_candidate_id: string, has_stakes: boolean }[]}
@@ -178,7 +201,7 @@ function loadSnapshot() {
       has_stakes: info.has_stakes,
     }));
   } catch (err) {
-    logger.error('Failed to load snapshot:', err);
+    logger.error('Failed to load snapshot:', serializeErr(err));
     return [];
   }
 }
@@ -287,7 +310,7 @@ async function sendEmail(to, subject, html) {
     logger.error(`Failed to send email: ${err.message}`, {
       to,
       subject,
-      error: err,
+      ...serializeErr(err),
     });
     throw err;
   }
@@ -311,7 +334,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
       challengers = await fetchChallengers();
       logger.info(`fetched ${challengers.length} serious challengers`);
     } catch (err) {
-      logger.error('fetch failed:', err);
+      logger.error('fetch failed:', serializeErr(err));
       return;
     }
 
@@ -573,7 +596,10 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
               `Posted social challenger event for ${state}-${district}`
             );
           } catch (postErr) {
-            logger.error('Failed to post social challenger event:', postErr);
+            logger.error(
+              'Failed to post social challenger event:',
+              serializeErr(postErr)
+            );
           }
         }
 
@@ -618,7 +644,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
               } catch (err) {
                 logger.error(
                   `Failed to send ChallengerReappeared email to ${recipient}:`,
-                  err
+                  serializeErr(err)
                 );
               }
             }
@@ -636,7 +662,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
             );
             logger.info('Alert SMS sent');
           } catch (err) {
-            logger.error('Failed to send SMS alert:', err);
+            logger.error('Failed to send SMS alert:', serializeErr(err));
           }
 
           if (!districtUsers.length) {
@@ -675,7 +701,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
             } catch (err) {
               logger.error(
                 `Failed to send ChallengerAppeared email to ${recipient}:`,
-                err
+                serializeErr(err)
               );
             }
           }
@@ -717,7 +743,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
             );
             logger.info('Alert SMS sent');
           } catch (err) {
-            logger.error('Failed to send SMS alert:', err);
+            logger.error('Failed to send SMS alert:', serializeErr(err));
           }
         }
 
@@ -770,7 +796,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
             } catch (err) {
               logger.error(
                 `Failed to send ChallengerDisappeared email to ${recipient}:`,
-                err
+                serializeErr(err)
               );
             }
           }
@@ -843,7 +869,10 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
               `Posted social incumbents event (removed) for ${state}-${district}`
             );
           } catch (postErr) {
-            logger.error('Failed to post social incumbents event:', postErr);
+            logger.error(
+              'Failed to post social incumbents event:',
+              serializeErr(postErr)
+            );
           }
         }
 
@@ -860,7 +889,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
             );
             logger.info('Alert SMS sent');
           } catch (err) {
-            logger.error('Failed to send SMS alert:', err);
+            logger.error('Failed to send SMS alert:', serializeErr(err));
           }
         }
 
@@ -914,14 +943,14 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
               } catch (error) {
                 logger.error(
                   `Error converting celebration ${celebration._id}:`,
-                  error
+                  serializeErr(error)
                 );
               }
             }
           } catch (error) {
             logger.error(
               `Error processing Celebrations for user ${user._id}:`,
-              error
+              serializeErr(error)
             );
           }
         }
@@ -956,7 +985,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
             } catch (err) {
               logger.error(
                 `Failed to send IncumbentDroppedOut email to ${recipient}:`,
-                err
+                serializeErr(err)
               );
             }
           }
@@ -1025,7 +1054,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
           } catch (postErr) {
             logger.error(
               'Failed to post social incumbents added event:',
-              postErr
+              serializeErr(postErr)
             );
           }
         }
@@ -1050,6 +1079,8 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
   );
 
   const initialRun = runCheck(logger, checkChallengers);
-  initialRun.catch((err) => logger.error(err));
+  initialRun.catch((err) =>
+    logger.error('challengersWatcher initial run failed', serializeErr(err))
+  );
   return initialRun;
 };

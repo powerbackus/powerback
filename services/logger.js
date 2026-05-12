@@ -64,8 +64,52 @@
  */
 
 const path = require('path');
+const util = require('util');
 const { createLogger, format, transports } = require('winston');
 require('winston-daily-rotate-file');
+
+/** Keys often tied to Axios/Node HTTP graphs; omit from console JSON meta. */
+const OMIT_META_KEYS = new Set([
+  'request',
+  'response',
+  'req',
+  'res',
+  'socket',
+  'client',
+  'parser',
+  '_httpMessage',
+]);
+
+/**
+ * Stringifies log meta for the console printf without throwing on Axios cycles.
+ * @param {Record<string, unknown>} meta
+ * @returns {string}
+ */
+function safeStringifyMeta(meta) {
+  if (meta == null) return '';
+  if (typeof meta !== 'object') return String(meta);
+  try {
+    return JSON.stringify(meta, (key, value) => {
+      if (OMIT_META_KEYS.has(key)) return undefined;
+      if (value instanceof Error) {
+        return {
+          name: value.name,
+          message: value.message,
+          code: value.code,
+          stack: value.stack,
+        };
+      }
+      return value;
+    });
+  } catch {
+    return util.inspect(meta, {
+      depth: 2,
+      breakLength: 120,
+      maxStringLength: 400,
+      compact: true,
+    });
+  }
+}
 
 const logDir =
   process.env.NODE_ENV === 'production' ? process.env.LOG_DIR : 'logs';
@@ -170,7 +214,7 @@ const customFormat = format.printf(
 
     const label = module ? `${moduleColor}(${module})${reset} ` : '';
     const metaString = Object.keys(meta).length
-      ? ` ${JSON.stringify(meta)}`
+      ? ` ${safeStringifyMeta(meta)}`
       : '';
 
     return `${timestampColor}[${timestamp}]${reset} ${color}${level.toUpperCase()}${reset}: ${label}${message}${metaString}`;
