@@ -1,0 +1,33 @@
+---
+description: Production VPS log directory and secrets file layout (powerback deploy host)
+globs:
+  - 'scripts/**/*.js'
+  - 'jobs/**/*.js'
+  - 'services/logger.js'
+  - 'docs/**/*.md'
+alwaysApply: false
+priority: 3
+---
+
+# Production VPS layout
+
+Use when debugging production, tailing logs, or running one-off CLI scripts that need `MONGODB_URI` and other secrets on the deployed host.
+
+## Application logs
+
+- Rotating JSON logs live under **`/var/log/powerback/`** (e.g. `powerback-YYYY-MM-DD.log`).
+- In production, Winston uses `process.env.LOG_DIR` for the daily-rotate file path; on this VPS that resolves to the directory above (see `services/logger.js`).
+
+## Secrets
+
+- Production secrets are maintained in **`/etc/powerback/secrets.env`** (not only in the app checkout `.env`).
+- For **`node scripts/...`** and similar, load secrets before connect, e.g.  
+  `set -a && . /etc/powerback/secrets.env && set -a`  
+  (merge with app-root `.env` / `.env.cli` if your workflow uses both.)
+- **`sudo`** often strips variables like `MONGODB_URI` even with `-E`, depending on sudoers. Prefer running scripts as the deploy user without sudo, or pass explicitly:  
+  `sudo env MONGODB_URI="$MONGODB_URI" node ...`  
+  after sourcing secrets in the deploy shell.
+
+## App checkout
+
+- Deployment tree is typically **`/opt/powerback/app`** (adjust if the host differs). Run repo scripts from the **app root** when they resolve env via `path.resolve(__dirname, '../.env')`.

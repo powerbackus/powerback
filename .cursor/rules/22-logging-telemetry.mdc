@@ -117,6 +117,10 @@ logger.error('Operation failed', {
 });
 ```
 
+## Production VPS (deploy host)
+
+When tailing logs or checking `LOG_DIR` on the production server, see **`44-production-vps-layout.mdc`** (e.g. `/var/log/powerback`, `/etc/powerback/secrets.env`).
+
 ## Best Practices
 
 1. **Use central logger**: Always use `services/logger`

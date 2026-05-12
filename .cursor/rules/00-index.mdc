@@ -11,18 +11,21 @@ This directory contains comprehensive cursor rules for the POWERBACK project. Th
 ## Rule Categories
 
 ### Architecture & Structure
+
 - **01-project-structure.mdc** - Project organization, directory structure, file naming, module exports
 - **02-react-components.mdc** - React component patterns, composition, lazy loading, performance
 - **03-custom-hooks.mdc** - Custom hook patterns, state management, memoization
 - **10-react-contexts.mdc** - React Context patterns, provider composition, dependency injection
 
 ### Styling & UI
+
 - **04-css-styling.mdc** - CSS patterns, design system, Bootstrap integration, responsive design
 - **24-css-class-naming.mdc** - CSS class/id naming: block--part-or-variant (BEM-like, single separator)
 - **28-css-property-ordering.mdc** - CSS property ordering standard (referenced in specs)
 - **29-bootstrap-css-blending.mdc** - Bootstrap + custom CSS blending patterns (referenced in specs)
 
 ### Backend Patterns
+
 - **05-api-patterns.mdc** - API client patterns, route handlers, authentication, rate limiting
 - **06-backend-services.mdc** - Service layer patterns, logging, database operations
 - **12-models.mdc** - Mongoose model patterns, schemas, queries, indexes
@@ -30,27 +33,33 @@ This directory contains comprehensive cursor rules for the POWERBACK project. Th
 - **14-authentication.mdc** - JWT authentication, token management, password handling
 
 ### Data & Validation
+
 - **07-error-handling.mdc** - Error handling patterns, error types, error boundaries
 - **08-validation.mdc** - Validation patterns, Joi schemas, form validation, compliance
 
 ### TypeScript & Types
+
 - **09-typescript-patterns.mdc** - TypeScript patterns, interfaces, type guards, generics
 
 ### Quality & Testing
+
 - **11-testing.mdc** - Testing patterns, Jest, React Testing Library, E2E tests
 
 ### Code Style & Conventions
+
 - **15-naming-conventions.mdc** - Naming conventions for files, variables, functions, CSS
 - **16-documentation.mdc** - Documentation patterns, JSDoc, comments, README structure
 - **17-code-style.mdc** - Code style guidelines, formatting, best practices
 - **23-commit-messages.mdc** - Commit message format: no double-quotes in title or body
 
 ### Specialized Rules
+
 - **18-ai-assistant-guidelines.mdc** - AI assistant autonomy, permissions, and workflow
 - **19-compliance-system.mdc** - FEC compliance system, tiers, limits, backend authority
 - **20-client-storage.mdc** - Client storage policy, what can/cannot be stored
 - **21-election-dates.mdc** - Election dates handling, snapshots, fallbacks
 - **22-logging-telemetry.mdc** - Logging patterns, PII handling, central logger
+- **44-production-vps-layout.mdc** - Production VPS: log dir `/var/log/powerback`, secrets `/etc/powerback/secrets.env`, CLI/sudo notes
 - **26-copy-registry.mdc** - Copy text registry patterns (referenced in specs)
 - **42-pol-roster-exclusion.mdc** - Policy exclusions from roster and new Celebrations (`roster_excluded` vs watcher `has_stakes`)
 
@@ -64,6 +73,7 @@ This directory contains comprehensive cursor rules for the POWERBACK project. Th
 ## Rule Dependencies
 
 Some rules reference others:
+
 - `specs/frontend-ui.md` references `28-css-property-ordering.mdc` and `29-bootstrap-css-blending.mdc`
 - `specs/escrow-and-aggregate-limits.md` references `26-copy-registry.mdc`
 - `specs/pol-roster-exclusion.md` references `42-pol-roster-exclusion.mdc`
@@ -78,6 +88,7 @@ Some rules reference others:
 ## Quick Reference
 
 ### Common Patterns
+
 - **Component**: See `02-react-components.mdc`
 - **Hook**: See `03-custom-hooks.mdc`
 - **API Route**: See `05-api-patterns.mdc`
@@ -92,13 +103,17 @@ Some rules reference others:
 - **Client Storage**: See `20-client-storage.mdc`
 - **Election Dates**: See `21-election-dates.mdc`
 - **Logging**: See `22-logging-telemetry.mdc`
+- **Prod VPS logs / secrets paths**: See `44-production-vps-layout.mdc`
 
 ### Naming Conventions
+
 - See `15-naming-conventions.mdc` for all naming patterns
 - See `24-css-class-naming.mdc` for CSS class/id block--part-or-variant convention
 
 ### Code Style
+
 - See `17-code-style.mdc` for formatting and style guidelines
 
 ### Documentation
+
 - See `16-documentation.mdc` for documentation patterns
