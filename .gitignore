@@ -87,7 +87,6 @@ lib-cov/
 *~
 
 # Cursor AI
-
 !.cursor/rules/*.mdc
 .cursor/mcp.json
 .cursor/worktrees.json
@@ -126,3 +125,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .yarn/unplugged
 .yarn/build-state.yml
 .yarn/install-state.gz
+
+# automation scripts
+scripts/x-triage.js
+scripts/posts.txt
