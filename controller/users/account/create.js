@@ -50,14 +50,22 @@ module.exports = {
     logger.debug(`Account creation started for: ${newPowerbacker.username}`);
     const hashObj = await generate('join');
     logger.debug(`Hash generated: ${hashObj.hash?.substring(0, 10) || 'N/A'}`);
+    // Optional inbound referral from client pb:refShareCode (Rally); persisted for activate attribution
+    const { refShareCode, ref_share_code, ...accountFields } = newPowerbacker;
+    const inboundCode = refShareCode || ref_share_code;
+    const PUBLIC_CODE_PATTERN = /^[A-Za-z0-9_-]{10,24}$/;
+    const payload = {
+      ...accountFields,
+      settings: APP.SETTINGS,
+      joinHash: hashObj.hash,
+      joinHashExpires: hashObj.expires,
+      joinHashIssueDate: hashObj.issueDate,
+    };
+    if (inboundCode && PUBLIC_CODE_PATTERN.test(inboundCode)) {
+      payload.ref_share_code = inboundCode;
+    }
     try {
-      const created = await model.create({
-        ...newPowerbacker,
-        settings: APP.SETTINGS,
-        joinHash: hashObj.hash,
-        joinHashExpires: hashObj.expires,
-        joinHashIssueDate: hashObj.issueDate,
-      });
+      const created = await model.create(payload);
       if (created) {
         logger.debug(`New user account created: ${created.id}`);
         logger.debug(`Sending email to ${newPowerbacker.username}`);

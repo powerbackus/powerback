@@ -17,7 +17,7 @@ import type { AuthProp, NavigationProp } from '@Types';
 import { activation, regexMatchURI } from '@Utils';
 import { Wrapper } from '@Components/page';
 import { ALERT_TIMEOUT } from '@CONSTANTS';
-import { Loading, Splash } from '@Pages';
+import { Loading, Rally, Splash } from '@Pages';
 import { routes } from '../router';
 
 /**
@@ -189,7 +189,7 @@ const Page = ({
     };
   }, [route?.name]);
 
-  const { funnel: tabKey, navContext } = useNavigation();
+  const { funnel: tabKey, navContext, splash } = useNavigation();
 
   /**
    * Track legitimate guest access to funnel
@@ -236,8 +236,8 @@ const Page = ({
   }, [isInitializing, isLoggedIn, navContext]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
-   * Effect to enable scrolling on Splash page by adding/removing splash-scrollable class
-   * Allows vertical scrolling when Splash content (including Pitch) exceeds viewport height
+   * Effect to enable scrolling on Splash/Rally by adding/removing splash-scrollable class
+   * Allows vertical scrolling when landing content exceeds viewport height
    */
   useEffect(() => {
     const isSplashPage =
@@ -326,7 +326,13 @@ const Page = ({
         );
       })}
 
-      <Wrapper classProps={`wrapper-${tabKey ?? 'pol-donation'}`}>
+      <Wrapper
+        classProps={
+          splash === 'Rally'
+            ? 'wrapper-rally'
+            : `wrapper-${tabKey ?? 'pol-donation'}`
+        }
+      >
         {/* Reset password page */}
         {route?.name === 'reset' && userIsAssumedValid && !linkIsExpired && (
           <Suspense
@@ -357,8 +363,9 @@ const Page = ({
                 route={route}
                 {...props}
               />
+            ) : splash === 'Rally' ? (
+              <Rally />
             ) : (
-              // Landing page
               <Splash />
             )}
           </Suspense>

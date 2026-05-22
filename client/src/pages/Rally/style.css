@@ -1,0 +1,394 @@
+/**
+ * Rally page styles (share-first funnel). Uses app design tokens for dark theme.
+ */
+
+/* Outer shell: vertically center card on landscape (Funnel #funnel--page pattern) */
+#rally--page {
+  width: 100%;
+}
+
+#rally.rally-page {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+  text-align: left;
+  color: var(--text);
+  background-color: var(--bg-fade);
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgb(from var(--contrast-black) r g b / 55%);
+}
+
+.rally--headline {
+  color: var(--text-mission);
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.75rem;
+  text-shadow: -1px 1px 0 rgb(from var(--contrast-black) r g b / 45%);
+}
+
+.rally--subcopy {
+  font-size: 1.05rem;
+  margin-bottom: 1.5rem;
+  color: var(--text);
+  font-family: 'Inconsolata', monospace;
+  line-height: 1.4;
+}
+
+.rally--section {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1rem 1.25rem;
+  background-color: var(--elevated);
+  border: 1px solid var(--accent);
+  border-radius: 5px;
+}
+
+.rally--section:last-of-type {
+  margin-bottom: 0;
+}
+
+.rally--section-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-mission);
+  font-family: 'Oswald', sans-serif;
+}
+
+.rally--section-title--secondary {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.rally--hint {
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  color: var(--text-placeholder);
+  font-family: 'Inconsolata', monospace;
+  line-height: 1.35;
+}
+
+.rally--btn-row {
+  margin-top: 0.5rem;
+}
+
+#rally .rally--generate-btn.button--continue,
+#rally .rally--continue-btn.button--continue {
+  color: var(--btn) !important;
+  width: min(100%, 28rem);
+  display: block;
+  margin: 0.65rem auto 0;
+  padding: 0.5rem 1.25rem !important;
+  background-color: var(--elevated) !important;
+  border: 2px solid var(--btn) !important;
+  border-radius: 4px;
+  font-family: 'Oswald', sans-serif !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em;
+}
+
+/* Bootstrap outline-dark is illegible on our dark surfaces; use brand tokens */
+#rally .btn-outline-dark,
+#rally .rally--copy-btn,
+#rally .rally--claim-copy-btn {
+  color: var(--btn) !important;
+  background-color: var(--slate) !important;
+  border: 2px solid var(--accent) !important;
+  font-family: 'Inconsolata', monospace !important;
+}
+
+#rally .btn-outline-dark:hover,
+#rally .btn-outline-dark:focus-visible,
+#rally .rally--copy-btn:hover,
+#rally .rally--copy-btn:focus-visible,
+#rally .rally--claim-copy-btn:hover,
+#rally .rally--claim-copy-btn:focus-visible {
+  color: var(--success-theme) !important;
+  border-color: var(--btn-hover) !important;
+  background-color: var(--semi-dark) !important;
+}
+
+.rally--link-url-block {
+  margin-bottom: 0.35rem;
+}
+
+.rally--link-url-label {
+  display: block;
+  margin-bottom: 0.2rem;
+  font-size: 0.9rem;
+  color: var(--text-placeholder);
+  font-family: 'Inconsolata', monospace;
+}
+
+/* Copyable link/code (Confirmation .btc-address / .to-clipboard pattern) */
+.rally--clipboard-line {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.rally--share-url {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.88rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.rally--claim-display {
+  flex: 1 1 12rem;
+  min-width: 0;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.88rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  color: var(--text-contrast);
+}
+
+.rally--clipboard-icon-btn {
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  line-height: 1;
+  color: var(--primary);
+  cursor: copy;
+}
+
+.rally--clipboard-icon-btn:hover,
+.rally--clipboard-icon-btn:focus-visible {
+  color: var(--attention);
+}
+
+/* Anonymous share link: tighter vertical rhythm */
+.rally--section.rally--anonymous-link {
+  padding: 0.6rem 0.75rem 0.7rem;
+  margin-bottom: 1rem;
+}
+
+.rally--anonymous-link .rally--section-title {
+  margin-bottom: 0.2rem;
+  font-size: 1.1rem;
+}
+
+.rally--anonymous-link .rally--hint {
+  margin-bottom: 0.45rem;
+  font-size: 0.88rem;
+  line-height: 1.3;
+}
+
+.rally--anonymous-link .rally--generate-btn.button--continue {
+  margin-top: 0.25rem !important;
+  margin-bottom: 0 !important;
+}
+
+.rally--link-panel {
+  margin-top: 0;
+}
+
+/* Fixed-height slots: visibility toggle without shifting claim row */
+.rally--claim-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.rally--claim-block--compact {
+  gap: 0.1rem;
+}
+
+.rally--claim-warning-slot {
+  min-height: 2.35rem;
+}
+
+.rally--claim-warning-slot--empty {
+  min-height: 0;
+}
+
+.rally--claim-warning {
+  font-size: 0.82rem;
+  color: var(--attention);
+  margin: 0;
+  font-family: 'Inconsolata', monospace;
+  line-height: 1.25;
+}
+
+.rally--claim-code-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-height: 2.65rem;
+  margin-top: 0;
+}
+
+.rally--claim-slot--hidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.rally--claim-copy-btn {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.rally--reveal-claim {
+  color: var(--link) !important;
+  font-family: 'Inconsolata', monospace;
+  align-self: flex-start;
+  font-size: 0.88rem;
+  line-height: 1.2;
+  min-height: 1.35rem;
+  padding: 0 !important;
+}
+
+.rally--disclaimer {
+  color: var(--text-placeholder);
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(0.75rem, 2.2vmin, 0.8rem);
+}
+
+.rally--account-link {
+  font-size: 0.9rem;
+  color: var(--link) !important;
+  text-decoration: underline;
+  font-family: 'Inconsolata', monospace;
+}
+
+.rally--account-link:hover {
+  color: var(--link-hover) !important;
+}
+
+.rally--account-sep {
+  font-size: 0.9rem;
+  color: var(--text-placeholder);
+}
+
+.rally--email-todo {
+  font-size: 0.85rem;
+  color: var(--text-placeholder);
+  text-align: center;
+  font-family: 'Inconsolata', monospace;
+}
+
+#rally .form-control {
+  background-color: var(--contrast-black) !important;
+  border-color: var(--accent) !important;
+}
+
+#rally .alert-danger {
+  background-color: var(--alert-dark);
+  border-color: var(--error);
+  color: var(--error);
+}
+
+/* Portrait / narrow: three action sections stack vertically (default block flow) */
+.rally--actions-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.rally--actions-row > .rally--section {
+  margin-bottom: 1rem;
+}
+
+.rally--actions-row > .rally--section:last-child {
+  margin-bottom: 0;
+}
+
+/* Tablet, landscape: center Rally card in viewport (Payment / TipAsk via #funnel--page) */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #rally--page {
+    --nav-h: 6vh;
+    height: 88vh;
+    justify-content: center;
+    padding-top: calc(var(--nav-h) + 1rem);
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Landscape: Share, Anonymous link, and Email updates in one row */
+@media only screen and (orientation: landscape) and (min-width: 600px) {
+  #rally.rally-page {
+    max-width: min(96vw, 72rem);
+    padding: 1rem 1.25rem 2rem;
+  }
+
+  .rally--subcopy {
+    margin-bottom: 1rem;
+  }
+
+  .rally--actions-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.65rem;
+    align-items: stretch;
+  }
+
+  .rally--actions-row > .rally--section {
+    margin-bottom: 0;
+    height: 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .rally--section.rally--anonymous-link {
+    margin-bottom: 0;
+  }
+
+  .rally--manual-share .rally--hint,
+  .rally--anonymous-link .rally--hint,
+  .rally--email .rally--hint {
+    margin-bottom: 0.4rem;
+  }
+
+  .rally--manual-share .rally--btn-row {
+    flex-direction: column;
+    align-items: stretch !important;
+    margin-top: auto;
+  }
+
+  #rally .rally--actions-row .rally--copy-btn,
+  #rally .rally--actions-row .btn-outline-dark {
+    width: 100%;
+  }
+
+  .rally--anonymous-link .rally--link-panel,
+  .rally--anonymous-link .rally--generate-btn.button--continue {
+    margin-top: auto;
+  }
+
+  .rally--email .rally--email-form {
+    margin-top: auto;
+    flex-direction: column;
+  }
+
+  .rally--email .rally--email-form > .col {
+    flex: 0 0 100%;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .rally--email .rally--email-form .btn {
+    width: 100%;
+  }
+
+}
+
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #rally.rally-page {
+    padding: 1rem 0.85rem 2rem;
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
+  }
+}

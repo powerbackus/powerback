@@ -19,7 +19,8 @@
   main.wrapper-payment,
   main.wrapper-loading,
   main.wrapper-confirmation,
-  main.wrapper-tips {
+  main.wrapper-tips,
+  main.wrapper-rally {
     height: min(35rem, 77vh) !important;
   }
 }
@@ -37,7 +38,8 @@
   main.wrapper-payment,
   main.wrapper-confirmation,
   main.wrapper-tips,
-  main.wrapper-loading {
+  main.wrapper-loading,
+  main.wrapper-rally {
     padding-top: 85px;
   }
 }

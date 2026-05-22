@@ -40,7 +40,7 @@ const Splash = () => {
         </p>
         <ContinueBtn
           classProp={'splash-enter--btn button--continue'}
-          handleClick={() => changeSplash('Tour')}
+          handleClick={() => changeSplash('Rally')}
           label={SPLASH_COPY.SPLASH.COPY.tour}
           variant={'dark'}
           type={'button'}

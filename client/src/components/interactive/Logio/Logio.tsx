@@ -17,7 +17,11 @@ import {
   useDonationState,
   type UserEntryResponse,
 } from '@Contexts';
-import { handleKeyDown, trackGoogleAnalyticsEvent } from '@Utils';
+import {
+  getStoredRefShareCode,
+  handleKeyDown,
+  trackGoogleAnalyticsEvent,
+} from '@Utils';
 import { UsernameField, PasswordField } from '@Components/forms';
 import { BtnErrorSwapper } from '@Components/displays';
 import { handleOverlay, handleFeedback } from './fn';
@@ -127,7 +131,7 @@ const Logio = ({
             btnId: 'logio-submitbtn-' + credentialsPath,
             value: showModal.credentials
               ? credentialsPath
-              : splash === 'Tour' || splash === ''
+              : splash === 'Tour' || splash === 'Rally' || splash === ''
                 ? credentialsPath
                 : splash || '',
           }}
@@ -189,6 +193,7 @@ const Logio = ({
     const canSwap =
       showModal.credentials ||
       splash === 'Tour' ||
+      splash === 'Rally' ||
       splash === 'Join Now' ||
       splash === 'Sign In';
 
@@ -196,7 +201,7 @@ const Logio = ({
       return;
     }
 
-    if (showModal.credentials || splash === 'Tour') {
+    if (showModal.credentials || splash === 'Tour' || splash === 'Rally') {
       const nextPath = credentialsPath === 'Join Now' ? 'Sign In' : 'Join Now';
 
       trackGoogleAnalyticsEvent('auth_modal_path_switched', {
@@ -249,7 +254,11 @@ const Logio = ({
   const joinUp = useCallback(
     async (form: UserEntryResponse) => {
       try {
-        await API.createUser({ ...form });
+        const refShareCode = getStoredRefShareCode();
+        await API.createUser({
+          ...form,
+          ...(refShareCode ? { refShareCode } : {}),
+        });
         trackGoogleAnalyticsEvent('account_created');
         setUserFormValidated(false);
         setShowAlert((a) => ({ ...a, join: true }));

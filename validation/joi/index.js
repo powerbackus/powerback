@@ -16,4 +16,5 @@ module.exports = {
   paymentMethod: require('./paymentMethod'),
   pol: require('./pol'),
   contributing: require('./contributing'),
+  shareLinkPublicCode: require('./shareLinkPublicCode'),
 };

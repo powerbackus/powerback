@@ -166,6 +166,15 @@ const rateLimiters = {
     legacyHeaders: false,
   }),
 
+  // Anonymous share link creation (Rally)
+  shareLinkCreate: createRateLimiter({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 10,
+    message: 'Too many share links created. Please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+  }),
+
   // General API protection
   general: createRateLimiter({
     windowMs: 15 * 60 * 1000, // 15 minutes

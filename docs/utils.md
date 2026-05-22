@@ -45,7 +45,9 @@ Application-level helpers: user data, donation validation messaging, activation,
 - **User and session**
   - `loadUser` – load user data (e.g. after auth).
   - `updateUser` – update user data (e.g. after profile/celebration changes).
-  - `activation` – activation flow helper.
+  - `activation` – activation flow helper; clears `pb:refShareCode` after successful activate.
+- **Rally / share inbound**
+  - `recordShareLinkVisitFromQuery`, `getShareCodeFromLocation`, `stripShareQueryFromUrl`, `hasShareInboundThisSession` – inbound `?share=` visit API and URL cleanup ([`recordShareLinkVisit.ts`](../client/src/utils/app/recordShareLinkVisit.ts)). See [Rally and share links](./rally-share-links.md).
 - **Donation flow**
   - `donationFailure` – build donation-failure/rejection messaging from validation response.
   - `transformPolData` – transform politician data for forms/display.
@@ -127,7 +129,14 @@ See [Payment Processing](./payment-processing.md) for the full flow.
 
 Single storage utility: prefix (`pb:`), JSON encoding, and optional TTL/size checks. All persistent client storage should go through this (or the app localStorage helpers that respect the same policy).
 
-- **`storage`** – object with `set`, `get`, `clear` (and any other exposed methods).
+- **`storage`** – `storage.local` / `storage.session` with `pb:` prefix ([`storage.ts`](../client/src/utils/storage/storage.ts)).
+
+#### Rally share-link storage
+
+See [Rally and share links](./rally-share-links.md) for when to use each key.
+
+- **`getStoredShareLink`**, **`setStoredShareLink`** – outbound link this user generated (`pb:shareLink`: `publicCode`, `claimCode`, `shareUrl`). [`shareLinkStorage.ts`](../client/src/utils/storage/shareLinkStorage.ts)
+- **`getStoredRefShareCode`**, **`setStoredRefShareCode`**, **`clearStoredRefShareCode`** – inbound referral (`pb:refShareCode`, 30-day TTL). [`refShareCodeStorage.ts`](../client/src/utils/storage/refShareCodeStorage.ts)
 
 See [Client Storage Policy](../.cursor/rules/20-client-storage.mdc) for what may be stored and naming/size/clear-on-logout rules.
 

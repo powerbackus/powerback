@@ -22,6 +22,7 @@ This directory captures domain specifications that guide implementation. Each sp
 
 - `docs/authentication-system.md` - JWT authentication system, token management, and security patterns
 - `docs/API.md` - API endpoint documentation with authentication details
+- `docs/rally-share-links.md` - Rally funnel, anonymous share links, inbound attribution (see `specs/rally-page.md`)
 
 ## Agentic Loop
 

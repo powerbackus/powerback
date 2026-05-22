@@ -24,5 +24,12 @@ export {
   fetchAndCacheElectionDates,
 } from './electionDates';
 
+export {
+  getShareCodeFromLocation,
+  recordShareLinkVisitFromQuery,
+  hasShareInboundThisSession,
+  stripShareQueryFromUrl,
+} from './recordShareLinkVisit';
+
 export type { DonationFailureProps } from './donationFailure';
 export type { ElectionDatesResult } from './electionDates';

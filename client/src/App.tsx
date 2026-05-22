@@ -13,6 +13,8 @@ import React, {
 import {
   clearLocalMap,
   getScrollBehavior,
+  recordShareLinkVisitFromQuery,
+  stripShareQueryFromUrl,
   trackGoogleAnalyticsEvent,
 } from '@Utils';
 import { APP, ANALYTICS_COPY, type AccountTab } from '@CONSTANTS';
@@ -99,6 +101,15 @@ const App = ({ serverConstantsError }: AppProps) => {
 
     trackGoogleAnalyticsEvent(ANALYTICS_COPY.EVENTS.CAMPAIGN_PATH_SEEN, {
       [ANALYTICS_COPY.PARAMS.CAMPAIGN_PATH]: path,
+    });
+  }, []);
+
+  /**
+   * Inbound ?share= visit: record once per session, then strip query from URL.
+   */
+  useEffect(() => {
+    void recordShareLinkVisitFromQuery().then(() => {
+      stripShareQueryFromUrl();
     });
   }, []);
 

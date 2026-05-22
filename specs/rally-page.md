@@ -6,9 +6,9 @@ Insert a **Rally** step between the landing page (Splash) and the Lobby / Celebr
 
 **Core message:** PEOPLE, NOT MONEY.
 
-**In scope (v1):** Rally UI, navigation wiring, `ShareLink` model + APIs, rate limiting, GA events, minimal visit counters.
+**In scope (v1):** Rally UI, navigation wiring, `ShareLink` model + APIs, rate limiting, GA events, minimal visit counters, inbound referral persistence (`pb:refShareCode`), signup attribution to `ShareLink.referred_users`.
 
-**Out of scope (v1):** Claim-code redemption (unless trivial), `User.referred_by_share_link`, per-visit metadata in MongoDB, full email-list backend (UI + analytics only if no existing endpoint fits).
+**Out of scope (v1):** Claim-code redemption (unless trivial), `User.referred_by_share_link`, per-visit metadata in MongoDB, full email-list backend (UI + analytics only if no existing endpoint fits), rewards or compliance-sensitive incentives tied to referrals.
 
 ---
 
@@ -32,6 +32,7 @@ Insert a **Rally** step between the landing page (Splash) and the Lobby / Celebr
 - Navigation: Splash primary CTA → Rally; Rally “Continue” → existing `Tour` → funnel (`pol-donation`, guest access).
 - Backend: `ShareLink` Mongoose model, `POST` create + `GET` visit-by-public-code, IP rate limit on create.
 - Frontend: show stored link from `pb:shareLink` when present; call `POST /api/share-links` only after an explicit generate click (never on Rally mount).
+- Frontend: after successful inbound visit API, persist inbound `publicCode` in `pb:refShareCode` (30-day TTL); on signup `POST /api/users`, send `refShareCode` for `Applicant.ref_share_code`; on activation, server reads `Applicant.ref_share_code` only for `$addToSet` on `ShareLink.referred_users`.
 
 ---
 
@@ -70,7 +71,11 @@ flowchart LR
 1. Recipient opens share URL (see §5).
 2. Client records `share_link_visited` (GA) and calls visit API.
 3. Server increments `visit_count`, updates `first_visit_at` / `last_visit_at` only.
-4. Recipient may land on Splash or Rally with share context in session (no PII in MongoDB).
+4. After successful visit API, client stores inbound `publicCode` in `pb:refShareCode` (localStorage, 30-day TTL). Not the same as `pb:shareLink` (outbound link this visitor generated).
+5. Recipient may land on Splash or Rally with share context in session (`pb:rallyShareInbound` for GA only; no `publicCode` in GA custom event params).
+6. **Signup:** `POST /api/users` includes optional `refShareCode` from `pb:refShareCode` → stored on `Applicant.ref_share_code`.
+7. **Activation:** server reads `Applicant.ref_share_code` only (no `?refShareCode=` on activate URL) → best-effort `$addToSet` on `ShareLink.referred_users`. Signup/activation succeed even if attribution fails.
+8. Client clears `pb:refShareCode` after successful activation.
 
 ### Navigation / history (align with `specs/navigation-system.md`)
 
@@ -92,13 +97,16 @@ Rally is **not** an authentication gate and must not block normal app use for si
 
 ### Session / storage keys (frontend)
 
-| Key              | Purpose                                                                                                                                                            |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `pb:shareLink`   | `{ publicCode, claimCode }` — set only after successful explicit generate; read on mount to restore UI; never triggers POST by itself; TTL optional (e.g. 30 days) |
-| `pb:guestAccess` | Unchanged; set when continuing to Lobby                                                                                                                            |
-| `pb:rallySeen`   | Optional; suppress duplicate `rally_page_seen` in same session                                                                                                     |
+| Key                    | Purpose                                                                                                                                                                                         |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pb:shareLink`         | Outbound link **this visitor generated** for others: `{ publicCode, claimCode, shareUrl }` — set only after successful explicit generate; never stores inbound referral                         |
+| `pb:refShareCode`      | Inbound referral for **signup only**: `{ publicCode, storedAt }` — set after successful visit API; 30-day TTL; sent on `POST /api/users`; cleared after successful activation; **no claimCode** |
+| `pb:shareVisit:{code}` | Session dedupe for visit API (per `publicCode`)                                                                                                                                                 |
+| `pb:rallyShareInbound` | Session flag for GA `rally_page_seen` entry (`share` vs `splash`); boolean only                                                                                                                 |
+| `pb:guestAccess`       | Unchanged; set when continuing to Lobby                                                                                                                                                         |
+| `pb:rallySeen`         | Optional; suppress duplicate `rally_page_seen` in same session                                                                                                                                  |
 
-Do **not** add `User.referred_by_share_link` in v1. When a referred user registers later, append their `User` `_id` to `ShareLink.referred_users` via a separate attribution hook (deferred unless trivial at signup).
+Do **not** add `User.referred_by_share_link` in v1. Attribution stays on `ShareLink.referred_users` only.
 
 ---
 
@@ -261,7 +269,17 @@ Add methods to `client/src/api/API.ts` (only gateway for HTTP). Types in `client
 
 - **Public URL to share (v1):** `https://powerback.us/?share={publicCode}` — canonical form returned as `shareUrl` from `POST /api/share-links` and shown in Rally copy/share controls.
 - **App route:** same query param on main route (`/?share={publicCode}`; works with existing `routes.main()`).
-- **Visit recording:** on bootstrap, if `share` query param is present, frontend calls `GET /api/share-links/:publicCode` once per session (e.g. `sessionStorage` flag `pb:shareVisit:{publicCode}`), then strip or retain the query param per UX choice. Do not expose the API URL in UI or share sheets.
+- **Visit recording:** on bootstrap, if `share` query param is present, frontend calls `GET /api/share-links/:publicCode` once per session (session flag `pb:shareVisit:{publicCode}`), then strips the query param from the URL. On **successful** response only, persist inbound code to `pb:refShareCode`. Do not expose the API URL in UI or share sheets.
+
+### Signup attribution (v1)
+
+**Flow:** inbound `/?share=` → visit API → `pb:refShareCode` → signup `POST /api/users` (`refShareCode`) → `Applicant.ref_share_code` → activation (`GET /api/users/activate/:hash` only, no share query param) → `ShareLink.referred_users`.
+
+- **Client signup:** `POST /api/users` may include optional `refShareCode` from `pb:refShareCode`; stored on `Applicant.ref_share_code`.
+- **Client activation:** `GET /api/users/activate/:hash` only (hash in path). Do **not** pass `refShareCode` as a query param (avoids access logs and URL leakage).
+- **Server activation:** read `Applicant.ref_share_code`, validate with public-code pattern, call `attributeShareLinkReferral` → `$addToSet` on `referred_users`. Best-effort; failures logged without blocking activation.
+- **Clear:** client clears `pb:refShareCode` after successful activation (`isHashConfirmed` and not expired).
+- **Not for:** money, credits, compliance tiers, or custom GA event params (never send `publicCode` to GA events).
 
 ---
 
@@ -315,6 +333,12 @@ Use `trackGoogleAnalyticsEvent` from `@Utils` (see `.cursor/skills/powerback-ga-
 
 **Server:** no GA from API in v1; visit counts live in MongoDB + client event.
 
+### GA automatic `page_location` (inbound `?share=`)
+
+- gtag loads in `client/public/index.html` before React. Without mitigation, the default `gtag('config')` initial `page_view` can send `page_location` including `?share={publicCode}` while the param is still in the address bar.
+- **Mitigation (v1):** inline gtag `config` sets `page_path` / `page_location` with the `share` query param removed (same origin/path/hash, no share code in GA URL fields). Custom events still must not include share identifiers (see above).
+- **Residual risk:** third-party analytics, browser extensions, or future SPA `gtag('config')` calls could still observe the full URL briefly before `stripShareQueryFromUrl()` in `App.tsx`. Follow-up: audit any added SPA page-view tracking.
+
 ---
 
 ## 8. Privacy constraints
@@ -327,8 +351,10 @@ Use `trackGoogleAnalyticsEvent` from `@Utils` (see `.cursor/skills/powerback-ga-
 
 ### Client storage
 
-- `pb:shareLink` may hold `claimCode` for same-device convenience; not synced server-side.
+- `pb:shareLink` may hold `claimCode` for same-device convenience (outbound only); not synced server-side.
+- `pb:refShareCode` holds inbound `publicCode` only (no `claimCode`); JSON + `storedAt`; 30-day TTL; purge on read when stale.
 - Clear `pb:shareLink` on explicit user “reset link” action if offered (optional v1).
+- Clear `pb:refShareCode` after successful activation attribution.
 - Follow `20-client-storage.mdc`: prefixed keys, JSON, size/TTL discipline.
 
 ### Claim code
@@ -343,22 +369,26 @@ Use `trackGoogleAnalyticsEvent` from `@Utils` (see `.cursor/skills/powerback-ga-
 ### GA
 
 - Richer funnels (scroll, time on page, campaigns) via GA only, not MongoDB visit logs.
+- Initial `page_view` must not include `?share=` in `page_location` (see §7 GA automatic `page_location`).
 
 ---
 
 ## 9. Deferred items
 
-| Item                                       | Notes                                                                                   |
-| ------------------------------------------ | --------------------------------------------------------------------------------------- |
-| `POST .../claim`                           | Redeem claim code; set `claimed_by_user`, `claimed_at`                                  |
-| `User.referred_by_share_link`              | Attribution stays on `ShareLink.referred_users`                                         |
-| Signup attribution hook                    | On `User` create, if `?share=` or session flag present, `$addToSet` on `referred_users` |
-| Email updates backend                      | Dedicated waitlist model or `Applicant`-lite + double opt-in                            |
-| Server-side idempotent create              | e.g. fingerprint cookie (privacy review required)                                       |
-| Share link admin / revoke                  | Ops tooling                                                                             |
-| Rewards / gamification tied to claim codes | Product follow-on                                                                       |
-| Dedicated route `/#/rally/:code`           | Optional prettier URLs                                                                  |
-| Docs: `docs/API.md`                        | Update when endpoints ship                                                              |
+| Item                                       | Notes                                                                                                   |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| `POST .../claim`                           | Redeem claim code; set `claimed_by_user`, `claimed_at`                                                  |
+| `User.referred_by_share_link`              | Never; attribution stays on `ShareLink.referred_users` only                                             |
+| Email updates backend                      | Dedicated waitlist model or `Applicant`-lite + double opt-in                                            |
+| Cross-device signup → activate             | `ref_share_code` on `Applicant` bridges signup device to activation when signup included `refShareCode` |
+| Signup before inbound visit, then activate | No `Applicant.ref_share_code` unless user signs up again after visit; no activate query-param fallback  |
+| Attribution if visit API never succeeded   | No `pb:refShareCode`; no referral write                                                                 |
+| SPA / duplicate gtag page_view             | Audit if additional `gtag('config')` is added beyond `index.html`                                       |
+| Server-side idempotent create              | e.g. fingerprint cookie (privacy review required)                                                       |
+| Share link admin / revoke                  | Ops tooling                                                                                             |
+| Rewards / gamification tied to claim codes | Product follow-on                                                                                       |
+| Dedicated route `/#/rally/:code`           | Optional prettier URLs                                                                                  |
+| Docs: `docs/API.md`                        | Share-links section shipped; see Documentation table above                                              |
 
 ---
 
@@ -386,7 +416,17 @@ Use `trackGoogleAnalyticsEvent` from `@Utils` (see `.cursor/skills/powerback-ga-
 ### Inbound share
 
 - [ ] `/?share={publicCode}` triggers visit API once per session and fires `share_link_visited`.
+- [ ] After successful visit API, inbound `publicCode` is stored in `pb:refShareCode` separately from `pb:shareLink`.
 - [ ] Recipient can use the app without creating a link or account.
+
+### Signup attribution
+
+- [ ] `POST /api/users` accepts optional `refShareCode`; valid values stored on `Applicant.ref_share_code`.
+- [ ] Activate URL does **not** include `?refShareCode=`; attribution uses `Applicant.ref_share_code` only.
+- [ ] On activation, server `$addToSet` new `User` `_id` onto `ShareLink.referred_users` when stored code is valid and link exists.
+- [ ] Attribution is idempotent (`$addToSet`); signup/activation succeed if attribution fails.
+- [ ] `pb:refShareCode` cleared after successful activation.
+- [ ] Initial gtag `page_location` omits `?share=` (see §7).
 
 ### Analytics
 
@@ -409,25 +449,40 @@ Use `trackGoogleAnalyticsEvent` from `@Utils` (see `.cursor/skills/powerback-ga-
 
 ---
 
+## Documentation
+
+| Doc | Purpose |
+| --- | ------- |
+| [`docs/rally-share-links.md`](../docs/rally-share-links.md) | Operator guide: flows, storage keys, API vs public URL, attribution, privacy |
+| [`docs/API.md`](../docs/API.md#share-links-rally) | Endpoint table and client method names |
+| [`docs/analytics.md`](../docs/analytics.md#rally-and-share-link-events) | GA events and `page_location` mitigation |
+| [`docs/utils.md`](../docs/utils.md#rally-share-link-storage) | `shareLinkStorage`, `refShareCodeStorage`, `recordShareLinkVisit` |
+
 ## Implementation references
 
-| Area          | Location                                                             |
-| ------------- | -------------------------------------------------------------------- |
-| Splash CTA    | `client/src/pages/Splash/Splash.tsx`                                 |
-| Tour → funnel | `client/src/contexts/NavigationContext.tsx` (`navigateToSplashView`) |
-| Guest access  | `specs/navigation-system.md`, `pb:guestAccess`                       |
-| Rate limiters | `services/utils/rateLimitHelpers.js`                                 |
-| API mount     | `routes/api/index.js`                                                |
-| GA helper     | `client/src/utils/analytics/analytics.ts`                            |
-| Models index  | `models/index.js`                                                    |
+| Area            | Location                                                                                |
+| --------------- | --------------------------------------------------------------------------------------- |
+| Splash CTA      | `client/src/pages/Splash/Splash.tsx`                                                    |
+| Tour → funnel   | `client/src/contexts/NavigationContext.tsx` (`navigateToSplashView`)                    |
+| Guest access    | `specs/navigation-system.md`, `pb:guestAccess`                                          |
+| Rate limiters   | `services/utils/rateLimitHelpers.js`                                                    |
+| API mount       | `routes/api/index.js`                                                                   |
+| GA helper       | `client/src/utils/analytics/analytics.ts`                                               |
+| Models index    | `models/index.js`                                                                       |
+| Inbound store   | `client/src/utils/storage/refShareCodeStorage.ts`                                       |
+| Visit + ref     | `client/src/utils/app/recordShareLinkVisit.ts`                                          |
+| Attribution     | `controller/shareLinks/index.js` (`attributeShareLinkReferral`)                         |
+| Signup/activate | `controller/users/account/create.js`, `utils/activate.js`, `Logio.tsx`, `activation.js` |
 
 ---
 
 ## Changelog
 
-| Date       | Change                                                                          |
-| ---------- | ------------------------------------------------------------------------------- |
-| 2026-05-21 | Initial spec (share-first funnel, ShareLink v1)                                 |
-| 2026-05-21 | Clarify public share URL vs API; GA identifier prohibition; Rally copy WIP note |
-| 2026-05-21 | ShareLink create on explicit generate click only (no POST on Rally mount)       |
-| 2026-05-21 | Rally not an auth gate; no forced Rally for logged-in or direct app navigation  |
+| Date       | Change                                                                                                           |
+| ---------- | ---------------------------------------------------------------------------------------------------------------- |
+| 2026-05-21 | Initial spec (share-first funnel, ShareLink v1)                                                                  |
+| 2026-05-21 | Clarify public share URL vs API; GA identifier prohibition; Rally copy WIP note                                  |
+| 2026-05-21 | ShareLink create on explicit generate click only (no POST on Rally mount)                                        |
+| 2026-05-21 | Rally not an auth gate; no forced Rally for logged-in or direct app navigation                                   |
+| 2026-05-21 | v1 inbound `pb:refShareCode` + signup attribution to `ShareLink.referred_users`                                  |
+| 2026-05-21 | Activation attribution via `Applicant.ref_share_code` only; no `?refShareCode=`; GA page_location strips `share` |

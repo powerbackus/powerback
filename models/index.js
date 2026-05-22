@@ -6,4 +6,5 @@ module.exports = {
   Applicant: require('./Applicant'),
   Celebration: require('./Celebration'),
   PfpImageErrorAlert: require('./PfpImageErrorAlert'),
+  ShareLink: require('./ShareLink'),
 };

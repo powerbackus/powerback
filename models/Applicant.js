@@ -199,6 +199,14 @@ const ApplicantSchema = new Schema(
       },
       type: Object,
     },
+    /**
+     * Inbound share publicCode from client pb:refShareCode at signup.
+     * Used at activation for ShareLink.referred_users; not copied to User document.
+     */
+    ref_share_code: {
+      type: String,
+      required: false,
+    },
   },
   { timestamps: true }
 );

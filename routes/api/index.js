@@ -44,7 +44,8 @@ const celebrationRoutes = require('./celebrations'),
   userRoutes = require('./users'),
   btcRoutes = require('./btc'),
   devRoutes = require('./dev'),
-  sysRoutes = require('./sys');
+  sysRoutes = require('./sys'),
+  shareLinksRoutes = require('./shareLinks');
 
 // Health check endpoint
 router.get('/health', async (req, res) => {
@@ -93,6 +94,7 @@ router
   .use('/users', userRoutes)
   .use('/btc', btcRoutes)
   .use('/dev', devRoutes)
-  .use('/sys', sysRoutes);
+  .use('/sys', sysRoutes)
+  .use('/share-links', shareLinksRoutes);
 
 module.exports = router;

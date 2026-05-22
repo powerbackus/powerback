@@ -70,6 +70,28 @@ External link clicks and UTM attribution are handled by the [Link Tracking](./li
 - Additional tracked events currently in use:
   - `account_created`, `celebrate_click`, `celebration_completed`, `celebrate_auth_blocked`, `carousel_interaction`, `enter_lobby`, `search_used`, `limit_validation_failed`.
 
+## Rally and share-link events
+
+Rally instrumentation lives in [`Rally.tsx`](../client/src/pages/Rally/Rally.tsx) and [`recordShareLinkVisit.ts`](../client/src/utils/app/recordShareLinkVisit.ts). Product rules: [`specs/rally-page.md`](../specs/rally-page.md) §7; overview: [Rally and share links](./rally-share-links.md).
+
+| Event | When | Params |
+| ----- | ---- | ------ |
+| `rally_page_seen` | Rally mount (once per session) | `entry`: `splash` \| `share` (boolean session flag only) |
+| `rally_manual_share_seen` | Manual share section first seen/interaction | — |
+| `share_link_generated` | Successful `POST /api/share-links` after explicit generate | — |
+| `share_link_copied` | User copies public URL or claim code | `target`: `url` \| `claim` |
+| `share_link_visited` | Inbound visit API success | `has_share_param: true`, `entry: share_link` |
+| `rally_email_signup_started` | Email field focus or submit on Rally | — |
+| `rally_continue_to_lobby_click` | Continue to Lobby CTA | — |
+
+**Prohibited in Rally-related custom params:** `publicCode`, `claimCode`, email, full share URLs.
+
+### Automatic `page_location` and `?share=`
+
+gtag loads in [`client/public/index.html`](../client/public/index.html) before React. The initial `gtag('config')` sets `page_path` and `page_location` **without** the `share` query param so the default `page_view` does not include the referral code. The app still reads `?share=` for the visit API, then [`stripShareQueryFromUrl()`](../client/src/utils/app/recordShareLinkVisit.ts) removes it from the address bar.
+
+**Residual risk:** the browser URL may briefly show `?share=` before strip; third-party tools or future SPA `gtag('config')` calls could observe the full URL. Follow-up: audit any added client-side page-view tracking.
+
 ## Remote GA consumer changes (last several `origin/main` commits)
 
 Reviewed recent remote history and reflected GA-impacting changes below.
@@ -103,4 +125,5 @@ Analytics is used for aggregate, non-PII insights only.
 - Reuse existing event names and parameters where possible.
 - Avoid tracking for “nice to have” or speculative dashboards.
 
-> **Related:** [Link Tracking](./link-tracking.md) – UTM parameters and external-link click events.
+> **Related:** [Link Tracking](./link-tracking.md) – UTM parameters and external-link click events.  
+> **Related:** [Rally and share links](./rally-share-links.md) – share-first funnel and inbound visit flow.

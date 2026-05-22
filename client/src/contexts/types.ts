@@ -175,7 +175,7 @@ export type FunnelView =
 /**
  * Landing/navigation view: where we are on the splash/landing flow (no credentials form).
  */
-export type LandingNavView = '' | 'Tour';
+export type LandingNavView = '' | 'Rally' | 'Tour';
 
 /**
  * Credentials form view: which credentials modal form is shown (registration vs login).

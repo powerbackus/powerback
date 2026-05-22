@@ -80,6 +80,22 @@ Each category is a link to its [`Routes`](../routes/) or relevant folder.
 
 > **📖 For comprehensive webhook system documentation, see [`docs/webhooks.md`](./webhooks.md)**
 
+### **Share links (Rally)** [`../routes/api/shareLinks.js`](../routes/api/shareLinks.js)
+
+Anonymous referral links for the [Rally share-first funnel](./rally-share-links.md). Controller: [`controller/shareLinks`](../controller/shareLinks/index.js). Model: [`ShareLink`](../models/ShareLink.js).
+
+| Client method | HTTP | Handler | Notes |
+| ------------- | ---- | ------- | ----- |
+| `createShareLink` | `POST /api/share-links` | [`createShareLink`](../controller/shareLinks/index.js) | Rate limit: 10/hour/IP. Returns `publicCode`, `shareUrl`, one-time `claimCode` (hashed at rest). |
+| `recordShareLinkVisit` | `GET /api/share-links/:publicCode` | [`recordShareLinkVisit`](../controller/shareLinks/index.js) | Increments `visit_count`; 404 if unknown. Called when app loads with `?share=`. |
+
+**Public share URL (copy/share):** `https://powerback.us/?share={publicCode}` — not the API path.
+
+**Signup attribution:** optional `refShareCode` on [`createUser`](../controller/users/account/create.js) → `Applicant.ref_share_code`; on activation, [`activate`](../controller/users/account/utils/activate.js) calls [`attributeShareLinkReferral`](../controller/shareLinks/index.js) (`$addToSet` on `referred_users`). Activate does **not** accept `refShareCode` as a query param.
+
+> **📖 Full flow, storage keys, and privacy:** [`docs/rally-share-links.md`](./rally-share-links.md)  
+> **📖 Product spec:** [`specs/rally-page.md`](../specs/rally-page.md)
+
 ## Related Documentation
 
 - [Authentication System](./authentication-system.md) - JWT authentication details
@@ -89,3 +105,4 @@ Each category is a link to its [`Routes`](../routes/) or relevant folder.
 - [Email System](./email-system.md) - Email notifications
 - [Bitcoin Donations](./bitcoin-donations.md) - Cryptocurrency support
 - [Pol roster exclusion](../specs/pol-roster-exclusion.md) - Policy exclusions for selectable roster and new Celebrations
+- [Rally and share links](./rally-share-links.md) - Share-first funnel and anonymous share link APIs

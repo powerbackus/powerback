@@ -251,6 +251,19 @@ interface PowerbackAPI {
     githubUrl?: string;
     message?: string;
   }) => Promise<AxiosResponse<{ success: boolean }>>;
+  createShareLink: () => Promise<
+    AxiosResponse<{
+      publicCode: string;
+      shareUrl: string;
+      claimCode: string;
+    }>
+  >;
+  recordShareLinkVisit: (publicCode: string) => Promise<
+    AxiosResponse<{
+      publicCode: string;
+      visitCount: number;
+    }>
+  >;
 }
 
 const API: PowerbackAPI = {
@@ -930,6 +943,27 @@ const API: PowerbackAPI = {
     message?: string;
   }): Promise<AxiosResponse<{ success: boolean }>> => {
     return axiosClient.post('contact/contributing', body);
+  },
+
+  createShareLink: (): Promise<
+    AxiosResponse<{
+      publicCode: string;
+      shareUrl: string;
+      claimCode: string;
+    }>
+  > => {
+    return axiosClient.post('share-links', {});
+  },
+
+  recordShareLinkVisit: (
+    publicCode: string
+  ): Promise<
+    AxiosResponse<{
+      publicCode: string;
+      visitCount: number;
+    }>
+  > => {
+    return axiosClient.get(`share-links/${encodeURIComponent(publicCode)}`);
   },
 };
 

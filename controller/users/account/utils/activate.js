@@ -20,7 +20,10 @@
 const { emails } = require('../../../comms/emails'),
   { sendEmail } = require('../../../comms');
 
+const { attributeShareLinkReferral } = require('../../../shareLinks');
 const { transfer } = require('./transfer');
+
+const PUBLIC_CODE_PATTERN = /^[A-Za-z0-9_-]{10,24}$/;
 
 module.exports = {
   /**
@@ -82,6 +85,11 @@ module.exports = {
           const applicantData = matchingUser.toObject();
           delete applicantData._id;
           delete applicantData.__v;
+          // Rally: read inbound code from Applicant only (not activate query param)
+          const storedRef = applicantData.ref_share_code;
+          const refShareCode =
+            storedRef && PUBLIC_CODE_PATTERN.test(storedRef) ? storedRef : null;
+          delete applicantData.ref_share_code;
           // Consume the hash immediately so a second request (e.g. double-click) never sends email
           await matchingUser.deleteOne();
           const createdUser = await transfer(applicantData, nextModel);
@@ -90,6 +98,10 @@ module.exports = {
           const transferSucceeded =
             createdUser && createdUser._id && !(createdUser instanceof Error);
           if (transferSucceeded) {
+            // Best-effort; failure must not block activation or welcome email
+            if (refShareCode) {
+              await attributeShareLinkReferral(refShareCode, createdUser._id);
+            }
             const recordOfExUser = await storageModel.findOne({
               username: { $eq: username },
             });

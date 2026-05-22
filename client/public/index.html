@@ -20,7 +20,18 @@
         }
 
         window.gtag('js', new Date());
-        window.gtag('config', '%GTAG_ID%');
+
+        <!-- GA: omit ?share= from page_location (Rally inbound); see docs/rally-share-links.md -->
+        // Omit ?share= from GA page_location (Rally inbound links); app still reads it before strip.
+        var gaUrl = new URL(window.location.href);
+        gaUrl.searchParams.delete('share');
+        var gaPagePath = gaUrl.pathname + gaUrl.search;
+        var gaPageLocation = gaUrl.origin + gaPagePath + gaUrl.hash;
+
+        window.gtag('config', '%GTAG_ID%', {
+          page_path: gaPagePath,
+          page_location: gaPageLocation,
+        });
 
         var gtagScript = document.createElement('script');
         gtagScript.async = true;

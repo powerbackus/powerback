@@ -21,6 +21,7 @@ export {
   CONFIRMATION_COPY,
   LIMIT_MESSAGE_COPY,
   CELEBRATION_EVENT_COPY,
+  RALLY_COPY,
 } from './copy';
 
 export {

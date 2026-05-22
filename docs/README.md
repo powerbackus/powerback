@@ -57,6 +57,11 @@ This directory contains comprehensive documentation for the POWERBACK.us platfor
 - **[CSS Organization](./css-organization.md)** - CSS file structure
 - **[CSS Important Usage](./css-important-usage.md)** - When and how to use !important
 
+### Growth and onboarding
+
+- **[Rally and share links](./rally-share-links.md)** - Share-first Splash → Rally funnel, anonymous share links, inbound `?share=`, signup attribution
+- **[Spec: Rally page](../specs/rally-page.md)** - Product requirements and acceptance criteria
+
 ### Communication Systems
 
 - **[Email System](./email-system.md)** - Email templates and notifications
@@ -110,6 +115,9 @@ This directory contains comprehensive documentation for the POWERBACK.us platfor
 
 **...learn about the frontend architecture**
 → [Project Overview](./overview.md) → [React Contexts](./contexts.md) → [Custom Hooks](./hooks.md) → [Client Utils](./utils.md) → [Design System](./design-system.md) → [Accessibility](./accessibility.md)
+
+**...understand Rally and share links**
+→ [Rally and share links](./rally-share-links.md) → [Spec: Rally page](../specs/rally-page.md) → [API — Share links](./API.md#share-links-rally) → [Analytics — Rally events](./analytics.md#rally-and-share-link-events)
 
 **...understand compliance and limits**
 → [FEC Compliance Guide](./fec-compliance-guide.md) → [Donation Limits](./donation-limits.md) → [Donor Validation](./donor-validation-comprehensive.md)

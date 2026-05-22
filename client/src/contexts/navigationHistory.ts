@@ -27,9 +27,13 @@ export const SPLASH_NAV_GRAPH: Record<
   Partial<Record<LandingNavView | CredentialsFormView, 'push' | 'replace'>>
 > = {
   '': {
+    Rally: 'push',
     Tour: 'push',
     'Join Now': 'replace',
     'Sign In': 'replace',
+  },
+  Rally: {
+    '': 'replace',
   },
   'Join Now': {
     '': 'replace',
