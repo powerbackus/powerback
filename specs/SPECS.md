@@ -8,6 +8,7 @@ This directory captures domain specifications that guide implementation. Each sp
 - `backend-compliance.md` - Compliance tiers, limits, resets, and server authority
 - `frontend-compliance.md` - Frontend compliance display, promotion logic, and tier ratchet behavior
 - `frontend-ui.md` - UI/UX patterns, accessibility, navigation/state, and styling (including custom hooks)
+- `rally-page.md` - Share-first Rally funnel (Splash → Rally → Lobby), anonymous share links, GA and privacy constraints
 - `jobs-notifications.md` - Background jobs, election-date updater, and email notifications
 - `pac-limit-system.md` - PAC contribution limits, tipLimitReached field, and payment flow integration
 - `pol-roster-exclusion.md` - Policy exclusions for Pol (roster + new Celebrations); separate from `has_stakes` watchers
