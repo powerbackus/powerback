@@ -264,6 +264,20 @@ interface PowerbackAPI {
       visitCount: number;
     }>
   >;
+  createRallySubscriber: (body: {
+    email: string;
+    source_public_code?: string;
+  }) => Promise<AxiosResponse<{ message: string }>>;
+  confirmRallySubscriber: (token: string) => Promise<
+    AxiosResponse<{
+      confirmed: boolean;
+      message: string;
+      unsubscribeUrl?: string;
+    }>
+  >;
+  unsubscribeRallySubscriber: (
+    token: string
+  ) => Promise<AxiosResponse<{ unsubscribed: boolean; message: string }>>;
 }
 
 const API: PowerbackAPI = {
@@ -964,6 +978,35 @@ const API: PowerbackAPI = {
     }>
   > => {
     return axiosClient.get(`share-links/${encodeURIComponent(publicCode)}`);
+  },
+
+  createRallySubscriber: (body: {
+    email: string;
+    source_public_code?: string;
+  }): Promise<AxiosResponse<{ message: string }>> => {
+    return axiosClient.post('rally-subscribers', body);
+  },
+
+  confirmRallySubscriber: (
+    token: string
+  ): Promise<
+    AxiosResponse<{
+      confirmed: boolean;
+      message: string;
+      unsubscribeUrl?: string;
+    }>
+  > => {
+    return axiosClient.get(
+      `rally-subscribers/confirm/${encodeURIComponent(token)}`
+    );
+  },
+
+  unsubscribeRallySubscriber: (
+    token: string
+  ): Promise<AxiosResponse<{ unsubscribed: boolean; message: string }>> => {
+    return axiosClient.post(
+      `rally-subscribers/unsubscribe/${encodeURIComponent(token)}`
+    );
   },
 };
 

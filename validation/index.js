@@ -1,4 +1,7 @@
+const validateMiddleware = require('./validate');
+
 module.exports = {
-  validate: require('./validate'),
-  ...require('./joi')
+  validate: validateMiddleware,
+  validatePayload: validateMiddleware.validatePayload,
+  ...require('./joi'),
 };

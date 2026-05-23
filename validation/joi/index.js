@@ -17,4 +17,6 @@ module.exports = {
   pol: require('./pol'),
   contributing: require('./contributing'),
   shareLinkPublicCode: require('./shareLinkPublicCode'),
+  rallySubscriberCreate: require('./rallySubscriberCreate'),
+  rallySubscriberToken: require('./rallySubscriberToken'),
 };

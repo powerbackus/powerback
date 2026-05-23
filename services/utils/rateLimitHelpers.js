@@ -55,12 +55,7 @@ const rateLimit = require('express-rate-limit');
  * @returns {boolean} True if request is from localhost
  */
 function isLocalhost(req) {
-  const localhostIPs = [
-    '127.0.0.1',
-    '::1',
-    '::ffff:127.0.0.1',
-    'localhost',
-  ];
+  const localhostIPs = ['127.0.0.1', '::1', '::ffff:127.0.0.1', 'localhost'];
 
   const clientIP =
     req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress;
@@ -133,8 +128,7 @@ const rateLimiters = {
   emailVerification: createRateLimiter({
     windowMs: 60 * 60 * 1000, // 1 hour
     max: 5, // 5 email verification attempts per hour
-    message:
-      'Too many email verification attempts. Please try again later.',
+    message: 'Too many email verification attempts. Please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
   }),
@@ -171,6 +165,14 @@ const rateLimiters = {
     windowMs: 60 * 60 * 1000, // 1 hour
     max: 10,
     message: 'Too many share links created. Please try again later.',
+    standardHeaders: true,
+    legacyHeaders: false,
+  }),
+
+  rallySubscriberCreate: createRateLimiter({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 5,
+    message: 'Too many signup attempts. Please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
   }),

@@ -7,4 +7,5 @@ module.exports = {
   Celebration: require('./Celebration'),
   PfpImageErrorAlert: require('./PfpImageErrorAlert'),
   ShareLink: require('./ShareLink'),
+  RallySubscriber: require('./RallySubscriber'),
 };

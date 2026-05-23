@@ -1,13 +1,7 @@
 const { Reset, Change, Forgot } = require('./password'),
   { New, Update, Receipt, Test, ContributingInquiry } = require('./info'),
   { Image } = require('./error'),
-  {
-    Locked,
-    Quitter,
-    Promoted,
-    JoinedUp,
-    JoiningUp,
-  } = require('./account'),
+  { Locked, Quitter, Promoted, JoinedUp, JoiningUp } = require('./account'),
   {
     DefunctCelebrationNotification,
     DefunctCelebrationWarning,
@@ -18,10 +12,12 @@ const { Reset, Change, Forgot } = require('./password'),
     ChallengerAppeared,
     IncumbentDroppedOut,
     PacLimitReached,
-  } = require('./alerts');
+  } = require('./alerts'),
+  { RallyConfirm } = require('./rally/RallyConfirm');
 
 module.exports = {
   emails: {
+    RallyConfirm,
     DefunctCelebrationNotification,
     DefunctCelebrationWarning,
     ElectionDateNotification,

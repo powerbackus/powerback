@@ -14,6 +14,8 @@ const hashParamRoute = (path: string) =>
 
 export const { RouteProvider, useRoute, routes } = createRouter({
   unsubscribe: hashParamRoute('unsubscribe'),
+  rallyConfirm: hashParamRoute('rally-confirm'),
+  rallyUnsubscribe: hashParamRoute('rally-unsubscribe'),
   activate: hashParamRoute('activate'),
   reset: hashParamRoute('reset'),
   join: hashParamRoute('join'), // Legacy route from emails, redirects to activate

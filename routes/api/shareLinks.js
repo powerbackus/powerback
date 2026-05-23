@@ -5,7 +5,7 @@
 
 const router = require('express').Router();
 const Controller = require('../../controller/shareLinks');
-const { validate } = require('../../validation');
+const { validatePayload } = require('../../validation');
 const schemas = require('../../validation');
 const { rateLimiters } = require('../../services/utils');
 
@@ -41,7 +41,7 @@ router.get(
   shareLinkVisitLimiter,
   async (req, res, next) => {
     try {
-      await validate(schemas.shareLinkPublicCode, {
+      validatePayload(schemas.shareLinkPublicCode, {
         publicCode: req.params.publicCode,
       });
       const result = await Controller.recordShareLinkVisit(

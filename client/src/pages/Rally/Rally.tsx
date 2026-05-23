@@ -13,15 +13,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import {
-  Alert,
-  Button,
-  Col,
-  Container,
-  Form,
-  Row,
-  Stack,
-} from 'react-bootstrap';
+import { Button, Container, Form, Stack } from 'react-bootstrap';
 import { ContinueBtn } from '@Components/buttons';
 import API from '@API';
 import { APP, RALLY_COPY, SPLASH_COPY } from '@CONSTANTS';
@@ -34,6 +26,7 @@ import {
 import {
   getStoredShareLink,
   setStoredShareLink,
+  getStoredRefShareCode,
   type StoredShareLink,
   trackGoogleAnalyticsEvent,
   hasShareInboundThisSession,
@@ -110,7 +103,9 @@ const Rally = () => {
   const [showClaimCode, setShowClaimCode] = useState(false);
   const [justCreatedClaim, setJustCreatedClaim] = useState(false);
   const [email, setEmail] = useState('');
-  const [emailNotice, setEmailNotice] = useState(false);
+  const [emailSuccess, setEmailSuccess] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [isEmailSubmitting, setIsEmailSubmitting] = useState(false);
   const manualShareSeenRef = useRef(false);
 
   const siteUrl = useMemo(
@@ -204,12 +199,39 @@ const Rally = () => {
     trackGoogleAnalyticsEvent('rally_email_signup_started');
   }, []);
 
-  const handleEmailSubmit = useCallback((e: React.FormEvent) => {
-    e.preventDefault();
-    trackGoogleAnalyticsEvent('rally_email_signup_started');
-    setEmailNotice(true);
-    setEmail('');
-  }, []);
+  const handleEmailSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      const trimmed = email.trim();
+      if (!trimmed || isEmailSubmitting) {
+        return;
+      }
+      trackGoogleAnalyticsEvent('rally_email_signup_started');
+      setIsEmailSubmitting(true);
+      setEmailError(null);
+      setEmailSuccess(false);
+      const sourcePublicCode = getStoredRefShareCode();
+      try {
+        await API.createRallySubscriber({
+          email: trimmed,
+          ...(sourcePublicCode ? { source_public_code: sourcePublicCode } : {}),
+        });
+        setEmailSuccess(true);
+        setEmail('');
+      } catch (error: unknown) {
+        const status = (error as { response?: { status?: number } })?.response
+          ?.status;
+        if (status === 429) {
+          setEmailError(RALLY_COPY.EMAIL.rateLimit);
+        } else {
+          setEmailError(RALLY_COPY.EMAIL.errorGeneric);
+        }
+      } finally {
+        setIsEmailSubmitting(false);
+      }
+    },
+    [email, isEmailSubmitting]
+  );
 
   const handleNativeShare = useCallback(async () => {
     markManualShareSeen();
@@ -330,16 +352,17 @@ const Rally = () => {
                     ? RALLY_COPY.ANONYMOUS_LINK.generating
                     : RALLY_COPY.ANONYMOUS_LINK.generate}
                 </Button>
-                {generateError && (
-                  <Alert
-                    variant='danger'
-                    className='mt-2'
-                    dismissible
-                    onClose={() => setGenerateError(null)}
+                <div className='rally--feedback-slot'>
+                  <div
+                    className={`invalid-feedback d-block${
+                      generateError ? '' : ' rally--feedback-hidden'
+                    }`}
+                    role={generateError ? 'alert' : undefined}
+                    aria-hidden={!generateError}
                   >
-                    {generateError}
-                  </Alert>
-                )}
+                    {generateError || RALLY_COPY.ANONYMOUS_LINK.rateLimit}
+                  </div>
+                </div>
               </>
             ) : (
               <div className='rally--link-panel'>
@@ -428,40 +451,83 @@ const Rally = () => {
               {RALLY_COPY.EMAIL.title}
             </h2>
             <p className='rally--hint'>{RALLY_COPY.EMAIL.hint}</p>
-            <Form onSubmit={handleEmailSubmit}>
-              <Row className='rally--email-form g-2'>
-                <Col
-                  xs={12}
-                  md={6}
-                >
-                  <Form.Control
-                    type='email'
-                    name='rally-email'
-                    autoComplete='email'
-                    placeholder={RALLY_COPY.EMAIL.placeholder}
-                    value={email}
-                    onFocus={handleEmailFocus}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </Col>
-                <Col
-                  xs='auto'
-                  className='d-flex align-items-center'
-                >
-                  <Button
-                    variant='outline-dark'
-                    type='submit'
+            <Form
+              onSubmit={handleEmailSubmit}
+              className='rally--email-form'
+            >
+              <Form.Group className='form-input-wfeedback rally--email-field'>
+                <Form.Control
+                  type='email'
+                  name='rally-email'
+                  autoComplete='email'
+                  placeholder={RALLY_COPY.EMAIL.placeholder}
+                  value={email}
+                  isInvalid={!!emailError}
+                  onFocus={handleEmailFocus}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (emailError) {
+                      setEmailError(null);
+                    }
+                    if (emailSuccess) {
+                      setEmailSuccess(false);
+                    }
+                  }}
+                  aria-describedby='rally-email-error'
+                />
+                <div className='rally--feedback-slot'>
+                  <div
+                    className={`invalid-feedback d-block${
+                      emailError ? '' : ' rally--feedback-hidden'
+                    }`}
+                    id='rally-email-error'
+                    role={emailError ? 'alert' : undefined}
+                    aria-hidden={!emailError}
+                  >
+                    {emailError || RALLY_COPY.EMAIL.rateLimit}
+                  </div>
+                </div>
+              </Form.Group>
+              <Button
+                variant='outline-dark'
+                type='submit'
+                className='rally--email-submit'
+                disabled={isEmailSubmitting || emailSuccess}
+                aria-label={
+                  emailSuccess
+                    ? RALLY_COPY.EMAIL.submitSuccess
+                    : RALLY_COPY.EMAIL.submit
+                }
+              >
+                <span className='rally--email-submit-inner'>
+                  <span
+                    className={
+                      emailSuccess ? 'rally--feedback-hidden' : undefined
+                    }
+                    aria-hidden={emailSuccess}
                   >
                     {RALLY_COPY.EMAIL.submit}
-                  </Button>
-                </Col>
-              </Row>
+                  </span>
+                  <i
+                    className={`bi bi-check-lg rally--email-submit-check${
+                      emailSuccess ? '' : ' rally--feedback-hidden'
+                    }`}
+                    aria-hidden
+                  />
+                </span>
+              </Button>
+              <div className='rally--email-status-slot'>
+                <p
+                  className={`rally--email-success${
+                    emailSuccess ? '' : ' rally--feedback-hidden'
+                  }`}
+                  role={emailSuccess ? 'status' : undefined}
+                  aria-hidden={!emailSuccess}
+                >
+                  {RALLY_COPY.EMAIL.success}
+                </p>
+              </div>
             </Form>
-            {emailNotice && (
-              <p className='rally--email-todo mt-2'>
-                {RALLY_COPY.EMAIL.todoNotice}
-              </p>
-            )}
           </section>
         </div>
 

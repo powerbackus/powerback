@@ -28,4 +28,32 @@ const validate = (schema) => (req, res, next) => {
   next();
 };
 
+/**
+ * Validate an arbitrary payload (params object, etc.) and return coerced value.
+ *
+ * @param {import('joi').ObjectSchema} schema - Joi schema
+ * @param {unknown} data - Data to validate
+ * @returns {unknown} Validated value
+ * @throws {Error} With status 403 when validation fails
+ */
+function validatePayload(schema, data) {
+  const { error, value } = schema.validate(data, {
+    abortEarly: false,
+    allowUnknown: false,
+    stripUnknown: true,
+  });
+
+  if (error) {
+    const err = new Error(
+      error.details.map((d) => d.message).join(' ')
+    );
+    err.status = 403;
+    throw err;
+  }
+
+  return value;
+}
+
+validate.validatePayload = validatePayload;
+
 module.exports = validate;

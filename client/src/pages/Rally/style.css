@@ -271,11 +271,37 @@
   color: var(--text-placeholder);
 }
 
-.rally--email-todo {
+.rally--email-success {
   font-size: 0.85rem;
   color: var(--text-placeholder);
   text-align: center;
   font-family: 'Inconsolata', monospace;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.rally--email-status-slot {
+  min-height: 1.35rem;
+}
+
+#rally .form-input-wfeedback .invalid-feedback,
+#rally .rally--anonymous-link .invalid-feedback,
+#rally .rally--feedback-slot .invalid-feedback {
+  display: block;
+  color: var(--validation-feedback) !important;
+  text-align: left;
+  margin-top: 0.35rem;
+  margin-bottom: 0;
+  line-height: 1.35;
+}
+
+.rally--feedback-slot {
+  /* Fits longest Rally email/share error copy in landscape column */
+  min-height: 4rem;
+}
+
+.rally--feedback-hidden {
+  visibility: hidden;
 }
 
 #rally .form-control {
@@ -283,10 +309,45 @@
   border-color: var(--accent) !important;
 }
 
-#rally .alert-danger {
-  background-color: var(--alert-dark);
-  border-color: var(--error);
-  color: var(--error);
+.rally--email .rally--email-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+}
+
+.rally--email .rally--email-field,
+.rally--email .rally--email-field .form-control {
+  width: 100%;
+}
+
+.rally--email .rally--email-submit {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* Lock height: matches label + btn padding so icon state does not shrink */
+  min-height: 2.625rem;
+  padding-top: 0.375rem;
+  padding-bottom: 0.375rem;
+  margin: 0;
+}
+
+.rally--email-submit-inner {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  line-height: 1.35;
+}
+
+.rally--email-submit-inner > * {
+  grid-area: 1 / 1;
+}
+
+.rally--email .rally--email-submit-check {
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--positive-indicator);
 }
 
 /* Portrait / narrow: three action sections stack vertically (default block flow) */
@@ -370,17 +431,6 @@
 
   .rally--email .rally--email-form {
     margin-top: auto;
-    flex-direction: column;
-  }
-
-  .rally--email .rally--email-form > .col {
-    flex: 0 0 100%;
-    max-width: 100%;
-    width: 100%;
-  }
-
-  .rally--email .rally--email-form .btn {
-    width: 100%;
   }
 
 }

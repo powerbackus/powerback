@@ -27,6 +27,8 @@ import { routes } from '../router';
 const Funnel = React.lazy(() => import('./Funnel'));
 const Reset = React.lazy(() => import('./Reset'));
 const Unsub = React.lazy(() => import('./Unsub'));
+const RallyConfirm = React.lazy(() => import('./Rally/Confirm'));
+const RallyUnsub = React.lazy(() => import('./Rally/Unsub'));
 
 // Modal component lazy-loading configuration
 const MODAL_IMPORTS = {
@@ -157,6 +159,8 @@ const Page = ({
         route?.name !== 'main' &&
         route?.name !== 'reset' &&
         route?.name !== 'unsubscribe' &&
+        route?.name !== 'rallyConfirm' &&
+        route?.name !== 'rallyUnsubscribe' &&
         route?.name !== 'activate' &&
         route?.name !== 'join',
       [route?.name]
@@ -177,7 +181,12 @@ const Page = ({
    * Effect to add/remove magic-link-page class on body element
    */
   useEffect(() => {
-    if (route?.name === 'reset' || route?.name === 'unsubscribe') {
+    if (
+      route?.name === 'reset' ||
+      route?.name === 'unsubscribe' ||
+      route?.name === 'rallyConfirm' ||
+      route?.name === 'rallyUnsubscribe'
+    ) {
       document.body.classList.add('magic-link-page');
     } else {
       document.body.classList.remove('magic-link-page');
@@ -351,6 +360,18 @@ const Page = ({
         {route?.name === 'unsubscribe' && (
           <Suspense fallback={<Loading msg={'Loading Unsubscribe Page...'} />}>
             <Unsub homeLinkRedirect={homeLinkRedirect} />
+          </Suspense>
+        )}
+
+        {route?.name === 'rallyConfirm' && (
+          <Suspense fallback={<Loading msg={'Loading confirmation page...'} />}>
+            <RallyConfirm homeLinkRedirect={homeLinkRedirect} />
+          </Suspense>
+        )}
+
+        {route?.name === 'rallyUnsubscribe' && (
+          <Suspense fallback={<Loading msg={'Loading unsubscribe page...'} />}>
+            <RallyUnsub homeLinkRedirect={homeLinkRedirect} />
           </Suspense>
         )}
 

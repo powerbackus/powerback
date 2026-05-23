@@ -5,6 +5,8 @@ export { default as Splash } from './Splash';
 export { default as Rally } from './Rally';
 export { default as Reset } from './Reset';
 export { default as Unsub } from './Unsub';
+export { default as RallyConfirm } from './Rally/Confirm';
+export { default as RallyUnsub } from './Rally/Unsub';
 export { default as Page } from './Page';
 
 export * from './Reset/Reset';
