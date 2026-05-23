@@ -6,9 +6,9 @@ Insert a **Rally** step between the landing page (Splash) and the Lobby / Celebr
 
 **Core message:** PEOPLE, NOT MONEY.
 
-**In scope (v1):** Rally UI, navigation wiring, `ShareLink` model + APIs, rate limiting, GA events, minimal visit counters, inbound referral persistence (`pb:refShareCode`), signup attribution to `ShareLink.referred_users`.
+**In scope (v1):** Rally UI, navigation wiring, `ShareLink` model + APIs, **`RallySubscriber` model + Rally email signup APIs** (capture, double opt-in confirmation, unsubscribe), rate limiting, GA events, minimal visit counters, inbound referral persistence (`pb:refShareCode`), signup attribution to `ShareLink.referred_users`.
 
-**Out of scope (v1):** Claim-code redemption (unless trivial), `User.referred_by_share_link`, per-visit metadata in MongoDB, full email-list backend (UI + analytics only if no existing endpoint fits), rewards or compliance-sensitive incentives tied to referrals.
+**Out of scope (v1):** Claim-code redemption, `User.referred_by_share_link`, per-visit metadata in MongoDB, broadcast / milestone / digest email automation (subscriber persistence only in v1), rewards or compliance-sensitive incentives tied to referrals.
 
 ---
 
@@ -18,7 +18,7 @@ Insert a **Rally** step between the landing page (Splash) and the Lobby / Celebr
 
 - Shift the top-of-funnel from “enter the lobby / donate” to “spread the word first.”
 - Make sharing the **primary** CTA; account creation and Celebration remain **secondary**.
-- Collect rally interest via optional email signup without blocking exploration.
+- Collect rally interest via **email signup** (double opt-in) without blocking exploration or sharing — email is the primary way POWERBACK stays in touch with visitors who are not ready to create an account or make a Celebration.
 
 ### Product
 
@@ -30,7 +30,7 @@ Insert a **Rally** step between the landing page (Splash) and the Lobby / Celebr
 
 - New frontend page: `client/src/pages/Rally/`.
 - Navigation: Splash primary CTA → Rally; Rally “Continue” → existing `Tour` → funnel (`pol-donation`, guest access).
-- Backend: `ShareLink` Mongoose model, `POST` create + `GET` visit-by-public-code, IP rate limit on create.
+- Backend: `ShareLink` Mongoose model, `POST` create + `GET` visit-by-public-code, IP rate limit on create; `RallySubscriber` model + rally-subscriber create / confirm / unsubscribe routes (see **Rally Email Signup**).
 - Frontend: show stored link from `pb:shareLink` when present; call `POST /api/share-links` only after an explicit generate click (never on Rally mount).
 - Frontend: after successful inbound visit API, persist inbound `publicCode` in `pb:refShareCode` (30-day TTL); on signup `POST /api/users`, send `refShareCode` for `Applicant.ref_share_code`; on activation, server reads `Applicant.ref_share_code` only for `$addToSet` on `ShareLink.referred_users`.
 
@@ -45,13 +45,18 @@ flowchart LR
   Splash[Landing / Splash]
   Rally[Rally page]
   Share[Share actions]
+  Email[Email signup]
   Lobby[Lobby / Celebration funnel]
 
   Splash -->|primary CTA| Rally
   Rally --> Share
+  Rally --> Email
   Rally -->|Continue to Lobby| Lobby
   Share --> Rally
+  Email --> Rally
 ```
+
+**Core visitor path (v1):** visitor arrives → understands the movement → shares POWERBACK and/or joins the email list → may continue to Lobby afterward. Email signup is **core v1 behavior**, not a later enhancement.
 
 1. **Landing (Splash)** — Visitor reads mission / explainer; primary CTA for unauthenticated visitors goes to Rally instead of straight into the funnel.
 2. **Rally** — Visitor sees PEOPLE, NOT MONEY and four parallel paths (below).
@@ -59,12 +64,12 @@ flowchart LR
 
 ### Rally choices (non-exclusive)
 
-| #   | Action                            | Behavior                                                                                                                     |
-| --- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **Share manually**                | Copy / Web Share API for site URL or suggested message; no server write required.                                            |
-| 2   | **Generate anonymous share link** | Reuse stored link if present; otherwise create only after explicit generate click; then show URL + claim code copy controls. |
-| 3   | **Join email updates**            | Email capture UI; submit if/when backend exists; do not block other paths.                                                   |
-| 4   | **Continue to Lobby**             | Same guest entry as current Splash `Tour` path (`pb:guestAccess`, funnel step 0).                                            |
+| #   | Action                            | Behavior                                                                                                                            |
+| --- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Share manually**                | Copy / Web Share API for site URL or suggested message; no server write required.                                                   |
+| 2   | **Generate anonymous share link** | Reuse stored link if present; otherwise create only after explicit generate click; then show URL + claim code copy controls.        |
+| 3   | **Join email updates**            | Email capture UI + `POST /api/rally-subscribers`; double opt-in confirmation; do not block other paths. See **Rally Email Signup**. |
+| 4   | **Continue to Lobby**             | Same guest entry as current Splash `Tour` path (`pb:guestAccess`, funnel step 0).                                                   |
 
 ### Share link inbound path
 
@@ -147,9 +152,11 @@ New page module: `client/src/pages/Rally/` (Tier 1 header, co-located `style.css
 
 ### Section D — Email updates (secondary)
 
-- Single email field + submit; minimal friction (no full account form).
-- `rally_email_signup_started` on focus or submit start.
-- v1: wire to existing comms/contact pattern if available; otherwise UI-only + TODO endpoint (see §9).
+- Single email field + **Get updates** submit button; minimal friction (no full account form).
+- Success state: **Check your email to confirm.** (double opt-in; subscriber is `pending` until confirm link is used.)
+- Error state: generic, non-alarming copy (no enumeration hints).
+- `rally_email_signup_started` on focus or submit start; do not send email address or `source_public_code` to GA.
+- Full backend, attribution, and API behavior: **Rally Email Signup** (below).
 
 ### Section E — Continue to Lobby (secondary)
 
@@ -196,6 +203,199 @@ New page module: `client/src/pages/Rally/` (Tier 1 header, co-located `style.css
 4. If visitor loses `claim_code`, POWERBACK cannot recover it (document in UI).
 
 Export from `models/index.js`.
+
+---
+
+## Rally Email Signup
+
+Email capture is **core Rally v1**. Anonymous share links and signup attribution address people who may create accounts; **Rally email signup** is the durable channel for visitors who are not ready to register or make a Celebration. Implementation should reuse existing comms patterns (`sendEmail`, `createEmailTemplate()` — see `docs/email-system.md`) where practical.
+
+### Visitor path (email)
+
+```mermaid
+flowchart LR
+  Arrive[Visitor arrives]
+  Rally[Rally: movement message]
+  ShareOrEmail[Share and/or Get updates]
+  Confirm[Confirm via email link]
+  Lobby[Continue to Lobby optional]
+
+  Arrive --> Rally
+  Rally --> ShareOrEmail
+  ShareOrEmail --> Confirm
+  ShareOrEmail --> Lobby
+  Confirm --> Lobby
+```
+
+Sharing and email signup are **non-exclusive** and **non-blocking**; Continue to Lobby remains available without either.
+
+### Database model — `RallySubscriber` (`models/RallySubscriber.js`)
+
+| Field                    | Type     | Required | Notes                                                                |
+| ------------------------ | -------- | -------- | -------------------------------------------------------------------- |
+| `email`                  | `String` | yes      | As submitted (display / reply-to context); trim on write             |
+| `email_normalized`       | `String` | yes      | Unique index; lowercase + trim normalization for dedupe              |
+| `status`                 | `String` | yes      | Enum: `pending` \| `subscribed` \| `unsubscribed`; default `pending` |
+| `source`                 | `String` | yes      | v1 fixed: `rally`                                                    |
+| `source_public_code`     | `String` | no       | Optional inbound share `publicCode` from `pb:refShareCode` at signup |
+| `confirm_token_hash`     | `String` | no       | bcrypt hash of one-time confirmation token; rotate on resend         |
+| `unsubscribe_token_hash` | `String` | no       | bcrypt hash of persistent unsubscribe token; set when `subscribed`   |
+| `created_at`             | `Date`   | yes      | First capture time (or use `timestamps` + alias in app code)         |
+| `confirmed_at`           | `Date`   | no       | Set when status becomes `subscribed`                                 |
+| `unsubscribed_at`        | `Date`   | no       | Set when status becomes `unsubscribed`                               |
+| `last_email_sent_at`     | `Date`   | no       | Reserved for future send controls / cron (not used in v1 capture)    |
+
+**Indexes:** unique on `email_normalized`.
+
+**Privacy / scope:**
+
+- Store **token hashes only** — never persist raw confirmation or unsubscribe tokens in MongoDB.
+- **`source_public_code`** comes from client `pb:refShareCode` when present at submit time; do **not** send `pb:shareLink` outbound `publicCode` unless the visitor arrived via another person’s share link (i.e. only inbound ref, never outbound generated link or claim code).
+- Do **not** store IP address, user agent, referrer, or per-visit tracking metadata on this collection.
+- This collection holds **durable subscriber state**, not analytics (funnel metrics stay in GA + `ShareLink` visit counters).
+
+Export from `models/index.js`.
+
+**Email normalization (v1):** trim whitespace; `email_normalized = email.trim().toLowerCase()`. Reject invalid format before insert (Joi + shared validator pattern).
+
+### API endpoints
+
+Mount router at `/api/rally-subscribers` in `routes/api/index.js`. All responses use existing error envelope: `{ error: { message, status } }`.
+
+#### `POST /api/rally-subscribers`
+
+Create or refresh a pending Rally subscriber and send confirmation email.
+
+- **Auth:** none (public).
+- **Rate limit:** `rallySubscriberCreate` — **5 attempts per hour per IP** (§6).
+- **Body:**
+
+```json
+{
+  "email": "visitor@example.com",
+  "source_public_code": "optional-inbound-publicCode"
+}
+```
+
+- `source_public_code` optional; validate with same public-code pattern as share links when present; omit if absent.
+- **Logic:**
+  1. Normalize email → `email_normalized`.
+  2. If **new** address: insert `RallySubscriber` with `status: pending`, `source: rally`, optional `source_public_code`, generate confirmation token (CSPRNG), store `confirm_token_hash` only, send confirmation email.
+  3. If **already `pending`:** rotate `confirm_token_hash`, resend confirmation email (safe refresh; prior link invalid).
+  4. If **already `subscribed`:** return generic success **without** revealing subscription state; do not send another confirmation email.
+  5. If **already `unsubscribed`:** v1 **remains unsubscribed** — return the same generic success body; do **not** resubscribe or send mail unless a future explicit resubscribe flow is specified (deferred).
+- **Anti-enumeration:** success and error messaging must not confirm whether an email is registered, subscribed, or unsubscribed. Prefer a single generic success message for accepted requests; use generic failure for validation/rate-limit errors.
+- **Success `200` or `201`:**
+
+```json
+{
+  "message": "If this address is eligible, you will receive a confirmation email shortly."
+}
+```
+
+(Exact copy may vary; tone: neutral, non-alarming.)
+
+#### `GET /api/rally-subscribers/confirm/:token`
+
+Confirm double opt-in.
+
+- **Auth:** none.
+- **Rate limit:** `general` or dedicated light limiter (prevent token brute force).
+- **Logic:**
+  1. Hash incoming `:token` and find subscriber where `confirm_token_hash` matches (bcrypt compare against active pending rows).
+  2. If no match → `404` or generic invalid-token response (do not leak existence).
+  3. If match and already `subscribed` → idempotent success (still `subscribed`).
+  4. If match and `pending` → set `status: subscribed`, `confirmed_at: now`, clear or invalidate `confirm_token_hash`, ensure `unsubscribe_token_hash` exists (generate if first confirm).
+  5. Preserve existing `source_public_code` if already set; do not overwrite with empty.
+- **Success `200`:** payload suitable for frontend confirmation UI (e.g. `{ confirmed: true, message: "…" }`).
+
+Confirmation links in email should target a **frontend route** that calls this API and renders a clean result page (same pattern as account activation / `Unsub` — implementation choice for path name).
+
+#### `POST /api/rally-subscribers/unsubscribe/:token`
+
+One-click unsubscribe for confirmed Rally subscribers.
+
+- **Auth:** none.
+- **Rate limit:** `general` or dedicated light limiter.
+- **Logic:**
+  1. Hash incoming `:token` and match `unsubscribe_token_hash`.
+  2. If no match → generic not-found / invalid response.
+  3. If already `unsubscribed` → idempotent success.
+  4. Else → set `status: unsubscribed`, `unsubscribed_at: now`.
+- **Success `200`:** payload suitable for frontend unsubscribe UI.
+
+Unsubscribe links may appear in confirmation email footer and in all future Rally broadcast emails.
+
+**Validation:** Joi schemas for email body and token path params (length/format bounds). No PII in logs.
+
+**Frontend API client:** add methods to `client/src/api/API.ts` only.
+
+### Rate limiting (Rally email)
+
+Use `express-rate-limit` via `services/utils/rateLimitHelpers.js` (`createRateLimiter` + localhost skip in non-production).
+
+| Limiter                 | Route                              | Suggested value       |
+| ----------------------- | ---------------------------------- | --------------------- |
+| `rallySubscriberCreate` | `POST /api/rally-subscribers` only | **5 per IP per hour** |
+
+- **Dedupe:** `email_normalized` unique index prevents duplicate subscriber documents; generic API responses prevent email enumeration.
+- **Confirm / unsubscribe:** idempotent; safe to retry; invalid tokens return generic errors without revealing subscriber existence.
+
+### Frontend (Rally page)
+
+- **Email input** + button label **Get updates**.
+- On submit: `POST /api/rally-subscribers` with `{ email }` and optional `source_public_code`.
+- **`source_public_code`:** include **only** when `pb:refShareCode` holds a valid inbound code (visitor arrived via `/?share=`). Do **not** submit outbound `pb:shareLink` `publicCode`. Do **not** submit claim codes.
+- **Success UI:** “Check your email to confirm.” Disable double-submit while in flight.
+- **Error UI:** generic message (rate limit may use slightly specific copy; still no enumeration).
+- **GA:** `rally_email_signup_started` only; never send email, `source_public_code`, `publicCode`, `claimCode`, or full URLs in custom params (§7).
+- Email signup does **not** block share actions or Continue to Lobby.
+
+### Email templates
+
+Use POWERBACK’s existing template builder (`createEmailTemplate()` in `controller/comms/emails/template.js`) and `sendEmail` transport when practical. Add a Rally confirmation template (e.g. under `controller/comms/emails/` — name TBD in implementation).
+
+**Confirmation email must include:**
+
+- Clear POWERBACK branding
+- Primary confirmation button/link (frontend route → confirm API)
+- Plain-text fallback confirmation URL (same destination)
+- Short explanation that the recipient signed up for POWERBACK movement updates from the Rally page
+- Note that confirmed subscribers can unsubscribe from future emails (footer link once `unsubscribe_token_hash` exists, or post-confirm messaging)
+
+**Future broadcast / update emails** (deferred sending in v1, required content when implemented):
+
+- Why the person is receiving the email
+- Unsubscribe link (uses `unsubscribe_token_hash` route)
+- POWERBACK branding
+- **No** candidate coordination language
+- **No** language implying donations are rewards for official action
+- **No** language implying private bargaining with candidates or Representatives
+
+Rally subscriber email is **separate** from User topic preferences (`filterUnsubscribed` / account email topics) unless a later spec merges them.
+
+### Future email sending (cron / event monitor)
+
+**v1 builds only:** subscriber capture, confirmation, unsubscribe, persistence.
+
+**Deferred to later updates:**
+
+- Broadcast cron job
+- Milestone email automation
+- Digest generation
+- Campaign update scheduler
+
+**Note:** `last_email_sent_at` exists on `RallySubscriber` so future cron or event-monitor logic can throttle sends, enforce cooldowns, and support operational send controls without a schema migration.
+
+### Rally Email Signup — deferred items
+
+| Item                                    | Notes                                                        |
+| --------------------------------------- | ------------------------------------------------------------ |
+| Explicit resubscribe after unsubscribe  | v1 keeps `unsubscribed` on repeat POST; generic success only |
+| Rally subscriber admin / export UI      | Ops tooling                                                  |
+| Merge with User email topic preferences | Rally list may stay separate in v1                           |
+| Complex email preference center         | Single list + unsubscribe only in v1                         |
+| Automated email sequences               | Beyond confirm + future manual/broadcast sends               |
 
 ---
 
@@ -299,6 +499,18 @@ Add to `rateLimiters` export:
 
 Apply to `POST /api/share-links` only.
 
+### New limiter: `rallySubscriberCreate`
+
+Add to `rateLimiters` export (see **Rally Email Signup**):
+
+| Setting    | Suggested value                                   |
+| ---------- | ------------------------------------------------- |
+| `windowMs` | 1 hour                                            |
+| `max`      | **5 per IP**                                      |
+| `message`  | Too many signup attempts. Please try again later. |
+
+Apply to `POST /api/rally-subscribers` only.
+
 ### Visit endpoint
 
 - Stricter than general API if abuse appears; start with `general` (100 / 15 min) or a dedicated `shareLinkVisit` (e.g. 60 / 15 min per IP).
@@ -362,9 +574,12 @@ Use `trackGoogleAnalyticsEvent` from `@Utils` (see `.cursor/skills/powerback-ga-
 - One-time display on create; hash-only at rest.
 - No recovery flow in v1; UI must state this clearly.
 
-### Email signup
+### Email signup (`RallySubscriber`)
 
-- If persisted later, use existing email/comms patterns with consent copy; do not merge into `ShareLink` without spec update.
+- Store **hashes only** for confirm/unsubscribe tokens; never log plaintext tokens or raw email in server logs where avoidable.
+- Do not store IP, UA, referrer, or per-submit metadata on `RallySubscriber`.
+- Do not merge subscriber rows into `ShareLink`; optional `source_public_code` is attribution metadata only.
+- Do not send email addresses or `source_public_code` to GA (§7).
 
 ### GA
 
@@ -377,9 +592,16 @@ Use `trackGoogleAnalyticsEvent` from `@Utils` (see `.cursor/skills/powerback-ga-
 
 | Item                                       | Notes                                                                                                   |
 | ------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
-| `POST .../claim`                           | Redeem claim code; set `claimed_by_user`, `claimed_at`                                                  |
+| `POST .../claim`                           | **Claim-code redemption** — redeem claim code; set `claimed_by_user`, `claimed_at`                      |
 | `User.referred_by_share_link`              | Never; attribution stays on `ShareLink.referred_users` only                                             |
-| Email updates backend                      | Dedicated waitlist model or `Applicant`-lite + double opt-in                                            |
+| Rally subscriber dashboard                 | Ops / marketing UI for list management                                                                  |
+| Referral rewards / gamification            | Badges, points, or incentives tied to share or email                                                    |
+| Complex Rally email preferences            | Beyond subscribe / unsubscribe                                                                          |
+| Automated Rally email sequences            | Drip, milestone, digest, campaign scheduler (see **Rally Email Signup** future sending)                 |
+| Public leaderboards                        | Share or referral rankings                                                                              |
+| Discord roles or badges                    | Community integrations                                                                                  |
+| Direct social posting integrations         | Beyond manual copy / Web Share / anonymous link (no auto-post APIs in v1)                               |
+| Explicit resubscribe after unsubscribe     | v1 keeps unsubscribed on repeat POST                                                                    |
 | Cross-device signup → activate             | `ref_share_code` on `Applicant` bridges signup device to activation when signup included `refShareCode` |
 | Signup before inbound visit, then activate | No `Applicant.ref_share_code` unless user signs up again after visit; no activate query-param fallback  |
 | Attribution if visit API never succeeded   | No `pb:refShareCode`; no referral write                                                                 |
@@ -399,6 +621,9 @@ Use `trackGoogleAnalyticsEvent` from `@Utils` (see `.cursor/skills/powerback-ga-
 - [ ] Splash primary CTA navigates unauthenticated visitors to Rally, not directly into the funnel.
 - [ ] Rally displays **PEOPLE, NOT MONEY** as the dominant message.
 - [ ] All four Rally paths are available without completing the others.
+- [ ] Email signup: Get updates → generic success → confirmation email → confirm link sets `subscribed`; unsubscribe link sets `unsubscribed`.
+- [ ] `POST /api/rally-subscribers` does not reveal whether an email is already subscribed (generic responses).
+- [ ] `source_public_code` sent only from `pb:refShareCode`, never from `pb:shareLink` or claim codes.
 - [ ] “Continue to Lobby” enters the same guest funnel as pre-Rally `Tour` (Lobby at `pol-donation`, guest access flag set).
 - [ ] Account/sign-in remain available but visually secondary to share actions.
 
@@ -433,10 +658,18 @@ Use `trackGoogleAnalyticsEvent` from `@Utils` (see `.cursor/skills/powerback-ga-
 - [ ] All seven events in §7 are implemented at the specified trigger points.
 - [ ] No PII or share-link identifiers in GA params (`public_code`, `claimCode`, emails, full share URLs forbidden per §7).
 
+### Rally email (v1 backend)
+
+- [ ] `RallySubscriber` model exists with fields in **Rally Email Signup**; unique index on `email_normalized`.
+- [ ] `POST /api/rally-subscribers` creates pending subscriber, resends safely when pending, neutral success when subscribed/unsubscribed.
+- [ ] Confirm and unsubscribe routes validate token hashes only; idempotent where applicable.
+- [ ] `rallySubscriberCreate` rate limit: 5/hour/IP on POST create.
+- [ ] No IP/UA/referrer stored on `RallySubscriber`; confirmation emails use existing template patterns.
+
 ### Privacy / security
 
 - [ ] Lost claim code cannot be recovered via API or support tooling in v1.
-- [ ] Server logs do not contain plaintext claim codes.
+- [ ] Server logs do not contain plaintext claim codes or confirmation/unsubscribe tokens.
 - [ ] `User` schema unchanged (no `referred_by_share_link`).
 
 ### Regression
@@ -451,12 +684,13 @@ Use `trackGoogleAnalyticsEvent` from `@Utils` (see `.cursor/skills/powerback-ga-
 
 ## Documentation
 
-| Doc | Purpose |
-| --- | ------- |
-| [`docs/rally-share-links.md`](../docs/rally-share-links.md) | Operator guide: flows, storage keys, API vs public URL, attribution, privacy |
-| [`docs/API.md`](../docs/API.md#share-links-rally) | Endpoint table and client method names |
-| [`docs/analytics.md`](../docs/analytics.md#rally-and-share-link-events) | GA events and `page_location` mitigation |
-| [`docs/utils.md`](../docs/utils.md#rally-share-link-storage) | `shareLinkStorage`, `refShareCodeStorage`, `recordShareLinkVisit` |
+| Doc                                                                     | Purpose                                                                      |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| [`docs/rally-share-links.md`](../docs/rally-share-links.md)             | Operator guide: flows, storage keys, API vs public URL, attribution, privacy |
+| [`docs/API.md`](../docs/API.md#share-links-rally)                       | Endpoint table and client method names                                       |
+| [`docs/analytics.md`](../docs/analytics.md#rally-and-share-link-events) | GA events and `page_location` mitigation                                     |
+| [`docs/utils.md`](../docs/utils.md#rally-share-link-storage)            | `shareLinkStorage`, `refShareCodeStorage`, `recordShareLinkVisit`            |
+| `docs/email-system.md` (TBD section)                                    | Rally confirmation template + `sendEmail` patterns (when implemented)        |
 
 ## Implementation references
 
@@ -478,11 +712,12 @@ Use `trackGoogleAnalyticsEvent` from `@Utils` (see `.cursor/skills/powerback-ga-
 
 ## Changelog
 
-| Date       | Change                                                                                                           |
-| ---------- | ---------------------------------------------------------------------------------------------------------------- |
-| 2026-05-21 | Initial spec (share-first funnel, ShareLink v1)                                                                  |
-| 2026-05-21 | Clarify public share URL vs API; GA identifier prohibition; Rally copy WIP note                                  |
-| 2026-05-21 | ShareLink create on explicit generate click only (no POST on Rally mount)                                        |
-| 2026-05-21 | Rally not an auth gate; no forced Rally for logged-in or direct app navigation                                   |
-| 2026-05-21 | v1 inbound `pb:refShareCode` + signup attribution to `ShareLink.referred_users`                                  |
-| 2026-05-21 | Activation attribution via `Applicant.ref_share_code` only; no `?refShareCode=`; GA page_location strips `share` |
+| Date       | Change                                                                                                                                       |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-21 | Initial spec (share-first funnel, ShareLink v1)                                                                                              |
+| 2026-05-21 | Clarify public share URL vs API; GA identifier prohibition; Rally copy WIP note                                                              |
+| 2026-05-21 | ShareLink create on explicit generate click only (no POST on Rally mount)                                                                    |
+| 2026-05-21 | Rally not an auth gate; no forced Rally for logged-in or direct app navigation                                                               |
+| 2026-05-21 | v1 inbound `pb:refShareCode` + signup attribution to `ShareLink.referred_users`                                                              |
+| 2026-05-21 | Activation attribution via `Applicant.ref_share_code` only; no `?refShareCode=`; GA page_location strips `share`                             |
+| 2026-05-21 | **Rally Email Signup** — `RallySubscriber` model, create/confirm/unsubscribe APIs, double opt-in, rate limits, deferred broadcast automation |
