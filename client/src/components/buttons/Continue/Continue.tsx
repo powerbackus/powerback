@@ -1,3 +1,7 @@
+/**
+ * Continue CTA button (Splash, Lobby, Rally continue actions).
+ * @module buttons/Continue
+ */
 import React from 'react';
 import { Button, type ButtonProps } from 'react-bootstrap';
 import './style.css';
@@ -10,11 +14,21 @@ type Props = {
   classProp?: string | undefined;
   size?: 'sm' | 'lg' | undefined;
   ariaPressed?: boolean;
+  /** Accessible name override when label content is not sufficient */
+  ariaLabel?: string;
+  /** For expandable controls paired with visible label */
+  ariaExpanded?: boolean;
   disabled?: boolean;
   isMobile?: boolean;
   hidden?: boolean;
 };
 
+/**
+ * ContinueBtn component
+ *
+ * @param props - Continue button props
+ * @returns Bootstrap Button with continue styling defaults
+ */
 const ContinueBtn = ({
   size = 'lg',
   type = 'button',
@@ -25,6 +39,8 @@ const ContinueBtn = ({
   disabled,
   classProp = 'button--continue',
   ariaPressed,
+  ariaLabel,
+  ariaExpanded,
   handleClick,
 }: Props) => (
   <Button
@@ -34,8 +50,10 @@ const ContinueBtn = ({
     variant={variant}
     disabled={disabled}
     className={classProp}
-    onClick={handleClick}    
+    onClick={handleClick}
     aria-pressed={ariaPressed}
+    aria-label={ariaLabel}
+    aria-expanded={ariaExpanded}
     size={size ?? (isMobile ? 'sm' : 'lg')}
   >
     {label}

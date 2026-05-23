@@ -1,5 +1,77 @@
-#rally-confirm-page.rally-magic-page {
-  max-width: 36rem;
-  margin: 2rem auto;
-  padding: 1rem;
+/**
+ * Rally confirm page only (#rally-confirm-container). Account Unsub / Rally Unsub
+ * keep shared rules in pages/Unsub/style.css.
+ */
+
+#rally-confirm-container .secureuserpass--field {
+  margin-top: 0 !important;
+  padding-top: 0.75rem !important;
+}
+
+#rally-confirm-container .magic-user-interaction {
+  color: var(--accent);
+}
+
+#rally-confirm-container .magic-user-interaction .card-body {
+  padding: 0.85rem 1.1rem 1rem;
+  text-align: center;
+}
+
+#rally-confirm-container .magic-user-interaction .display-6 {
+  color: var(--contrast);
+  font-size: 2.15rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  line-height: 1.1;
+}
+
+#rally-confirm-container .rally-confirm-content p {
+  color: var(--text-contrast) !important;
+  text-align: center;
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  margin: 0 auto 0.4rem;
+  max-width: 26rem;
+}
+
+#rally-confirm-container .rally-confirm-unsub-hint {
+  margin: 0.25rem auto 0.35rem;
+}
+
+#rally-confirm-container .rally-confirm-unsub-hint a {
+  color: var(--accent);
+  font-size: 0.85rem;
+}
+
+#rally-confirm-container .rally-confirm-unsub-hint a:hover {
+  color: var(--contrast);
+}
+
+#rally-confirm-container .rally-confirm-actions {
+  margin-top: 0.5rem;
+  padding: 0;
+}
+
+#rally-confirm-container .rally-confirm-loading {
+  padding: 0.5rem 0 0.25rem;
+}
+
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #rally-confirm-container .magic-user-interaction {
+    height: auto !important;
+    min-height: 0;
+    max-height: none;
+    margin-top: clamp(10vh, 10rem, 16vh);
+    padding: 0.65rem 1rem 0.85rem;
+    box-shadow: 0.35vw 0.35vw 0.75px
+      rgb(from var(--text-placeholder) r g b / 10%);
+    text-shadow: 2px 2px var(--shadow-dark);
+  }
+
+  #rally-confirm-container .magic-user-interaction .display-6 {
+    font-size: 2.35rem;
+    padding-bottom: 0.25rem;
+    text-shadow: 3px 4px 0.5px rgb(from var(--secondary) r g b / 68%);
+  }
 }

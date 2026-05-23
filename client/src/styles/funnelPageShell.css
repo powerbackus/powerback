@@ -1,0 +1,28 @@
+/**
+ * Rally lobby underlay viewport sizing (mirrors #funnel--page dimensions; Rally-only).
+ *
+ * Keeps faded carousel vertical alignment in sync with Lobby without changing
+ * Funnel/Lobby styles. Breakpoints match client/src/pages/Funnel/style.css.
+ *
+ * @module styles/funnelPageShell
+ */
+
+.rally--lobby-underlay-shell {
+  width: 100%;
+}
+
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .rally--lobby-underlay-shell {
+    --bs-gutter-x: 0;
+    min-height: 507px;
+    height: 76vh;
+    justify-content: center;
+  }
+}
+
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .rally--lobby-underlay-shell {
+    height: 88vh;
+    justify-content: center;
+  }
+}

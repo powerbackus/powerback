@@ -1,3 +1,20 @@
+/* Shared card shell for reset, unsubscribe, and Rally magic-link pages */
+.magic-user-interaction {
+  color: var(--text);
+  background-color: rgb(from var(--semi-dark) r g b / 80%);
+  border: 1px solid var(--btn);
+}
+
+.magic-user-interaction form {
+  display: block;
+}
+
+.magic-user-interaction .form-text {
+  color: var(--secondary) !important;
+  font-size: 0.85rem !important;
+  font-family: 'Inter';
+}
+
 /*** SCREEN SIZES ***/
 /* Tablet, landscape */
 @media only screen and (min-width: 900px) and (orientation: landscape) {

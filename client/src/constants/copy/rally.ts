@@ -8,20 +8,24 @@
 import { SPLASH_COPY } from './splash';
 
 export const RALLY_COPY = {
+  /** Above-the-fold positioning; subcopy explains protest tool before money ask */
   HERO: {
     headline: 'PEOPLE, NOT MONEY.',
-    subcopy:
-      'POWERBACK needs reach and volunteers before donations. Sharing the app counts as participation.',
+    subcopy: `Money runs America whether we like it or not. Campaigns, even at their best, need money upfront with no receipts. POWERBACK flips the script so you set the terms. Contributions stay locked until Congress turns your demand into real legislative action. Before you donate, we the people must become impossible to ignore. Here's how we take the power back:`,
   },
+  /** Platform selector + suggested post; no OAuth posting in v1 */
   MANUAL_SHARE: {
     title: 'Tell the People',
-    hint: 'Friends, local groups, or anyone who wants Congress to earn support—not give it upfront.',
-    copySiteLink: 'Copy site link',
+    hint: 'Pick a platform, copy the suggested post message, and share it with anyone who wants Congress to earn support - not get it upfront.',
+    platformLabel: 'Platform',
+    suggestedMessageLabel: 'Suggested message',
     copyMessage: 'Copy suggested message',
+    copyMessageSuccess: 'Suggested message copied to clipboard!',
+    copyUrlSuccess: 'Share link copied to clipboard!',
+    copyClaimSuccess: 'Claim code copied to clipboard!',
     nativeShare: 'Share…',
-    messageTemplate:
-      'Congress should earn your support through action, not take donations upfront. Learn how POWERBACK works:',
   },
+  /** Explicit generate only; claim code shown once, not recoverable */
   ANONYMOUS_LINK: {
     title: 'Take the Lead',
     explain:
@@ -32,17 +36,15 @@ export const RALLY_COPY = {
       'Too many links created from this network. Try again later or use the link you already have.',
     copyUrl: 'Copy share link',
     copyClaim: 'Copy claim code',
-    revealClaim: 'Show claim code',
-    hideClaim: 'Hide claim code',
     claimWarning:
       'Save your claim code now. POWERBACK cannot look it up or send it again.',
     visitCountLabel: 'Opens recorded for your link',
   },
   EMAIL: {
-    title: 'Stay Connected',
-    hint: 'Occasional news about the movement. No account required.',
+    title: 'Stay on Top',
+    hint: 'Get the latest news about the movement as it grows. No account required.',
     placeholder: 'Email address',
-    submit: 'Get updates',
+    submit: 'Subscribe',
     submitSuccess: 'Signed up for email updates',
     success: 'Check your email to confirm.',
     errorGeneric: 'Something went wrong. Please try again later.',
@@ -59,6 +61,7 @@ export const RALLY_COPY = {
   UNSUB: {
     title: 'Unsubscribe',
     body: 'Stop receiving POWERBACK movement update emails from this address.',
+    cancel: 'Stay subscribed',
     confirm: 'Unsubscribe',
     loading: 'Processing…',
     successTitle: 'Unsubscribed',
@@ -70,8 +73,12 @@ export const RALLY_COPY = {
     label: 'Continue to Lobby',
     disclaimer: SPLASH_COPY.SPLASH.COPY.disclaimer,
   },
-  ACCOUNT: {
-    join: 'Create account',
-    signIn: 'Sign in',
+  SOCIAL: {
+    discordBlurb:
+      'Join the Discord for movement updates and volunteer coordination.',
+    discordLabel: 'Discord',
+    githubLabel: 'GitHub',
+    patreonLabel: 'Patreon',
+    xLabel: 'Follow on X',
   },
 } as const;

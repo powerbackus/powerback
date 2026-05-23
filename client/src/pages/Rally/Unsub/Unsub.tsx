@@ -1,15 +1,13 @@
 /**
- * Rally movement email unsubscribe page.
+ * Rally movement email unsubscribe page (same MagicLink shell as account Unsub).
  * @module Rally/Unsub
  */
-import React, { useCallback, useMemo, useState } from 'react';
-import { Button } from 'react-bootstrap';
-import { ContinueBtn } from '@Components/buttons';
-import { Loading } from '@Pages';
+import React, { useCallback, useState } from 'react';
+import { ContinueBtn, GenericBtn } from '@Components/buttons';
+import { MagicLink } from '@Components/page';
 import { RALLY_COPY } from '@CONSTANTS';
 import API from '@API';
-import { regexMatchURI } from '@Utils';
-import './style.css';
+import '../../Unsub/style.css';
 
 type UnsubProps = {
   homeLinkRedirect: () => void;
@@ -22,125 +20,93 @@ type UnsubProps = {
  * @param props.homeLinkRedirect - Navigate to main route
  */
 const Unsub = ({ homeLinkRedirect }: UnsubProps) => {
-  const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
-  const [error, setError] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState('');
 
-  const token = useMemo(() => {
-    const match = regexMatchURI('rally-unsubscribe');
-    return match?.[0] ?? null;
-  }, []);
-
-  const handleUnsub = useCallback(async () => {
-    if (!token) {
-      setError(true);
-      return;
-    }
-    setLoading(true);
-    setError(false);
+  const handleUnsub = useCallback(async (token: string) => {
     try {
       const { data } = await API.unsubscribeRallySubscriber(token);
       setMessage(data.message);
-      setDone(true);
+      setSuccess(true);
     } catch {
-      setError(true);
-    } finally {
-      setLoading(false);
+      setError('Failed to unsubscribe. Please try again.');
     }
-  }, [token]);
-
-  if (!token) {
-    return (
-      <div
-        id='rally-unsub-page'
-        className='rally-magic-page text-center'
-      >
-        <h1 className='display-6 mb-3'>{RALLY_COPY.UNSUB.errorTitle}</h1>
-        <p className='inconsolata'>{RALLY_COPY.UNSUB.errorBody}</p>
-        <div className='p-4'>
-          <ContinueBtn
-            size='sm'
-            variant='outline-primary'
-            handleClick={homeLinkRedirect}
-            label={RALLY_COPY.UNSUB.home}
-            type='button'
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (done) {
-    return (
-      <div
-        id='rally-unsub-page'
-        className='rally-magic-page text-center'
-      >
-        <h1 className='display-6 mb-3'>{RALLY_COPY.UNSUB.successTitle}</h1>
-        <p className='inconsolata'>{message}</p>
-        <div className='p-4'>
-          <ContinueBtn
-            size='sm'
-            variant='outline-primary'
-            handleClick={homeLinkRedirect}
-            label={RALLY_COPY.UNSUB.home}
-            type='button'
-          />
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return <Loading msg={RALLY_COPY.UNSUB.loading} />;
-  }
-
-  if (error) {
-    return (
-      <div
-        id='rally-unsub-page'
-        className='rally-magic-page text-center'
-      >
-        <h1 className='display-6 mb-3'>{RALLY_COPY.UNSUB.errorTitle}</h1>
-        <p className='inconsolata'>{RALLY_COPY.UNSUB.errorBody}</p>
-        <div className='p-4'>
-          <ContinueBtn
-            size='sm'
-            variant='outline-primary'
-            handleClick={homeLinkRedirect}
-            label={RALLY_COPY.UNSUB.home}
-            type='button'
-          />
-        </div>
-      </div>
-    );
-  }
+  }, []);
 
   return (
-    <div
-      id='rally-unsub-page'
-      className='rally-magic-page text-center'
+    <MagicLink
+      routeType='rally-unsubscribe'
+      tokenOnly
+      containerId='rally-unsubscribe-container'
+      homeLinkRedirect={homeLinkRedirect}
+      shouldRedirect={() => false}
+      cardBodyClassName='text-center'
     >
-      <h1 className='display-6 mb-3'>{RALLY_COPY.UNSUB.title}</h1>
-      <p className='inconsolata'>{RALLY_COPY.UNSUB.body}</p>
-      <div className='p-4 d-flex justify-content-center gap-2'>
-        <Button
-          variant='dark'
-          type='button'
-          onClick={() => void handleUnsub()}
-        >
-          {RALLY_COPY.UNSUB.confirm}
-        </Button>
-        <ContinueBtn
-          size='sm'
-          variant='outline-secondary'
-          handleClick={homeLinkRedirect}
-          label={RALLY_COPY.UNSUB.home}
-          type='button'
-        />
-      </div>
-    </div>
+      {({ hash }) => {
+        if (!hash) {
+          return (
+            <>
+              <h1 className='display-6 mb-3'>{RALLY_COPY.UNSUB.errorTitle}</h1>
+              <p className='inconsolata'>{RALLY_COPY.UNSUB.errorBody}</p>
+              <div className='p-5'>
+                <ContinueBtn
+                  size='sm'
+                  variant='outline-primary'
+                  handleClick={homeLinkRedirect}
+                  label={RALLY_COPY.UNSUB.home}
+                  type='button'
+                />
+              </div>
+            </>
+          );
+        }
+
+        if (success) {
+          return (
+            <>
+              <h1 className='display-6 mb-3'>{RALLY_COPY.UNSUB.successTitle}</h1>
+              <p className='inconsolata'>{message}</p>
+              <div className='p-5'>
+                <ContinueBtn
+                  size='sm'
+                  variant='outline-primary'
+                  handleClick={homeLinkRedirect}
+                  label={RALLY_COPY.UNSUB.home}
+                  type='button'
+                />
+              </div>
+            </>
+          );
+        }
+
+        return (
+          <>
+            <h1 className='mt-lg-1 mb-lg-3 pb-lg-3 display-6'>
+              {RALLY_COPY.UNSUB.title}
+            </h1>
+            <p className='mb-lg-3 pb-lg-1'>{RALLY_COPY.UNSUB.body}</p>
+            <p className='pt-lg-2'>{RALLY_COPY.UNSUB.confirm}?</p>
+
+            <div className='d-flex justify-content-center gap-3 mt-4'>
+              <GenericBtn
+                onPress={homeLinkRedirect}
+                label={RALLY_COPY.UNSUB.cancel}
+                cls='cancel-btn'
+                size='sm'
+              />
+              <GenericBtn
+                onPress={() => void handleUnsub(hash)}
+                cls='unsubscribe-btn'
+                label={RALLY_COPY.UNSUB.confirm}
+                size='sm'
+              />
+            </div>
+            {error && <span className='text-danger'>{error}</span>}
+          </>
+        );
+      }}
+    </MagicLink>
   );
 };
 

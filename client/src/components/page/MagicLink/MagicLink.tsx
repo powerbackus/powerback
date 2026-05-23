@@ -16,16 +16,28 @@ interface HashVerificationResult {
   [key: string]: unknown;
 }
 
+type MagicLinkRouteType =
+  | 'reset'
+  | 'unsubscribe'
+  | 'activate'
+  | 'rally-confirm'
+  | 'rally-unsubscribe';
+
 interface MagicLinkProps {
   /**
-   * Route type for hash verification
+   * Route type for hash verification (URL segment before token)
    */
-  routeType: 'reset' | 'unsubscribe' | 'activate';
+  routeType: MagicLinkRouteType;
 
   /**
-   * API function to verify the hash
+   * Parse token from URL only (Rally confirm/unsub); skips verify API
    */
-  verifyHash: (hash: string) => Promise<AxiosResponse<HashVerificationResult>>;
+  tokenOnly?: boolean;
+
+  /**
+   * API function to verify the hash (required unless tokenOnly)
+   */
+  verifyHash?: (hash: string) => Promise<AxiosResponse<HashVerificationResult>>;
 
   /**
    * Callback when hash is expired
@@ -128,6 +140,7 @@ const MagicLink = ({
   onExpired,
   onInvalid,
   routeType,
+  tokenOnly = false,
   verifyHash,
   containerId,
   shouldRedirect,
@@ -138,14 +151,15 @@ const MagicLink = ({
     homeLinkRedirect,
     verifyHash,
     routeType,
+    tokenOnly,
     onExpired,
     onInvalid,
     onError,
     onValid,
   });
 
-  // Default redirect logic: redirect if invalid or expired
-  const defaultShouldRedirect = !isValid || isExpired;
+  // Rally token pages render invalid-token UI in the card instead of redirecting home
+  const defaultShouldRedirect = tokenOnly ? false : !isValid || isExpired;
   const willRedirect = shouldRedirect
     ? shouldRedirect({ hash, isValid, isExpired, loading })
     : defaultShouldRedirect;

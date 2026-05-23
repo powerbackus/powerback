@@ -152,7 +152,7 @@ New page module: `client/src/pages/Rally/` (Tier 1 header, co-located `style.css
 
 ### Section D — Email updates (secondary)
 
-- Single email field + **Get updates** submit button; minimal friction (no full account form).
+- Single email field + **Subscribe** submit button; minimal friction (no full account form).
 - Success state: **Check your email to confirm.** (double opt-in; subscriber is `pending` until confirm link is used.)
 - Error state: generic, non-alarming copy (no enumeration hints).
 - `rally_email_signup_started` on focus or submit start; do not send email address or `source_public_code` to GA.
@@ -216,7 +216,7 @@ Email capture is **core Rally v1**. Anonymous share links and signup attribution
 flowchart LR
   Arrive[Visitor arrives]
   Rally[Rally: movement message]
-  ShareOrEmail[Share and/or Get updates]
+  ShareOrEmail[Share and/or Subscribe]
   Confirm[Confirm via email link]
   Lobby[Continue to Lobby optional]
 
@@ -343,7 +343,7 @@ Use `express-rate-limit` via `services/utils/rateLimitHelpers.js` (`createRateLi
 
 ### Frontend (Rally page)
 
-- **Email input** + button label **Get updates**.
+- **Email input** + button label **Subscribe**.
 - On submit: `POST /api/rally-subscribers` with `{ email }` and optional `source_public_code`.
 - **`source_public_code`:** include **only** when `pb:refShareCode` holds a valid inbound code (visitor arrived via `/?share=`). Do **not** submit outbound `pb:shareLink` `publicCode`. Do **not** submit claim codes.
 - **Success UI:** “Check your email to confirm.” Disable double-submit while in flight.
@@ -621,7 +621,7 @@ Use `trackGoogleAnalyticsEvent` from `@Utils` (see `.cursor/skills/powerback-ga-
 - [ ] Splash primary CTA navigates unauthenticated visitors to Rally, not directly into the funnel.
 - [ ] Rally displays **PEOPLE, NOT MONEY** as the dominant message.
 - [ ] All four Rally paths are available without completing the others.
-- [ ] Email signup: Get updates → generic success → confirmation email → confirm link sets `subscribed`; unsubscribe link sets `unsubscribed`.
+- [ ] Email signup: Subscribe → generic success → confirmation email → confirm link sets `subscribed`; unsubscribe link sets `unsubscribed`.
 - [ ] `POST /api/rally-subscribers` does not reveal whether an email is already subscribed (generic responses).
 - [ ] `source_public_code` sent only from `pb:refShareCode`, never from `pb:shareLink` or claim codes.
 - [ ] “Continue to Lobby” enters the same guest funnel as pre-Rally `Tour` (Lobby at `pol-donation`, guest access flag set).

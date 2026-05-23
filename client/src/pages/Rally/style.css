@@ -1,6 +1,75 @@
 /**
  * Rally page styles (share-first funnel). Uses app design tokens for dark theme.
+ *
+ * Lobby underlay: absolute stack mirrors #funnel--page + Lobby; foreground wrap
+ * centers the Rally card without shifting carousel band (see rally--foreground-wrap).
  */
+
+/* Page shell: lobby underlay + foreground rally card */
+@import '../../styles/funnelPageShell.css';
+
+.rally--page-shell {
+  position: relative;
+  width: 100%;
+}
+
+#rally--page.rally--page-shell {
+  overflow: visible;
+}
+
+/* Match #funnel--page viewport (Rally-only; Lobby/Funnel unchanged) */
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  #rally--page.rally--page-shell {
+    --bs-gutter-x: 0;
+    min-height: 507px;
+    height: 76vh;
+  }
+}
+
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  #rally--page.rally--page-shell {
+    height: 88vh;
+  }
+}
+
+/* Faded lobby stack: absolute fill of rally page shell (same slot as #funnel--page) */
+.rally--lobby-underlay {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.14;
+  filter: saturate(0.55) blur(0.5px);
+  overflow: visible;
+}
+
+.rally--lobby-underlay-shell {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.rally--lobby-underlay .lobby {
+  pointer-events: none;
+  width: 100%;
+}
+
+/* Hidden search + donation blocks reserve Lobby vertical rhythm */
+.rally--lobby-underlay .rally--lobby-spacer {
+  visibility: hidden;
+}
+
+.rally--foreground-wrap {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  min-height: 100%;
+}
+
+#rally.rally-page--foreground {
+  position: relative;
+}
 
 /* Outer shell: vertically center card on landscape (Funnel #funnel--page pattern) */
 #rally--page {
@@ -20,7 +89,7 @@
 }
 
 .rally--headline {
-  color: var(--text-mission);
+  color: var(--attention);
   font-size: clamp(1.75rem, 5vw, 2.5rem);
   font-weight: 900;
   letter-spacing: 0.02em;
@@ -29,9 +98,9 @@
 }
 
 .rally--subcopy {
-  font-size: 1.05rem;
+  color: var(--contrast);
   margin-bottom: 1.5rem;
-  color: var(--text);
+  font-size: 1.05rem;
   font-family: 'Inconsolata', monospace;
   line-height: 1.4;
 }
@@ -52,20 +121,14 @@
   font-size: 1.2rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
-  color: var(--text-mission);
+  color: var(--secondary);
   font-family: 'Oswald', sans-serif;
-}
-
-.rally--section-title--secondary {
-  font-size: 1.05rem;
-  font-weight: 500;
-  color: var(--text);
 }
 
 .rally--hint {
   font-size: 0.95rem;
   margin-bottom: 1rem;
-  color: var(--text-placeholder);
+  color: var(--text);
   font-family: 'Inconsolata', monospace;
   line-height: 1.35;
 }
@@ -74,8 +137,7 @@
   margin-top: 0.5rem;
 }
 
-#rally .rally--generate-btn.button--continue,
-#rally .rally--continue-btn.button--continue {
+#rally .rally--generate-btn.button--continue {
   color: var(--btn) !important;
   width: min(100%, 28rem);
   display: block;
@@ -89,10 +151,57 @@
   letter-spacing: 0.12em;
 }
 
+/* Continue to Lobby: match Splash Occupy the Lobby CTA */
+#rally .splash-enter--btn.rally--continue-btn.button--continue {
+  color: var(--btn) !important;
+  width: min(100%, 28rem);
+  display: block;
+  margin: 0.65rem auto 0;
+  padding: 0.5rem 1.25rem !important;
+  background-color: var(--elevated) !important;
+  border: 2px solid var(--btn) !important;
+  border-radius: 4px;
+  font-family: 'Oswald', sans-serif !important;
+  font-size: clamp(1rem, 2.5vmin, 1.2rem) !important;
+  font-weight: 600 !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.25em;
+  box-shadow: 0 0 3px var(--attention-muted);
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 120ms ease;
+}
+
+#rally .splash-enter--btn.rally--continue-btn.button--continue:hover {
+  color: var(--success-theme) !important;
+  background-color: var(--slate) !important;
+  border-color: var(--btn-hover) !important;
+  box-shadow: 0 0 3px var(--attention);
+}
+
+#rally .splash-enter--btn.rally--continue-btn.button--continue:focus {
+  outline: none;
+}
+
+#rally .splash-enter--btn.rally--continue-btn.button--continue:focus-visible {
+  color: var(--success-theme) !important;
+  background-color: var(--slate) !important;
+  border-color: var(--btn-hover) !important;
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+#rally .splash-enter--btn.rally--continue-btn.button--continue:active {
+  color: var(--success) !important;
+  background-color: var(--semi-dark) !important;
+  border-color: var(--btn-border) !important;
+  box-shadow: none;
+}
+
 /* Bootstrap outline-dark is illegible on our dark surfaces; use brand tokens */
 #rally .btn-outline-dark,
-#rally .rally--copy-btn,
-#rally .rally--claim-copy-btn {
+#rally .rally--copy-btn {
   color: var(--btn) !important;
   background-color: var(--slate) !important;
   border: 2px solid var(--accent) !important;
@@ -102,9 +211,7 @@
 #rally .btn-outline-dark:hover,
 #rally .btn-outline-dark:focus-visible,
 #rally .rally--copy-btn:hover,
-#rally .rally--copy-btn:focus-visible,
-#rally .rally--claim-copy-btn:hover,
-#rally .rally--claim-copy-btn:focus-visible {
+#rally .rally--copy-btn:focus-visible {
   color: var(--success-theme) !important;
   border-color: var(--btn-hover) !important;
   background-color: var(--semi-dark) !important;
@@ -141,7 +248,7 @@
 }
 
 .rally--claim-display {
-  flex: 1 1 12rem;
+  flex: 1 1 auto;
   min-width: 0;
   font-family: 'Inter', sans-serif !important;
   font-size: 0.88rem;
@@ -160,6 +267,25 @@
   line-height: 1;
   color: var(--primary);
   cursor: copy;
+}
+
+#rally .rally--clipboard-icon-btn.generic-btn {
+  padding: 0;
+  border: none;
+  background: transparent !important;
+  box-shadow: none;
+  transform: none;
+  color: var(--primary);
+}
+
+#rally .rally--clipboard-icon-btn.generic-btn:hover,
+#rally .rally--clipboard-icon-btn.generic-btn:focus-visible,
+#rally .rally--clipboard-icon-btn.generic-btn:active {
+  color: var(--attention);
+  background: transparent !important;
+  border: none;
+  box-shadow: none;
+  transform: none;
 }
 
 .rally--clipboard-icon-btn:hover,
@@ -193,82 +319,22 @@
   margin-top: 0;
 }
 
-/* Fixed-height slots: visibility toggle without shifting claim row */
-.rally--claim-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.rally--claim-block--compact {
-  gap: 0.1rem;
-}
-
-.rally--claim-warning-slot {
-  min-height: 2.35rem;
-}
-
-.rally--claim-warning-slot--empty {
-  min-height: 0;
-}
-
 .rally--claim-warning {
   font-size: 0.82rem;
   color: var(--attention);
-  margin: 0;
+  margin: 0 0 0.5rem;
   font-family: 'Inconsolata', monospace;
   line-height: 1.25;
 }
 
-.rally--claim-code-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 0.35rem;
-  min-height: 2.65rem;
-  margin-top: 0;
-}
-
-.rally--claim-slot--hidden {
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.rally--claim-copy-btn {
-  flex-shrink: 0;
-  align-self: center;
-}
-
-.rally--reveal-claim {
-  color: var(--link) !important;
-  font-family: 'Inconsolata', monospace;
-  align-self: flex-start;
-  font-size: 0.88rem;
-  line-height: 1.2;
-  min-height: 1.35rem;
-  padding: 0 !important;
+.rally--link-panel .rally--link-url-block + .rally--link-url-block {
+  margin-top: 0.5rem;
 }
 
 .rally--disclaimer {
   color: var(--text-placeholder);
   font-family: 'Inter', sans-serif;
   font-size: clamp(0.75rem, 2.2vmin, 0.8rem);
-}
-
-.rally--account-link {
-  font-size: 0.9rem;
-  color: var(--link) !important;
-  text-decoration: underline;
-  font-family: 'Inconsolata', monospace;
-}
-
-.rally--account-link:hover {
-  color: var(--link-hover) !important;
-}
-
-.rally--account-sep {
-  font-size: 0.9rem;
-  color: var(--text-placeholder);
 }
 
 .rally--email-success {
@@ -307,6 +373,116 @@
 #rally .form-control {
   background-color: var(--contrast-black) !important;
   border-color: var(--accent) !important;
+}
+
+#rally .rally--email-field.input--translucent .form-control {
+  color: var(--input) !important;
+  font-family: 'Inconsolata', monospace !important;
+  border: 1px solid var(--btn);
+  border-radius: 0.25rem !important;
+}
+
+#rally .rally--email-field.input--translucent .form-control:focus {
+  background-color: #0a0a0a;
+  box-shadow: inset 1px 1px 2px 1px #cc99ff26;
+}
+
+.rally--platform-field {
+  margin-bottom: 0.75rem;
+}
+
+.rally--platform-label,
+.rally--suggested-message-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.88rem;
+  color: var(--text-placeholder);
+  font-family: 'Inconsolata', monospace;
+}
+
+#rally .rally--platform-field .form-select {
+  font-family: 'Inconsolata', monospace !important;
+  color: var(--text);
+  background-color: var(--contrast-black);
+  border-color: var(--accent);
+}
+
+.rally--suggested-message-block {
+  margin-bottom: 0.75rem;
+}
+
+.rally--suggested-message-preview {
+  margin: 0;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: var(--text-contrast);
+  font-family: 'Inconsolata', monospace;
+  background-color: var(--contrast-black);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.rally--social-footer {
+  margin-top: 1.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--accent);
+}
+
+.rally--social-blurb {
+  font-size: 0.82rem;
+  color: var(--text-placeholder);
+  font-family: 'Inconsolata', monospace;
+  margin-bottom: 0.5rem;
+  line-height: 1.35;
+}
+
+.rally--social-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.65rem 1rem;
+}
+
+.rally--social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  color: var(--link) !important;
+  text-decoration: none;
+  font-family: 'Inconsolata', monospace;
+}
+
+.rally--social-link:hover,
+.rally--social-link:focus-visible {
+  color: var(--link-hover) !important;
+  text-decoration: underline;
+}
+
+/* BTC-style copy toast (Confirmation pattern) */
+.copy-notification {
+  position: fixed !important;
+  top: 20px;
+  right: 20px;
+  z-index: 1050;
+  min-width: 250px;
+  animation: rallyCopySlideIn 0.3s ease-out;
+  pointer-events: auto;
+}
+
+@keyframes rallyCopySlideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .rally--email .rally--email-form {
@@ -365,12 +541,10 @@
   margin-bottom: 0;
 }
 
-/* Tablet, landscape: center Rally card in viewport (Payment / TipAsk via #funnel--page) */
+/* Tablet, landscape: nav clearance on foreground card only (not carousel underlay) */
 @media only screen and (min-width: 900px) and (orientation: landscape) {
-  #rally--page {
+  .rally--foreground-wrap {
     --nav-h: 6vh;
-    height: 88vh;
-    justify-content: center;
     padding-top: calc(var(--nav-h) + 1rem);
     padding-left: 1rem;
     padding-right: 1rem;
@@ -440,5 +614,15 @@
     padding: 1rem 0.85rem 2rem;
     margin-left: 0.25rem;
     margin-right: 0.25rem;
+  }
+
+  #rally .splash-enter--btn.rally--continue-btn.button--continue {
+    border: 1px solid var(--btn) !important;
+  }
+}
+
+@media only screen and (min-width: 600px) {
+  #rally .splash-enter--btn.rally--continue-btn.button--continue {
+    width: min(100%, 22.5rem);
   }
 }

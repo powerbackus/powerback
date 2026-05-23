@@ -12,6 +12,7 @@ export { WE_THE_PEOPLE } from './bill';
 export { INIT, INITIAL_ALERTS } from './init';
 
 export {
+  RALLY_COPY,
   SEARCH_COPY,
   SPLASH_COPY,
   ACCOUNT_COPY,
@@ -21,7 +22,6 @@ export {
   CONFIRMATION_COPY,
   LIMIT_MESSAGE_COPY,
   CELEBRATION_EVENT_COPY,
-  RALLY_COPY,
 } from './copy';
 
 export {
@@ -58,3 +58,6 @@ export type {
 export { emailTopics };
 
 export type { AccountTab, SearchLink, CelebrationOutcome } from './copy';
+
+/** Rally manual-share platform list and handles (see rallySocial.ts). */
+export { RALLY_SHARE_PLATFORMS, type RallySharePlatform } from './rallySocial';

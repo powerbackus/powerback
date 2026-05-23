@@ -53,9 +53,18 @@ interface HashVerificationResult {
   [key: string]: unknown;
 }
 
+type HashVerificationRouteType =
+  | 'reset'
+  | 'unsubscribe'
+  | 'activate'
+  | 'rally-confirm'
+  | 'rally-unsubscribe';
+
 interface UseHashVerificationOptions {
-  routeType: 'reset' | 'unsubscribe' | 'activate';
-  verifyHash: (hash: string) => Promise<AxiosResponse<HashVerificationResult>>;
+  routeType: HashVerificationRouteType;
+  /** When true, only parse token from URL (Rally confirm/unsub); no verify API call */
+  tokenOnly?: boolean;
+  verifyHash?: (hash: string) => Promise<AxiosResponse<HashVerificationResult>>;
   onValid?: (data: HashVerificationResult) => void;
   onExpired?: (data: HashVerificationResult) => void;
   onInvalid?: () => void;
@@ -104,6 +113,7 @@ interface HashVerificationState {
  */
 export default function useHashVerification({
   routeType,
+  tokenOnly = false,
   verifyHash,
   onValid,
   onExpired,
@@ -131,6 +141,11 @@ export default function useHashVerification({
         const [extractedHash] = hashMatch || [];
 
         if (!extractedHash) {
+          if (tokenOnly) {
+            setIsValid(false);
+            onInvalid?.();
+            return;
+          }
           logError(`Invalid ${routeType} URL: No hash found`);
           onInvalid?.();
           homeLinkRedirect();
@@ -138,6 +153,19 @@ export default function useHashVerification({
         }
 
         setHash(extractedHash);
+
+        if (tokenOnly) {
+          setIsValid(true);
+          onValid?.({});
+          return;
+        }
+
+        if (!verifyHash) {
+          logError(`${routeType} verification error: verifyHash required`);
+          onError?.();
+          homeLinkRedirect();
+          return;
+        }
 
         const { data }: AxiosResponse<HashVerificationResult> =
           await verifyHash(extractedHash);
@@ -184,6 +212,7 @@ export default function useHashVerification({
     verify();
   }, [
     routeType,
+    tokenOnly,
     verifyHash,
     onValid,
     onExpired,
