@@ -245,33 +245,39 @@ const Page = ({
   }, [isInitializing, isLoggedIn, navContext]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /**
-   * Effect to enable scrolling on Splash/Rally by adding/removing splash-scrollable class
-   * Allows vertical scrolling when landing content exceeds viewport height
+   * Splash/Rally scroll + Rally horizontal overflow guards on html/body/.App.
+   * splash-scrollable: vertical scroll when landing content exceeds viewport.
+   * rally-page: block horizontal scroll from Lobby 100vw carousel underlay (100vw + scrollbar).
    */
-  useEffect(() => {
-    const isSplashPage =
-      navContext === 'splash' &&
-      route?.name === 'main' &&
-      !isInitializing &&
-      !isLoggedIn;
+  useLayoutEffect(() => {
+    const isGuestMain =
+      route?.name === 'main' && !isInitializing && !isLoggedIn;
+    const isSplashPage = navContext === 'splash' && isGuestMain;
+    const isRallyPage = splash === 'Rally' && isGuestMain;
 
     if (isSplashPage) {
-      // add the class to the body and document element
-      // this allows the page to scroll vertically when the content exceeds the viewport height
       document.body.classList.add('splash-scrollable');
       document.documentElement.classList.add('splash-scrollable');
     } else {
-      // remove the class from the body and document element
       document.body.classList.remove('splash-scrollable');
       document.documentElement.classList.remove('splash-scrollable');
     }
 
-    // Cleanup function to remove class when component unmounts
+    if (isRallyPage) {
+      document.body.classList.add('rally-page');
+      document.documentElement.classList.add('rally-page');
+    } else {
+      document.body.classList.remove('rally-page');
+      document.documentElement.classList.remove('rally-page');
+    }
+
     return () => {
       document.body.classList.remove('splash-scrollable');
       document.documentElement.classList.remove('splash-scrollable');
+      document.body.classList.remove('rally-page');
+      document.documentElement.classList.remove('rally-page');
     };
-  }, [route?.name, isInitializing, isLoggedIn, navContext]);
+  }, [route?.name, isInitializing, isLoggedIn, navContext, splash]);
 
   /**
    * Global modals configuration - single source of truth for all modals

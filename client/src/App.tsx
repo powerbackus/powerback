@@ -223,6 +223,10 @@ const App = ({ serverConstantsError }: AppProps) => {
   // mobile form path control
   const route = useRoute();
 
+  /** Rally is a single scrollable card; skip link would only duplicate navbar → main tab stops */
+  const isRallyGuestPage =
+    route?.name === 'main' && splash === 'Rally' && !isLoggedIn;
+
   const handleSkipToMain = useCallback(
     (e: React.MouseEvent | React.KeyboardEvent) => {
       e.preventDefault();
@@ -239,6 +243,8 @@ const App = ({ serverConstantsError }: AppProps) => {
       <a
         href={'#main-content'}
         className={'skip-link'}
+        tabIndex={isRallyGuestPage ? -1 : 0}
+        aria-hidden={isRallyGuestPage ? true : undefined}
         onClick={handleSkipToMain}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
