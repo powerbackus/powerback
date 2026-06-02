@@ -42,9 +42,8 @@
  * BUSINESS LOGIC
  *
  * SHUFFLING
- * - Initial list is shuffled using shuffle utility
- * - Provides variety in display order
- * - Shuffled once on initialization
+ * - Initial order comes from buildSessionPolParade (one shuffle per tab session)
+ * - Rally backdrop and Lobby share the same order via session storage
  *
  * DISTRICT SORTING
  * - Uses Intl.Collator with numeric: true option
@@ -59,7 +58,7 @@
  * DEPENDENCIES
  * - react: useCallback, useReducer, useMemo
  * - @Interfaces: PolsOnParade, HouseMember, RepState interfaces
- * - @Utils: shuffle utility function
+ * - @Utils: buildSessionPolParade for tab-session order
  *
  * @module hooks/data/useParade
  * @requires react
@@ -68,7 +67,7 @@
  */
 import { useCallback, useReducer, useMemo } from 'react';
 import { PolsOnParade, HouseMember, RepState } from '@Interfaces';
-import { shuffle } from '@Utils';
+import { buildSessionPolParade } from '@Utils';
 
 type Action = {
   payload?: HouseMember[] | HouseMember | RepState | string;
@@ -86,15 +85,13 @@ interface Handlers {
 export default function useParade(): [PolsOnParade, Handlers] {
   const reducer = useCallback((state: PolsOnParade, action: Action) => {
     switch (action.type) {
-      case 'INIT':
-        state = {
-          ...state,
-          houseMembers: shuffle(action.payload),
+      case 'INIT': {
+        const parade = buildSessionPolParade(action.payload as HouseMember[]);
+        return {
+          houseMembers: parade.houseMembers,
+          applied: parade.applied,
         };
-        return (state = {
-          ...state,
-          applied: state.houseMembers,
-        });
+      }
       case 'NAME':
         return (state = {
           ...state,

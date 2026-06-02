@@ -22,10 +22,16 @@ import './style.css';
 export type PolCarouselProps = {
   polsOnParade?: PolsOnParade;
   isDemoMode: boolean;
+  /** Decorative underlay: no horizontal scroll container (Rally backdrop). */
+  suppressHorizontalScroll?: boolean;
 };
 
 // PolCarousel displays a horizontally scrollable list of Representatives
-const PolCarousel = ({ polsOnParade, isDemoMode }: PolCarouselProps) => {
+const PolCarousel = ({
+  polsOnParade,
+  isDemoMode,
+  suppressHorizontalScroll = false,
+}: PolCarouselProps) => {
   const { funnel: tabKey } = useNavigation();
 
   // Extract the array of applied representatives or fallback to empty
@@ -165,7 +171,10 @@ const PolCarousel = ({ polsOnParade, isDemoMode }: PolCarouselProps) => {
                     }
                     style={{
                       paddingRight: shouldCenter ? 0 : isMobile ? 0 : '2vw',
-                      overflowX: shouldCenter ? 'hidden' : 'scroll',
+                      overflowX:
+                        suppressHorizontalScroll || shouldCenter
+                          ? 'hidden'
+                          : 'scroll',
                     }}
                     className={'hide-scrollbar list'}
                     itemCount={applied.length}

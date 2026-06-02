@@ -7,7 +7,7 @@
 
 import { useRef, useEffect } from 'react';
 import API from '@API';
-import { logError } from '@Utils';
+import { getSessionPolParade, logError } from '@Utils';
 import type { HouseMember, PolsOnParade } from '@Interfaces';
 
 type SetPolsOnParade = (houseMembers: HouseMember[]) => void;
@@ -27,6 +27,13 @@ export default function useInitialPolsOnParade(
 
   useEffect(() => {
     if (polsOnParade.applied.length || hasFetchedPols.current) return;
+
+    const cached = getSessionPolParade();
+    if (cached?.houseMembers.length) {
+      hasFetchedPols.current = true;
+      setPolsOnParade(cached.houseMembers);
+      return;
+    }
 
     hasFetchedPols.current = true;
 

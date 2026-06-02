@@ -10,3 +10,4 @@ export {
   clearStoredRefShareCode,
   type StoredRefShareCode,
 } from './refShareCodeStorage';
+export { buildSessionPolParade, getSessionPolParade } from './polParadeSession';
