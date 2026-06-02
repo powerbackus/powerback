@@ -23,7 +23,7 @@ const STATUS = ['pending', 'subscribed', 'unsubscribed'];
  * @property {Date} created_at - First capture
  * @property {Date} [confirmed_at] - When status became subscribed
  * @property {Date} [unsubscribed_at] - When status became unsubscribed
- * @property {Date} [last_email_sent_at] - Reserved for future send controls
+ * @property {Date} [last_email_sent_at] - Last confirmation email queued (resend cooldown)
  */
 const RallySubscriberSchema = new Schema(
   {

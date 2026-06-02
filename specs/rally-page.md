@@ -51,7 +51,7 @@ flowchart LR
   Splash -->|primary CTA| Rally
   Rally --> Share
   Rally --> Email
-  Rally -->|Continue to Lobby| Lobby
+  Rally -->|Take me to the Lobby| Lobby
   Share --> Rally
   Email --> Rally
 ```
@@ -69,7 +69,7 @@ flowchart LR
 | 1   | **Share manually**                | Copy / Web Share API for site URL or suggested message; no server write required.                                                   |
 | 2   | **Generate anonymous share link** | Reuse stored link if present; otherwise create only after explicit generate click; then show URL + claim code copy controls.        |
 | 3   | **Join email updates**            | Email capture UI + `POST /api/rally-subscribers`; double opt-in confirmation; do not block other paths. See **Rally Email Signup**. |
-| 4   | **Continue to Lobby**             | Same guest entry as current Splash `Tour` path (`pb:guestAccess`, funnel step 0).                                                   |
+| 4   | **Take me to the Lobby**          | Same guest entry as current Splash `Tour` path (`pb:guestAccess`, funnel step 0).                                                   |
 
 ### Share link inbound path
 
@@ -96,7 +96,7 @@ Rally is **not** an authentication gate and must not block normal app use for si
 
 - If the user already has a valid logged-in session, or refresh-token restoration succeeds on load, **existing navigation must keep working** without forcing Rally first.
 - **Do not redirect** to Rally solely because Rally exists when the user navigates directly to Lobby, account, funnel steps, or other established routes (deep links, nav controls, history restore).
-- Rally applies **primarily** to the **public Splash primary CTA** path for **new or unauthenticated** visitors (Splash → Rally → optional share → Continue to Lobby).
+- Rally applies **primarily** to the **public Splash primary CTA** path for **new or unauthenticated** visitors (Splash → Rally → optional share → Take me to the Lobby).
 - Logged-in users **may** open Rally voluntarily (Rally link in nav/footer, share CTA, or Splash CTA), but must not be **trapped** on Rally or **required** to pass through it before using Lobby, Celebrations, or account features.
 - Implementations should branch on `isLoggedIn` / auth initialization: mandatory Rally insertion targets the guest funnel entry, not every route change.
 
@@ -158,7 +158,7 @@ New page module: `client/src/pages/Rally/` (Tier 1 header, co-located `style.css
 - `rally_email_signup_started` on focus or submit start; do not send email address or `source_public_code` to GA.
 - Full backend, attribution, and API behavior: **Rally Email Signup** (below).
 
-### Section E — Continue to Lobby (secondary)
+### Section E — Take me to the Lobby (secondary)
 
 - Button label along lines of “Continue to Lobby” / “Explore the Lobby” (match `SPLASH_COPY` tone).
 - Subtext: no payment or signup required to explore (reuse Splash disclaimer spirit).
@@ -218,7 +218,7 @@ flowchart LR
   Rally[Rally: movement message]
   ShareOrEmail[Share and/or Subscribe]
   Confirm[Confirm via email link]
-  Lobby[Continue to Lobby optional]
+  Lobby[Take me to the Lobby optional]
 
   Arrive --> Rally
   Rally --> ShareOrEmail
@@ -227,7 +227,7 @@ flowchart LR
   Confirm --> Lobby
 ```
 
-Sharing and email signup are **non-exclusive** and **non-blocking**; Continue to Lobby remains available without either.
+Sharing and email signup are **non-exclusive** and **non-blocking**; Take me to the Lobby remains available without either.
 
 ### Database model — `RallySubscriber` (`models/RallySubscriber.js`)
 
@@ -281,9 +281,9 @@ Create or refresh a pending Rally subscriber and send confirmation email.
 - **Logic:**
   1. Normalize email → `email_normalized`.
   2. If **new** address: insert `RallySubscriber` with `status: pending`, `source: rally`, optional `source_public_code`, generate confirmation token (CSPRNG), store `confirm_token_hash` only, send confirmation email.
-  3. If **already `pending`:** rotate `confirm_token_hash`, resend confirmation email (safe refresh; prior link invalid).
+  3. If **already `pending`:** resend confirmation only when past resend cooldown (`last_email_sent_at`); rotate token when sending.
   4. If **already `subscribed`:** return generic success **without** revealing subscription state; do not send another confirmation email.
-  5. If **already `unsubscribed`:** v1 **remains unsubscribed** — return the same generic success body; do **not** resubscribe or send mail unless a future explicit resubscribe flow is specified (deferred).
+  5. If **already `unsubscribed`:** return generic success; restart double opt-in and send confirmation only when past reactivation cooldown (`unsubscribed_at`).
 - **Anti-enumeration:** success and error messaging must not confirm whether an email is registered, subscribed, or unsubscribed. Prefer a single generic success message for accepted requests; use generic failure for validation/rate-limit errors.
 - **Success `200` or `201`:**
 
@@ -349,7 +349,7 @@ Use `express-rate-limit` via `services/utils/rateLimitHelpers.js` (`createRateLi
 - **Success UI:** “Check your email to confirm.” Disable double-submit while in flight.
 - **Error UI:** generic message (rate limit may use slightly specific copy; still no enumeration).
 - **GA:** `rally_email_signup_started` only; never send email, `source_public_code`, `publicCode`, `claimCode`, or full URLs in custom params (§7).
-- Email signup does **not** block share actions or Continue to Lobby.
+- Email signup does **not** block share actions or Take me to the Lobby.
 
 ### Email templates
 
@@ -360,7 +360,7 @@ Use POWERBACK’s existing template builder (`createEmailTemplate()` in `control
 - Clear POWERBACK branding
 - Primary confirmation button/link (frontend route → confirm API)
 - Plain-text fallback confirmation URL (same destination)
-- Short explanation that the recipient signed up for POWERBACK movement updates from the Rally page
+- Short explanation that the recipient signed up for POWERBACK updates from the Rally page
 - Note that confirmed subscribers can unsubscribe from future emails (footer link once `unsubscribe_token_hash` exists, or post-confirm messaging)
 
 **Future broadcast / update emails** (deferred sending in v1, required content when implemented):
@@ -661,7 +661,7 @@ Use `trackGoogleAnalyticsEvent` from `@Utils` (see `.cursor/skills/powerback-ga-
 ### Rally email (v1 backend)
 
 - [ ] `RallySubscriber` model exists with fields in **Rally Email Signup**; unique index on `email_normalized`.
-- [ ] `POST /api/rally-subscribers` creates pending subscriber, resends safely when pending, neutral success when subscribed/unsubscribed.
+- [ ] `POST /api/rally-subscribers` creates pending subscriber, resends when pending past cooldown, reactivates unsubscribed past cooldown, neutral success always (no enumeration).
 - [ ] Confirm and unsubscribe routes validate token hashes only; idempotent where applicable.
 - [ ] `rallySubscriberCreate` rate limit: 5/hour/IP on POST create.
 - [ ] No IP/UA/referrer stored on `RallySubscriber`; confirmation emails use existing template patterns.

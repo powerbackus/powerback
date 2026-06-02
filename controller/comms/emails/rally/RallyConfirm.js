@@ -17,7 +17,7 @@ module.exports = {
       ${emailUtils.createHeading('Confirm your POWERBACK updates', 1)}
 
       ${emailUtils.createParagraph(
-        'You signed up on the POWERBACK Rally page for occasional movement updates — news about the project and how to help spread the word.'
+        'You signed up on the POWERBACK Rally page for occasional POWERBACK updates — news about the project and how to help spread the word.'
       )}
 
       ${emailUtils.createInfoBox(
@@ -37,7 +37,7 @@ module.exports = {
       )}
 
       ${emailUtils.createParagraph(
-        'After you confirm, you may unsubscribe from future movement emails using the link in those messages.'
+        'After you confirm, you may unsubscribe from future POWERBACK update emails using the link in those messages.'
       )}
 
       ${emailUtils.createDivider()}
@@ -47,10 +47,6 @@ module.exports = {
       })}
     `;
 
-    return [
-      5,
-      'Confirm your POWERBACK movement updates',
-      createEmailTemplate(content),
-    ];
+    return [5, 'Confirm your POWERBACK updates', createEmailTemplate(content)];
   },
 };
