@@ -93,7 +93,7 @@ const ConfirmContent = ({ token, homeLinkRedirect }: ConfirmContentProps) => {
       <p>{message}</p>
       {unsubscribeUrl && (
         <p className={'rally-confirm-unsub-hint small'}>
-          <a href={unsubscribeUrl}>Unsubscribe from movement updates</a>
+          <a href={unsubscribeUrl}>Unsubscribe from POWERBACK updates</a>
         </p>
       )}
       <ConfirmActions homeLinkRedirect={homeLinkRedirect} />

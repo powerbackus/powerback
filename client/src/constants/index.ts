@@ -13,6 +13,9 @@ export { INIT, INITIAL_ALERTS } from './init';
 
 export {
   RALLY_COPY,
+  RALLY_SUPPORT_TABS,
+  type RallySocialLink,
+  type RallySupportTab,
   SEARCH_COPY,
   SPLASH_COPY,
   ACCOUNT_COPY,
@@ -59,5 +62,12 @@ export { emailTopics };
 
 export type { AccountTab, SearchLink, CelebrationOutcome } from './copy';
 
-/** Rally manual-share platform list and handles (see rallySocial.ts). */
-export { RALLY_SHARE_PLATFORMS, type RallySharePlatform } from './rallySocial';
+/** Rally manual-share format list and handles (see rallySocial.ts). */
+export {
+  RALLY_BLUESKY_HANDLE,
+  RALLY_MASTODON_HANDLE,
+  RALLY_SHARE_PLATFORMS,
+  RALLY_TRUTH_SOCIAL_HANDLE,
+  RALLY_X_HANDLE,
+  type RallySharePlatform,
+} from './rallySocial';

@@ -2,17 +2,17 @@
  * Faded Lobby layout underlay: mirrors Lobby tab stack so the carousel band
  * aligns with the real Lobby page. Rally-only; does not modify Lobby.tsx.
  *
- * @module Rally/RallyCarouselBackdrop
+ * @module Rally/subcomps/CarouselBackdrop
  */
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
+import '../../Funnel/TabContents/Lobby/DonationSection/style.css';
+import { buildSessionPolParade, logError } from '@Utils';
 import { Col, Container, Row } from 'react-bootstrap';
+import '../../Funnel/TabContents/Lobby/style.css';
+import type { PolsOnParade } from '@Interfaces';
+import '../../../components/search/style.css';
 import { CELEBRATE_COPY } from '@CONSTANTS';
 import API from '@API';
-import type { PolsOnParade } from '@Interfaces';
-import { shuffle, logError } from '@Utils';
-import '../Funnel/TabContents/Lobby/style.css';
-import '../Funnel/TabContents/Lobby/DonationSection/style.css';
-import '../../components/search/style.css';
 
 const PolCarousel = React.lazy(
   () => import('@Components/interactive/PolCarousel/PolCarousel')
@@ -22,7 +22,7 @@ const PolCarousel = React.lazy(
 const BACKDROP_POL_COUNT = 10;
 
 /**
- * RallyCarouselBackdrop component
+ * CarouselBackdrop component
  *
  * Renders a non-interactive, dimmed PolCarousel behind the Rally card.
  * Reuses Lobby DOM sections (search band, carousel, donation band) with hidden
@@ -30,8 +30,19 @@ const BACKDROP_POL_COUNT = 10;
  *
  * @returns Faded lobby underlay or null while pols load
  */
-const RallyCarouselBackdrop = () => {
+const CarouselBackdrop = () => {
   const [polsOnParade, setPolsOnParade] = useState<PolsOnParade | null>(null);
+  const underlayRef = useRef<HTMLDivElement>(null);
+
+  // Decorative only: keep pol cards and carousel skip controls out of tab order
+  useEffect(() => {
+    const el = underlayRef.current;
+    if (!el) return;
+    el.inert = true;
+    return () => {
+      el.inert = false;
+    };
+  }, [polsOnParade]);
 
   useEffect(() => {
     let cancelled = false;
@@ -40,10 +51,10 @@ const RallyCarouselBackdrop = () => {
         if (cancelled || !data?.length) {
           return;
         }
-        const shuffled = shuffle([...data]).slice(0, BACKDROP_POL_COUNT);
+        const parade = buildSessionPolParade(data);
         setPolsOnParade({
-          houseMembers: data,
-          applied: shuffled,
+          houseMembers: parade.houseMembers,
+          applied: parade.houseMembers.slice(0, BACKDROP_POL_COUNT),
         });
       })
       .catch((error) => {
@@ -60,23 +71,24 @@ const RallyCarouselBackdrop = () => {
 
   return (
     <div
-      className='rally--lobby-underlay'
+      ref={underlayRef}
+      className={'rally--lobby-underlay'}
       aria-hidden
     >
       <Container
         fluid
-        className='rally--lobby-underlay-shell d-flex align-items-center'
+        className={'rally--lobby-underlay-shell d-flex align-items-center'}
       >
-        <Row className='flex-column w-100'>
+        <Row className={'flex-column w-100'}>
           <Col>
-            <div className='lobby'>
+            <div className={'lobby'}>
               {/* Hidden search band: reserves .selector-bar height from Lobby */}
               <section aria-hidden>
                 <Row>
-                  <Col className='lobby-top third'>
-                    <Row className='selector-bar rally--lobby-spacer'>
+                  <Col className={'lobby-top third'}>
+                    <Row className={'selector-bar rally--lobby-spacer'}>
                       <Col
-                        id='choose-pols'
+                        id={'choose-pols'}
                         lg={5}
                       />
                     </Row>
@@ -85,12 +97,14 @@ const RallyCarouselBackdrop = () => {
               </section>
               <section aria-hidden>
                 <Row>
-                  <Col className='lobby-middle third'>
+                  <Col className={'lobby-middle third'}>
                     <Suspense fallback={null}>
                       {/* Demo mode skips escrow API; backdrop is visual only */}
+
                       <PolCarousel
                         polsOnParade={polsOnParade}
                         isDemoMode
+                        suppressHorizontalScroll
                       />
                     </Suspense>
                   </Col>
@@ -99,12 +113,12 @@ const RallyCarouselBackdrop = () => {
               {/* Hidden donation band: .starting text matches DonationSection height */}
               <section aria-hidden>
                 <Row>
-                  <Col className='lobby-bottom third'>
+                  <Col className={'lobby-bottom third'}>
                     <Row
-                      id='donation-section'
-                      className='rally--lobby-spacer'
+                      id={'donation-section'}
+                      className={'rally--lobby-spacer'}
                     >
-                      <div className='starting mt-lg-2 mb-2 px-2 w-75'>
+                      <div className={'starting mt-lg-2 mb-2 px-2 w-75'}>
                         {CELEBRATE_COPY.CELEBRATION_SCREEN_LOAD_HEADER}
                       </div>
                     </Row>
@@ -119,4 +133,4 @@ const RallyCarouselBackdrop = () => {
   );
 };
 
-export default React.memo(RallyCarouselBackdrop);
+export default React.memo(CarouselBackdrop);

@@ -3,11 +3,15 @@
  * @module pages/Rally/fn/buildSuggestedShareMessage
  */
 
-import type { RallySharePlatform } from '@CONSTANTS';
+import { RALLY_COPY, type RallySharePlatform } from '@CONSTANTS';
 import {
   RALLY_BLUESKY_HANDLE,
+  RALLY_MASTODON_HANDLE,
+  RALLY_TRUTH_SOCIAL_HANDLE,
   RALLY_X_HANDLE,
 } from '../../../constants/rallySocial';
+
+const GENERIC_POST = RALLY_COPY.MANUAL_SHARE.suggestedMessage;
 
 /**
  * Public URL for share copy: anonymous link when present, else site home.
@@ -29,8 +33,6 @@ export function resolveRallyShareUrl(
 /**
  * Platform-specific suggested post text (short; includes link; no claim codes).
  *
- * Reddit omits handles to avoid spammy tone; generic omits handles by design.
- *
  * @param platform - Target platform for tone/handle
  * @param link - Public share URL only (no PII)
  * @returns Single-line message suitable for clipboard or Web Share API
@@ -39,24 +41,17 @@ export function buildSuggestedShareMessage(
   platform: RallySharePlatform,
   link: string
 ): string {
-  const core =
-    'POWERBACK is a campaign-finance protest tool. Make public support visible before money enters the picture.';
-
   switch (platform) {
     case 'x':
-      return `${core} ${RALLY_X_HANDLE} ${link}`;
-    case 'bluesky': {
-      const handle = RALLY_BLUESKY_HANDLE.trim();
-      return handle ? `${core} ${handle} ${link}` : `${core} ${link}`;
-    }
-    case 'reddit':
-      return `${core} Worth a look if you care about how Congress earns support: ${link}`;
-    case 'linkedin':
-      return `${core} Learn how conditional public support works before donations: ${link}`;
-    case 'facebook':
-      return `${core} Share if this idea matters to you: ${link}`;
+      return `${GENERIC_POST} ${RALLY_X_HANDLE} ${link}`;
+    case 'bluesky':
+      return `${GENERIC_POST} ${RALLY_BLUESKY_HANDLE.trim()} ${link}`;
+    case 'mastodon':
+      return `${GENERIC_POST} ${RALLY_MASTODON_HANDLE.trim()} ${link}`;
+    case 'truth_social':
+      return `${GENERIC_POST} ${RALLY_TRUTH_SOCIAL_HANDLE.trim()} ${link}`;
     case 'generic':
     default:
-      return `${core} ${link}`;
+      return `${GENERIC_POST} ${link}`;
   }
 }

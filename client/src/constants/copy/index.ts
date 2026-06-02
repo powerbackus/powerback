@@ -11,7 +11,12 @@ export { BRAND_DISPLAY, SPLASH_COPY } from './splash';
 export { LIMIT_MESSAGE_COPY } from './limitMessage';
 export { CELEBRATE_COPY } from './celebrate';
 export { ANALYTICS_COPY } from './analytics';
-export { RALLY_COPY } from './rally';
+export {
+  RALLY_COPY,
+  RALLY_SUPPORT_TABS,
+  type RallySocialLink,
+  type RallySupportTab,
+} from './rally';
 
 // Future copy registries can be added here:
 // export { CHECKOUT_COPY, type CheckoutCopy } from './checkout';

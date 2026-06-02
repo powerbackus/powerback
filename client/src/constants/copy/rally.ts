@@ -11,40 +11,56 @@ export const RALLY_COPY = {
   /** Above-the-fold positioning; subcopy explains protest tool before money ask */
   HERO: {
     headline: 'PEOPLE, NOT MONEY.',
-    subcopy: `Money runs America whether we like it or not. Campaigns, even at their best, need money upfront with no receipts. POWERBACK flips the script so you set the terms. Contributions stay locked until Congress turns your demand into real legislative action. Before you donate, we the people must become impossible to ignore. Here's how we take the power back:`,
+    subcopy: `Money runs America whether we like it or not. Campaigns, even at their best, need money upfront with no receipts. POWERBACK flips the script so you set the terms. Contributions stay locked until Congress turns your demand into real legislative action. But before you Celebrate, we the people must take the power back:`,
   },
   /** Platform selector + suggested post; no OAuth posting in v1 */
   MANUAL_SHARE: {
     title: 'Tell the People',
-    hint: 'Pick a platform, copy the suggested post message, and share it with anyone who wants Congress to earn support - not get it upfront.',
+    pillDefinition: 'Copy a message to share on social media.',
+    hint: 'Spread the message in your own words, or use a suggested post.',
     platformLabel: 'Platform',
     suggestedMessageLabel: 'Suggested message',
-    copyMessage: 'Copy suggested message',
-    copyMessageSuccess: 'Suggested message copied to clipboard!',
+    copyMessage: 'Copy message',
+    copyMessageSuccess: 'Message copied to clipboard!',
     copyUrlSuccess: 'Share link copied to clipboard!',
     copyClaimSuccess: 'Claim code copied to clipboard!',
     nativeShare: 'Share…',
+    suggestedMessage:
+      'Stop donating to politicians for nothing. Use POWERBACK to make political donations conditional: no action, no support.',
   },
   /** Explicit generate only; claim code shown once, not recoverable */
   ANONYMOUS_LINK: {
     title: 'Take the Lead',
+    pillDefinition: 'Create a share link to build a network.',
     explain:
-      'Create a link that counts how many people open it. You receive a private claim code once; we cannot recover it if you lose it.',
-    generate: 'Generate anonymous share link',
+      'Create a share link that keeps track of the support you bring in. Send it to family, friends, or groups you care about. Post it anywhere, or save it for later. No account or donation required.',
+    howItWorksTitle: 'How it works',
+    howItWorksSteps: [
+      'Create your link.',
+      'Share it anywhere.',
+      'Save your claim code to claim your link stats later.',
+    ],
+    readyTitle: 'Your share link is ready.',
+    linkLabel: 'Share link',
+    claimLabel: 'Claim code',
+    generate: 'Create share link',
     generating: 'Creating link…',
     rateLimit:
       'Too many links created from this network. Try again later or use the link you already have.',
-    copyUrl: 'Copy share link',
-    copyClaim: 'Copy claim code',
-    claimWarning:
-      'Save your claim code now. POWERBACK cannot look it up or send it again.',
+    copyUrl: 'Copy link',
+    copyClaim: 'Copy code',
+    claimHelper:
+      'Save your claim code to claim your link stats later. POWERBACK cannot recover it if you lose it.',
     visitCountLabel: 'Opens recorded for your link',
   },
   EMAIL: {
-    title: 'Stay on Top',
-    hint: 'Get the latest news about the movement as it grows. No account required.',
+    title: 'Keep Watch',
+    pillDefinition: 'Get updates about the growing movement.',
+    kicker: 'Best way to follow POWERBACK',
+    hint: 'Watch POWERBACK grow. Get updates when user counts climb, donation totals rise, and major campaigns go live.',
     placeholder: 'Email address',
-    submit: 'Subscribe',
+    submit: 'Get updates',
+    submitting: 'Submitting…',
     submitSuccess: 'Signed up for email updates',
     success: 'Check your email to confirm.',
     errorGeneric: 'Something went wrong. Please try again later.',
@@ -70,15 +86,56 @@ export const RALLY_COPY = {
     home: 'Go to POWERBACK',
   },
   CONTINUE: {
-    label: 'Continue to Lobby',
+    label: 'Take me to the Lobby',
     disclaimer: SPLASH_COPY.SPLASH.COPY.disclaimer,
   },
   SOCIAL: {
-    discordBlurb:
-      'Join the Discord for movement updates and volunteer coordination.',
+    hoverBlurbs: {
+      discord:
+        'Join the Discord for updates, coordination, and early supporter status.',
+      github:
+        'View the public repo, inspect the code, and contribute to what POWERBACK is building.',
+      patreon:
+        'Help fund the infrastructure, compliance, and outreach behind POWERBACK.',
+      x: 'Follow to see who people are backing in Congressand when new campaigns go live.',
+    },
     discordLabel: 'Discord',
     githubLabel: 'GitHub',
     patreonLabel: 'Patreon',
     xLabel: 'Follow on X',
   },
+  /** Landscape pills nav + stacked card section labels */
+  SUPPORT_ACTIONS: {
+    tabsAriaLabel: 'Ways to help on Rally',
+    selectorLead: 'Start with one quick action.',
+    selectorSub: 'No signup. No donation. No overthinking.',
+  },
 } as const;
+
+export type RallySupportTab = 'tell' | 'lead' | 'watch';
+
+/** Social footer link ids for hover blurb copy */
+export type RallySocialLink = 'discord' | 'github' | 'patreon' | 'x';
+
+/** Tab/pill metadata for Tell the People / Take the Lead / Keep Watch */
+export const RALLY_SUPPORT_TABS: {
+  key: RallySupportTab;
+  title: string;
+  definition: string;
+}[] = [
+  {
+    key: 'tell',
+    title: RALLY_COPY.MANUAL_SHARE.title,
+    definition: RALLY_COPY.MANUAL_SHARE.pillDefinition,
+  },
+  {
+    key: 'lead',
+    title: RALLY_COPY.ANONYMOUS_LINK.title,
+    definition: RALLY_COPY.ANONYMOUS_LINK.pillDefinition,
+  },
+  {
+    key: 'watch',
+    title: RALLY_COPY.EMAIL.title,
+    definition: RALLY_COPY.EMAIL.pillDefinition,
+  },
+];

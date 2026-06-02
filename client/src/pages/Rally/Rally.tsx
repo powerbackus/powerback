@@ -1,10 +1,19 @@
 /**
- * Rally page: share-first funnel between Splash and Lobby.
+ * Rally page: share-first guest funnel between Splash and Lobby.
  *
- * Does not POST share-links on mount; generate is explicit only.
- * Inbound attribution uses pb:refShareCode at signup, not on this page directly.
+ * Owns share-link generate, clipboard copy, email signup, and continue-to-Lobby
+ * navigation. UI sections live in `./subcomps`; copy in `@CONSTANTS` `RALLY_COPY`.
  *
  * @module Rally
+ *
+ * KEY FUNCTIONS
+ * - `copyText` — clipboard + toast + GA (no PII in event params)
+ * - `handleGenerateLink` — explicit POST share-link; persists `pb:shareLink`
+ * - `handleEmailSubmit` — rally subscriber signup with optional ref attribution
+ * - `handleContinueToLobby` — navigates splash Tour → funnel
+ *
+ * FLOW
+ * CarouselBackdrop (decorative) → hero → SupportActions → continue CTA → social footer
  */
 import React, {
   useRef,
@@ -13,7 +22,12 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import API from '@API';
+import { createPortal } from 'react-dom';
+import { useDevice, useNavigation, type ShowAlert } from '@Contexts';
+import { SubmitBtn } from '@Components/buttons';
+import { CarouselBackdrop, SupportActions } from './subcomps';
+import { StyledAlert } from '@Components/alerts';
+import { Container } from 'react-bootstrap';
 import {
   GIT_REPO,
   RALLY_COPY,
@@ -23,7 +37,8 @@ import {
   ALERT_TIMEOUT,
   DISCORD_INVITE,
   INITIAL_ALERTS,
-  RALLY_SHARE_PLATFORMS,
+  type RallySocialLink,
+  type RallySupportTab,
   type RallySharePlatform,
 } from '@CONSTANTS';
 import {
@@ -36,18 +51,14 @@ import {
   type StoredShareLink,
   trackGoogleAnalyticsEvent,
   hasShareInboundThisSession,
+  getTrackedLink,
 } from '@Utils';
-import { createPortal } from 'react-dom';
-import { StyledAlert } from '@Components/alerts';
-import { GenericBtn, SubmitBtn } from '@Components/buttons';
-import { useNavigation, type ShowAlert } from '@Contexts';
-import RallyCarouselBackdrop from './RallyCarouselBackdrop';
-import { Form, Stack, Container } from 'react-bootstrap';
 import {
-  buildSuggestedShareMessage,
   getRallySiteUrl,
   resolveRallyShareUrl,
+  buildSuggestedShareMessage,
 } from './fn';
+import API from '@API';
 import './style.css';
 
 /** Session dedupe for rally_page_seen (pb:rallySeen). */
@@ -57,62 +68,70 @@ const RALLY_SEEN_KEY = 'rallySeen';
 const canUseNativeShare =
   typeof navigator !== 'undefined' && 'share' in navigator;
 
+/** Clipboard copy target for toast copy and GA `share_link_copied` events. */
 type RallyCopyTarget = 'url' | 'claim' | 'message';
 
+/**
+ * Props for {@link RallyClipboardLine} (injected into SupportActions as ClipboardLine).
+ *
+ * @property value - URL or claim code displayed and copied
+ * @property className - Display class (e.g. rally--share-url)
+ * @property copyLabel - Accessible name for click-to-copy control
+ * @property onCopy - Invoked for span click, keyboard, and icon button
+ */
 type RallyClipboardLineProps = {
-  value: string;
+  onCopy: () => void;
   className: string;
   copyLabel: string;
-  onCopy: () => void;
+  value: string;
 };
 
 /**
- * Copyable text with clipboard icon (Confirmation btc-address pattern).
+ * Copyable text row for share link / claim code (click or keyboard to copy).
  *
  * @param props - Clipboard line props
- * @param props.onCopy - Invoked for span click, keyboard, and icon button
+ * @param props.onCopy - Invoked for span click and keyboard
  * @param props.value - URL or code shown and copied
  * @param props.className - Display class (e.g. rally--share-url)
- * @param props.copyLabel - Accessible name for icon-only GenericBtn
+ * @param props.copyLabel - Accessible name for the copy control
  */
 const RallyClipboardLine = ({
   onCopy,
-  value,
   className,
   copyLabel,
+  value,
 }: RallyClipboardLineProps) => (
-  <div className='rally--clipboard-line'>
+  <div className={'rally--clipboard-line'}>
     <span
-      role='button'
-      tabIndex={0}
+      onKeyDown={(e) => handleKeyDown(e, onCopy)}
       className={`${className} to-clipboard`}
       onClick={() => void onCopy()}
-      onKeyDown={(e) => handleKeyDown(e, onCopy)}
+      role={'button'}
+      title={value}
+      aria-label={copyLabel}
+      tabIndex={0}
     >
       {value}
     </span>
-    <GenericBtn
-      label={copyLabel}
-      cls='rally--clipboard-icon-btn'
-      onPress={onCopy}
-    >
-      <i
-        className='bi bi-clipboard powerback'
-        aria-hidden
-      />
-    </GenericBtn>
   </div>
 );
 
 /**
  * Rally page component — share-first guest funnel step.
  *
- * Layout: faded Lobby underlay (RallyCarouselBackdrop) + foreground card.
- * GA: coarse copy events only; no emails, codes, or full share URLs in params.
+ * Layout: faded Lobby underlay ({@link CarouselBackdrop}) + foreground card
+ * ({@link SupportActions}, continue CTA, social footer). Does not POST
+ * share-links on mount; generate is explicit only. Inbound attribution uses
+ * `pb:refShareCode` at email signup, not on this page directly.
+ *
+ * @returns Rally page shell with optional copy toast portal
  */
 const Rally = () => {
   const { navigateToSplashView } = useNavigation();
+  const { isTabletLandscape } = useDevice();
 
+  const [activeSupportTab, setActiveSupportTab] =
+    useState<RallySupportTab>('tell');
   const [storedLink, setStoredLink] = useState<StoredShareLink | null>(() =>
     getStoredShareLink()
   );
@@ -128,6 +147,59 @@ const Rally = () => {
     useState<ShowAlert>(INITIAL_ALERTS);
   const [copyNotificationMessage, setCopyNotificationMessage] = useState('');
   const manualShareSeenRef = useRef(false);
+  const [socialHover, setSocialHover] = useState<RallySocialLink | null>(null);
+
+  /** Social footer blurb: platform-specific on hover/focus, Discord copy otherwise. */
+  const socialBlurb = useMemo(
+    () =>
+      socialHover
+        ? RALLY_COPY.SOCIAL.hoverBlurbs[socialHover]
+        : RALLY_COPY.SOCIAL.hoverBlurbs['discord'],
+    [socialHover]
+  );
+
+  /** UTM + GA click tracking on footer outbound links (medium rally). */
+  const rallySocialLinks = useMemo(
+    () => ({
+      discord: getTrackedLink(
+        DISCORD_INVITE || 'https://powerback.us/discord',
+        { medium: 'rally', content: 'discord' },
+        RALLY_COPY.SOCIAL.discordLabel
+      ),
+      github: getTrackedLink(
+        GIT_REPO,
+        { medium: 'rally', content: 'github' },
+        RALLY_COPY.SOCIAL.githubLabel
+      ),
+      patreon: PATREON_URL
+        ? getTrackedLink(
+            PATREON_URL,
+            { medium: 'rally', content: 'patron' },
+            RALLY_COPY.SOCIAL.patreonLabel
+          )
+        : null,
+      x: getTrackedLink(
+        TWITTER_URL,
+        { medium: 'rally', content: 'x' },
+        RALLY_COPY.SOCIAL.xLabel
+      ),
+    }),
+    []
+  );
+
+  const clearSocialHover = useCallback(() => {
+    setSocialHover(null);
+  }, []);
+
+  /** Reset social blurb when focus leaves the community links nav. */
+  const handleSocialNavBlur = useCallback(
+    (e: React.FocusEvent<HTMLElement>) => {
+      if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+        clearSocialHover();
+      }
+    },
+    [clearSocialHover]
+  );
 
   const siteUrl = useMemo(() => getRallySiteUrl(), []);
 
@@ -136,11 +208,67 @@ const Rally = () => {
     [siteUrl, storedLink?.shareUrl]
   );
 
-  const suggestedMessage = useMemo(
-    () => buildSuggestedShareMessage(sharePlatform, publicShareUrl),
-    [sharePlatform, publicShareUrl]
+  const [shareMessage, setShareMessage] = useState(() =>
+    buildSuggestedShareMessage(
+      'generic',
+      resolveRallyShareUrl(getRallySiteUrl(), getStoredShareLink()?.shareUrl)
+    )
+  );
+  const shareMessageDirtyRef = useRef(false);
+  const syncedShareUrlRef = useRef(publicShareUrl);
+  const syncedSharePlatformRef = useRef<RallySharePlatform>(sharePlatform);
+
+  /**
+   * Keep share message in sync with platform template unless the user edited it.
+   * When dirty and a personal share link is created, swap the previous URL in place.
+   */
+  useEffect(() => {
+    const urlChanged = syncedShareUrlRef.current !== publicShareUrl;
+    const platformChanged = syncedSharePlatformRef.current !== sharePlatform;
+
+    if (!shareMessageDirtyRef.current && (urlChanged || platformChanged)) {
+      setShareMessage(
+        buildSuggestedShareMessage(sharePlatform, publicShareUrl)
+      );
+      syncedShareUrlRef.current = publicShareUrl;
+      syncedSharePlatformRef.current = sharePlatform;
+      return;
+    }
+
+    if (
+      shareMessageDirtyRef.current &&
+      urlChanged &&
+      syncedShareUrlRef.current
+    ) {
+      const previousUrl = syncedShareUrlRef.current;
+      setShareMessage((current) => {
+        if (current.includes(previousUrl)) {
+          return current.replaceAll(previousUrl, publicShareUrl);
+        }
+        return `${current.trim()} ${publicShareUrl}`.trim();
+      });
+      syncedShareUrlRef.current = publicShareUrl;
+    }
+  }, [sharePlatform, publicShareUrl]);
+
+  const handleShareMessageChange = useCallback((value: string) => {
+    shareMessageDirtyRef.current = true;
+    setShareMessage(value);
+  }, []);
+
+  /** Reset template when platform changes; user edits do not carry across platforms. */
+  const handleSharePlatformChange = useCallback(
+    (platform: RallySharePlatform) => {
+      shareMessageDirtyRef.current = false;
+      setSharePlatform(platform);
+      setShareMessage(buildSuggestedShareMessage(platform, publicShareUrl));
+      syncedShareUrlRef.current = publicShareUrl;
+      syncedSharePlatformRef.current = platform;
+    },
+    [publicShareUrl]
   );
 
+  /** Fire `rally_page_seen` once per tab session (pb:rallySeen). */
   useEffect(() => {
     if (storage.session.getItem(RALLY_SEEN_KEY)) {
       return;
@@ -151,6 +279,7 @@ const Rally = () => {
     });
   }, []);
 
+  /** Deduped GA when user engages Tell the People (manual share path). */
   const markManualShareSeen = useCallback(() => {
     if (manualShareSeenRef.current) {
       return;
@@ -159,11 +288,26 @@ const Rally = () => {
     trackGoogleAnalyticsEvent('rally_manual_share_seen');
   }, []);
 
+  /** Landscape pills default to Tell; count as manual-share seen without a click. */
+  useEffect(() => {
+    if (isTabletLandscape && activeSupportTab === 'tell') {
+      markManualShareSeen();
+    }
+  }, [isTabletLandscape, activeSupportTab, markManualShareSeen]);
+
+  /** Confirmation toast after clipboard copy (portal to document.body). */
   const showCopyToast = useCallback((message: string) => {
     setCopyNotificationMessage(message);
     setShowCopyNotification((s) => ({ ...s, update: true }));
   }, []);
 
+  /**
+   * Copy text to clipboard, show success toast, and emit coarse GA event.
+   *
+   * @param text - Payload written to clipboard (never logged to GA)
+   * @param target - Drives toast copy and `share_link_copied.target`
+   * @param options - Optional platform/location dimensions for GA
+   */
   const copyText = useCallback(
     async (
       text: string,
@@ -190,6 +334,10 @@ const Rally = () => {
     [showCopyToast]
   );
 
+  /**
+   * POST /api/share-links on explicit user action; persist result to localStorage.
+   * No-op when a link already exists or a request is in flight.
+   */
   const handleGenerateLink = useCallback(async () => {
     if (isGenerating || storedLink) {
       return;
@@ -219,15 +367,23 @@ const Rally = () => {
     }
   }, [isGenerating, storedLink]);
 
+  /** Guest continue: splash Tour → funnel (Lobby entry). */
   const handleContinueToLobby = useCallback(() => {
     trackGoogleAnalyticsEvent('rally_continue_to_lobby_click');
     navigateToSplashView('Tour');
   }, [navigateToSplashView]);
 
+  /** GA when Keep Watch email field receives focus. */
   const handleEmailFocus = useCallback(() => {
     trackGoogleAnalyticsEvent('rally_email_signup_started');
   }, []);
 
+  /**
+   * Rally movement email signup (double opt-in). Attaches `source_public_code`
+   * from inbound ref when present (pb:refShareCode).
+   *
+   * @param e - Form submit event
+   */
   const handleEmailSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -262,10 +418,14 @@ const Rally = () => {
     [email, isEmailSubmitting]
   );
 
+  /**
+   * Web Share API when available; otherwise falls back to clipboard copy.
+   * User cancel is ignored (no error surface).
+   */
   const handleNativeShare = useCallback(async () => {
     markManualShareSeen();
     if (!canUseNativeShare) {
-      await copyText(suggestedMessage, 'message', {
+      await copyText(shareMessage, 'message', {
         platform: sharePlatform,
         location: 'manual',
       });
@@ -274,7 +434,7 @@ const Rally = () => {
     try {
       await navigator.share({
         title: SPLASH_COPY.SPLASH.SLOGAN,
-        text: suggestedMessage,
+        text: shareMessage,
         url: publicShareUrl,
       });
     } catch {
@@ -285,7 +445,7 @@ const Rally = () => {
     markManualShareSeen,
     publicShareUrl,
     sharePlatform,
-    suggestedMessage,
+    shareMessage,
   ]);
 
   return (
@@ -294,361 +454,167 @@ const Rally = () => {
         createPortal(
           <StyledAlert
             message={copyNotificationMessage}
-            alertClass='copy-notification'
             setShow={setShowCopyNotification}
+            alertClass={'copy-notification'}
             show={showCopyNotification}
             time={ALERT_TIMEOUT.copy}
-            icon='clipboard-check'
-            iconClass='text-info'
+            icon={'clipboard-check'}
+            type={'update'}
             dismissible
-            type='update'
           />,
           document.body
         )}
 
       <Container
         fluid
-        id='rally--page'
-        className='rally--page-shell'
+        id={'rally--page'}
+        className={'rally--page-shell'}
       >
-        <RallyCarouselBackdrop />
-        <div className='rally--foreground-wrap d-flex align-items-center justify-content-center'>
+        <CarouselBackdrop />
+        <div
+          className={
+            'rally--foreground-wrap d-flex align-items-center justify-content-center'
+          }
+        >
           <Container
-            id='rally'
-            className='rally-page rally-page--foreground'
+            id={'rally'}
+            className={'rally-page rally-page--foreground'}
           >
             <section
-              className='rally--hero text-center'
-              aria-labelledby='rally-headline'
+              className={'rally--hero text-center'}
+              aria-labelledby={'rally-headline'}
             >
               <h1
-                id='rally-headline'
-                className='rally--headline'
+                id={'rally-headline'}
+                className={'rally--headline mt-lg-1'}
               >
                 {RALLY_COPY.HERO.headline}
               </h1>
-              <p className='rally--subcopy'>{RALLY_COPY.HERO.subcopy}</p>
+              <p className={'rally--subcopy'}>{RALLY_COPY.HERO.subcopy}</p>
             </section>
 
-            <div className='rally--actions-row'>
-              <section
-                className='rally--section rally--manual-share'
-                aria-labelledby='rally-manual-title'
-                onFocus={markManualShareSeen}
-                onMouseEnter={markManualShareSeen}
-              >
-                <h2
-                  id='rally-manual-title'
-                  className='rally--section-title'
-                >
-                  {RALLY_COPY.MANUAL_SHARE.title}
-                </h2>
-                <p className='rally--hint'>{RALLY_COPY.MANUAL_SHARE.hint}</p>
+            <SupportActions
+              markManualShareSeen={markManualShareSeen}
+              handleGenerateLink={handleGenerateLink}
+              handleNativeShare={handleNativeShare}
+              handleEmailSubmit={handleEmailSubmit}
+              handleEmailFocus={handleEmailFocus}
+              onSharePlatformChange={handleSharePlatformChange}
+              ClipboardLine={RallyClipboardLine}
+              onSelectTab={setActiveSupportTab}
+              setEmailSuccess={setEmailSuccess}
+              setEmailError={setEmailError}
+              copyText={copyText}
+              setEmail={setEmail}
+              email={email}
+              storedLink={storedLink}
+              emailError={emailError}
+              isGenerating={isGenerating}
+              emailSuccess={emailSuccess}
+              activeTab={activeSupportTab}
+              sharePlatform={sharePlatform}
+              generateError={generateError}
+              useTabsLayout={isTabletLandscape}
+              shareMessage={shareMessage}
+              onShareMessageChange={handleShareMessageChange}
+              isEmailSubmitting={isEmailSubmitting}
+              canUseNativeShare={canUseNativeShare}
+            />
 
-                <Form.Group
-                  className='rally--platform-field'
-                  controlId='rally-share-platform'
-                >
-                  <Form.Label className='rally--platform-label'>
-                    {RALLY_COPY.MANUAL_SHARE.platformLabel}
-                  </Form.Label>
-                  <Form.Select
-                    aria-label={RALLY_COPY.MANUAL_SHARE.platformLabel}
-                    value={sharePlatform}
-                    onChange={(e) =>
-                      setSharePlatform(e.target.value as RallySharePlatform)
-                    }
-                  >
-                    {RALLY_SHARE_PLATFORMS.map(({ id, label }) => (
-                      <option
-                        key={id}
-                        value={id}
-                      >
-                        {label}
-                      </option>
-                    ))}
-                  </Form.Select>
-                </Form.Group>
-
-                <div className='rally--suggested-message-block'>
-                  <span className='rally--suggested-message-label'>
-                    {RALLY_COPY.MANUAL_SHARE.suggestedMessageLabel}
-                  </span>
-                  <p className='rally--suggested-message-preview'>
-                    {suggestedMessage}
-                  </p>
-                </div>
-
-                <Stack
-                  direction='horizontal'
-                  gap={2}
-                  className='flex-wrap justify-content-center rally--btn-row'
-                >
-                  <SubmitBtn
-                    btnId='rally-copy-message'
-                    variant='outline-dark'
-                    type='button'
-                    classProp='rally--copy-btn'
-                    onClick={() => {
-                      markManualShareSeen();
-                      void copyText(suggestedMessage, 'message', {
-                        platform: sharePlatform,
-                        location: 'manual',
-                      });
-                    }}
-                    value={RALLY_COPY.MANUAL_SHARE.copyMessage}
-                  />
-                  {canUseNativeShare && (
-                    <SubmitBtn
-                      btnId='rally-native-share'
-                      variant='outline-dark'
-                      type='button'
-                      classProp='rally--copy-btn'
-                      onClick={() => void handleNativeShare()}
-                      value={RALLY_COPY.MANUAL_SHARE.nativeShare}
-                    />
-                  )}
-                </Stack>
-              </section>
-
-              <section
-                className='rally--section rally--anonymous-link'
-                aria-labelledby='rally-link-title'
-              >
-                <h2
-                  id='rally-link-title'
-                  className='rally--section-title'
-                >
-                  {RALLY_COPY.ANONYMOUS_LINK.title}
-                </h2>
-                <p className='rally--hint'>
-                  {RALLY_COPY.ANONYMOUS_LINK.explain}
-                </p>
-
-                {!storedLink ? (
-                  <>
-                    <SubmitBtn
-                      btnId='rally-generate-share-link'
-                      variant='dark'
-                      type='button'
-                      classProp='rally--generate-btn button--continue'
-                      disabled={isGenerating}
-                      onClick={() => void handleGenerateLink()}
-                      value={
-                        isGenerating
-                          ? RALLY_COPY.ANONYMOUS_LINK.generating
-                          : RALLY_COPY.ANONYMOUS_LINK.generate
-                      }
-                    />
-                    <div className='rally--feedback-slot'>
-                      <div
-                        className={`invalid-feedback d-block${
-                          generateError ? '' : ' rally--feedback-hidden'
-                        }`}
-                        role={generateError ? 'alert' : undefined}
-                        aria-hidden={!generateError}
-                      >
-                        {generateError || RALLY_COPY.ANONYMOUS_LINK.rateLimit}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className='rally--link-panel'>
-                    <p className='rally--claim-warning'>
-                      {RALLY_COPY.ANONYMOUS_LINK.claimWarning}
-                    </p>
-                    <div className='rally--link-url-block'>
-                      <span className='rally--link-url-label'>Share link</span>
-                      <RallyClipboardLine
-                        value={storedLink.shareUrl}
-                        className='rally--share-url'
-                        copyLabel={RALLY_COPY.ANONYMOUS_LINK.copyUrl}
-                        onCopy={() =>
-                          void copyText(storedLink.shareUrl, 'url', {
-                            location: 'anonymous',
-                          })
-                        }
-                      />
-                    </div>
-                    <div className='rally--link-url-block'>
-                      <span className='rally--link-url-label'>Claim code</span>
-                      <RallyClipboardLine
-                        value={storedLink.claimCode}
-                        className='rally--claim-display'
-                        copyLabel={RALLY_COPY.ANONYMOUS_LINK.copyClaim}
-                        onCopy={() =>
-                          void copyText(storedLink.claimCode, 'claim', {
-                            location: 'anonymous',
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                )}
-              </section>
-
-              <section
-                className='rally--section rally--email'
-                aria-labelledby='rally-email-title'
-              >
-                <h2
-                  id='rally-email-title'
-                  className='rally--section-title rally--section-title'
-                >
-                  {RALLY_COPY.EMAIL.title}
-                </h2>
-                <p className='rally--hint'>{RALLY_COPY.EMAIL.hint}</p>
-                <Form
-                  onSubmit={handleEmailSubmit}
-                  className='rally--email-form'
-                >
-                  <Form.Group className='form-input-wfeedback rally--email-field input--translucent'>
-                    <Form.Control
-                      type='email'
-                      name='rally-email'
-                      autoComplete='email'
-                      placeholder={RALLY_COPY.EMAIL.placeholder}
-                      value={email}
-                      isInvalid={!!emailError}
-                      onFocus={handleEmailFocus}
-                      onChange={(e) => {
-                        setEmail(e.target.value);
-                        if (emailError) {
-                          setEmailError(null);
-                        }
-                        if (emailSuccess) {
-                          setEmailSuccess(false);
-                        }
-                      }}
-                      aria-describedby='rally-email-error'
-                    />
-                    <div className='rally--feedback-slot'>
-                      <div
-                        className={`invalid-feedback d-block${
-                          emailError ? '' : ' rally--feedback-hidden'
-                        }`}
-                        id='rally-email-error'
-                        role={emailError ? 'alert' : undefined}
-                        aria-hidden={!emailError}
-                      >
-                        {emailError || RALLY_COPY.EMAIL.rateLimit}
-                      </div>
-                    </div>
-                  </Form.Group>
-                  <SubmitBtn
-                    btnId='rally-email-submit'
-                    variant='outline-dark'
-                    type='submit'
-                    classProp='rally--email-submit'
-                    disabled={isEmailSubmitting || emailSuccess}
-                    ariaLabel={
-                      emailSuccess
-                        ? RALLY_COPY.EMAIL.submitSuccess
-                        : RALLY_COPY.EMAIL.submit
-                    }
-                    value={
-                      <span className='rally--email-submit-inner'>
-                        <span
-                          className={
-                            emailSuccess ? 'rally--feedback-hidden' : undefined
-                          }
-                          aria-hidden={emailSuccess}
-                        >
-                          {RALLY_COPY.EMAIL.submit}
-                        </span>
-                        <i
-                          className={`bi bi-check-lg rally--email-submit-check${
-                            emailSuccess ? '' : ' rally--feedback-hidden'
-                          }`}
-                          aria-hidden
-                        />
-                      </span>
-                    }
-                  />
-                  <div className='rally--email-status-slot'>
-                    <p
-                      className={`rally--email-success${
-                        emailSuccess ? '' : ' rally--feedback-hidden'
-                      }`}
-                      role={emailSuccess ? 'status' : undefined}
-                      aria-hidden={!emailSuccess}
-                    >
-                      {RALLY_COPY.EMAIL.success}
-                    </p>
-                  </div>
-                </Form>
-              </section>
-            </div>
-
-            <section className='rally--section rally--continue text-center'>
+            <section className={'rally--section rally--continue text-center'}>
               <SubmitBtn
-                btnId='rally-continue-to-lobby'
-                classProp='splash-enter--btn rally--continue-btn button--continue'
-                onClick={handleContinueToLobby}
+                classProp={
+                  'splash-enter--btn rally--continue-btn button--continue'
+                }
+                btnId={'rally-continue-to-lobby'}
                 value={RALLY_COPY.CONTINUE.label}
-                variant='dark'
-                type='button'
-                size='lg'
+                onClick={handleContinueToLobby}
+                variant={'dark'}
+                type={'button'}
+                size={'lg'}
               />
-              <small className='rally--disclaimer d-block mt-2'>
+              <small className={'rally--disclaimer d-block mt-2'}>
                 {RALLY_COPY.CONTINUE.disclaimer}
               </small>
             </section>
 
-            <footer className='rally--social-footer text-center'>
-              <p className='rally--social-blurb'>
-                {RALLY_COPY.SOCIAL.discordBlurb}
+            <footer className={'rally--social-footer text-center'}>
+              <p
+                className={'rally--social-blurb'}
+                aria-live={'polite'}
+              >
+                {socialBlurb}
               </p>
               <nav
-                className='rally--social-links'
-                aria-label='POWERBACK community links'
+                className={'rally--social-links'}
+                aria-label={'POWERBACK community links'}
+                onMouseLeave={clearSocialHover}
+                onBlur={handleSocialNavBlur}
               >
                 <a
-                  href={DISCORD_INVITE}
+                  href={rallySocialLinks.discord.trackedUrl}
+                  onClick={rallySocialLinks.discord.onClick}
                   target='_blank'
                   rel='noopener noreferrer'
                   className='rally--social-link'
+                  onMouseEnter={() => setSocialHover('discord')}
+                  onFocus={() => setSocialHover('discord')}
                 >
                   <i
-                    className='bi bi-discord'
+                    className={'bi bi-discord'}
                     aria-hidden
                   />
                   <span>{RALLY_COPY.SOCIAL.discordLabel}</span>
                 </a>
                 <a
-                  href={GIT_REPO}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='rally--social-link'
+                  onMouseEnter={() => setSocialHover('github')}
+                  onFocus={() => setSocialHover('github')}
+                  className={'rally--social-link'}
+                  rel={'noopener noreferrer'}
+                  target={'_blank'}
+                  href={rallySocialLinks.github.trackedUrl}
+                  onClick={rallySocialLinks.github.onClick}
                 >
                   <i
-                    className='bi bi-github'
+                    className={'bi bi-github'}
                     aria-hidden
                   />
                   <span>{RALLY_COPY.SOCIAL.githubLabel}</span>
                 </a>
-                {PATREON_URL && (
+                {rallySocialLinks.patreon && (
                   <a
-                    href={PATREON_URL}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='rally--social-link'
+                    onMouseEnter={() => setSocialHover('patreon')}
+                    onFocus={() => setSocialHover('patreon')}
+                    className={'rally--social-link'}
+                    rel={'noopener noreferrer'}
+                    href={rallySocialLinks.patreon.trackedUrl}
+                    onClick={rallySocialLinks.patreon.onClick}
+                    target={'_blank'}
                   >
-                    <i
-                      className='bi bi-heart'
+                    <svg
+                      className={'rally--social-icon-svg'}
+                      xmlns={'http://www.w3.org/2000/svg'}
+                      viewBox={'0 0 24 24'}
                       aria-hidden
-                    />
+                    >
+                      <path
+                        d={'M0 0v24h4.8V4.8H9.6V0zm14.4 0v24h4.8V4.8H24V0z'}
+                      />
+                    </svg>
                     <span>{RALLY_COPY.SOCIAL.patreonLabel}</span>
                   </a>
                 )}
                 <a
-                  href={TWITTER_URL}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                  className='rally--social-link'
+                  onMouseEnter={() => setSocialHover('x')}
+                  onFocus={() => setSocialHover('x')}
+                  className={'rally--social-link'}
+                  rel={'noopener noreferrer'}
+                  href={rallySocialLinks.x.trackedUrl}
+                  onClick={rallySocialLinks.x.onClick}
+                  target={'_blank'}
                 >
                   <i
-                    className='bi bi-twitter-x'
+                    className={'bi bi-twitter-x'}
                     aria-hidden
                   />
                   <span>{RALLY_COPY.SOCIAL.xLabel}</span>

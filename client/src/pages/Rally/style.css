@@ -10,11 +10,13 @@
 
 .rally--page-shell {
   position: relative;
-  width: 100%;
+  width: 100%;  
+  background-color: #1b1b1b80;
 }
 
 #rally--page.rally--page-shell {
-  overflow: visible;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 /* Match #funnel--page viewport (Rally-only; Lobby/Funnel unchanged) */
@@ -38,16 +40,23 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  user-select: none;
-  opacity: 0.14;
-  filter: saturate(0.55) blur(0.5px);
-  overflow: visible;
+  user-select: none;  
+  filter: saturate(0.3) blur(3px);
+  opacity: 0.97;
+  overflow: hidden;
+  
 }
 
+#rally--page .lobby-top.third.col,
+#rally--page .pol-carousel {
+  background-color: var(--bg-blend);
+}
+ 
 .rally--lobby-underlay-shell {
   width: 100%;
   height: 100%;
   pointer-events: none;
+  
 }
 
 .rally--lobby-underlay .lobby {
@@ -55,9 +64,51 @@
   width: 100%;
 }
 
+/* PolCarousel children default to pointer-events: auto; block navbar clicks otherwise */
+.rally--lobby-underlay * {
+  pointer-events: none !important;
+}
+
 /* Hidden search + donation blocks reserve Lobby vertical rhythm */
 .rally--lobby-underlay .rally--lobby-spacer {
   visibility: hidden;
+}
+
+/* Hidden Lobby spacers still match selector-bar / donation width rules (100vw) */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .rally--lobby-underlay .selector-bar.rally--lobby-spacer {
+    width: 100% !important;
+    max-width: 100%;
+  }
+}
+
+@media only screen and (max-width: 599px) and (orientation: portrait) {
+  .rally--lobby-underlay .starting {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* Beat App.css overflow: initial !important; clip 100vw carousel bleed at scrollport */
+html.rally-page,
+body.rally-page {
+  overflow-x: hidden !important;
+  max-width: 100%;
+}
+
+html.rally-page .App {
+  overflow-x: hidden !important;
+}
+
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  html.rally-page .App {
+    overflow-y: auto !important;
+  }
+}
+
+main.wrapper-rally {
+  overflow-x: hidden !important;
+  max-width: 100%;
 }
 
 .rally--foreground-wrap {
@@ -77,12 +128,13 @@
 }
 
 #rally.rally-page {
-  max-width: 42rem;
+  --rally-section-title-hover: var(--text-placeholder);
+  max-width: 57rem !important;  
   margin: 0 auto;
   padding: 1.25rem 1rem 3rem;
   text-align: left;
   color: var(--text);
-  background-color: var(--bg-fade);
+  background-color: var(--elevated);
   border: 2px solid var(--accent);
   border-radius: 8px;
   box-shadow: 0 0 12px rgb(from var(--contrast-black) r g b / 55%);
@@ -90,16 +142,17 @@
 
 .rally--headline {
   color: var(--attention);
-  font-size: clamp(1.75rem, 5vw, 2.5rem);
-  font-weight: 900;
-  letter-spacing: 0.02em;
   margin-bottom: 0.75rem;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);  font-weight: 900;
+  letter-spacing: 0.02em;  
   text-shadow: -1px 1px 0 rgb(from var(--contrast-black) r g b / 45%);
 }
 
 .rally--subcopy {
   color: var(--contrast);
   margin-bottom: 1.5rem;
+  padding-right: 2.5rem;
+  padding-left: 2.5rem;
   font-size: 1.05rem;
   font-family: 'Inconsolata', monospace;
   line-height: 1.4;
@@ -109,12 +162,18 @@
   margin-bottom: 1.5rem;
   padding: 1rem 1rem 1.25rem;
   background-color: var(--elevated);
-  border: 1px solid var(--accent);
+  border: 1px solid var(--secondary);
   border-radius: 5px;
 }
 
 .rally--section:last-of-type {
   margin-bottom: 0;
+}
+
+.rally--section.rally--continue {
+  border: none;
+  background-color: transparent;
+  padding: 0.5rem 0 0;
 }
 
 .rally--section-title {
@@ -123,6 +182,22 @@
   margin-bottom: 0.5rem;
   color: var(--secondary);
   font-family: 'Oswald', sans-serif;
+  transition: color 0.15s ease;
+}
+
+#rally .rally--section-title:hover {
+  color: var(--rally-section-title-hover);
+}
+
+.rally--section-kicker {
+  margin: -0.15rem 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-placeholder);
+  font-family: 'Inconsolata', monospace;
+  line-height: 1.2;
 }
 
 .rally--hint {
@@ -135,23 +210,28 @@
 
 .rally--btn-row {
   margin-top: 0.5rem;
+  justify-content: center;
 }
 
-#rally .rally--generate-btn.button--continue {
-  color: var(--btn) !important;
-  width: min(100%, 28rem);
-  display: block;
-  margin: 0.65rem auto 0;
-  padding: 0.5rem 1.25rem !important;
-  background-color: var(--elevated) !important;
-  border: 2px solid var(--btn) !important;
-  border-radius: 4px;
-  font-family: 'Oswald', sans-serif !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.12em;
+/* Copy message, Create share link, Get updates: content width, centered */
+#rally .rally--card-cta {
+  width: fit-content;
+  max-width: 100%;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.15rem;
+  margin-left: auto;
+  margin-right: auto;
+  min-height: 2.625rem;
+  padding: 0.5rem 1rem !important;
 }
 
-/* Continue to Lobby: match Splash Occupy the Lobby CTA */
+#rally .rally--email-form .rally--card-cta {
+  align-self: center;
+}
+
+/* Take me to the Lobby: match Splash Occupy the Lobby CTA */
 #rally .splash-enter--btn.rally--continue-btn.button--continue {
   color: var(--btn) !important;
   width: min(100%, 28rem);
@@ -164,6 +244,7 @@
   font-family: 'Oswald', sans-serif !important;
   font-size: clamp(1rem, 2.5vmin, 1.2rem) !important;
   font-weight: 600 !important;
+  text-transform: uppercase;
   line-height: 1.2 !important;
   letter-spacing: 0.25em;
   box-shadow: 0 0 3px var(--attention-muted);
@@ -201,7 +282,8 @@
 
 /* Bootstrap outline-dark is illegible on our dark surfaces; use brand tokens */
 #rally .btn-outline-dark,
-#rally .rally--copy-btn {
+#rally .rally--copy-btn,
+#rally .rally--card-action-btn {
   color: var(--btn) !important;
   background-color: var(--slate) !important;
   border: 2px solid var(--accent) !important;
@@ -211,29 +293,32 @@
 #rally .btn-outline-dark:hover,
 #rally .btn-outline-dark:focus-visible,
 #rally .rally--copy-btn:hover,
-#rally .rally--copy-btn:focus-visible {
+#rally .rally--copy-btn:focus-visible,
+#rally .rally--card-action-btn:hover,
+#rally .rally--card-action-btn:focus-visible {
   color: var(--success-theme) !important;
   border-color: var(--btn-hover) !important;
   background-color: var(--semi-dark) !important;
 }
 
-.rally--link-url-block {
-  margin-bottom: 0.35rem;
+#rally .rally--card-cta.rally--email-submit {
+  margin-bottom: 0;
+  /* Label reserves width; spinner/check overlay without shifting borders */
+  min-width: 9.75rem;
+  height: 2.625rem;
+  min-height: 2.625rem;
+  box-sizing: border-box;
 }
 
-.rally--link-url-label {
-  display: block;
-  margin-bottom: 0.2rem;
-  font-size: 0.9rem;
-  color: var(--text-placeholder);
-  font-family: 'Inconsolata', monospace;
+/* Inner spans match App.css span{color:--text}; inherit button label color */
+#rally .rally--card-action-btn.rally--email-submit .rally--email-submit-inner,
+#rally .rally--card-action-btn.rally--email-submit .rally--email-submit-inner > span,
+#rally .rally--card-action-btn.rally--email-submit .rally--email-submit-label {
+  color: inherit;
 }
 
-/* Copyable link/code (Confirmation .btc-address / .to-clipboard pattern) */
+/* Copyable link/code — click or keyboard on .to-clipboard span */
 .rally--clipboard-line {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.35rem;
   min-width: 0;
 }
 
@@ -258,44 +343,9 @@
   color: var(--text-contrast);
 }
 
-.rally--clipboard-icon-btn {
-  flex-shrink: 0;
-  margin-top: 0.1rem;
-  padding: 0;
-  border: none;
-  background: transparent;
-  line-height: 1;
-  color: var(--primary);
-  cursor: copy;
-}
-
-#rally .rally--clipboard-icon-btn.generic-btn {
-  padding: 0;
-  border: none;
-  background: transparent !important;
-  box-shadow: none;
-  transform: none;
-  color: var(--primary);
-}
-
-#rally .rally--clipboard-icon-btn.generic-btn:hover,
-#rally .rally--clipboard-icon-btn.generic-btn:focus-visible,
-#rally .rally--clipboard-icon-btn.generic-btn:active {
-  color: var(--attention);
-  background: transparent !important;
-  border: none;
-  box-shadow: none;
-  transform: none;
-}
-
-.rally--clipboard-icon-btn:hover,
-.rally--clipboard-icon-btn:focus-visible {
-  color: var(--attention);
-}
-
 /* Anonymous share link: tighter vertical rhythm */
 .rally--section.rally--anonymous-link {
-  padding: 0.6rem 0.75rem 0.7rem;
+  padding: 0.75rem 0.85rem 0.85rem;
   margin-bottom: 1rem;
 }
 
@@ -310,25 +360,106 @@
   line-height: 1.3;
 }
 
-.rally--anonymous-link .rally--generate-btn.button--continue {
-  margin-top: 0.25rem !important;
-  margin-bottom: 0 !important;
+/* Take the Lead: pre-generate layout (intro → CTA → how it works) */
+.rally--lead-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  height: 100%;
 }
 
-.rally--link-panel {
-  margin-top: 0;
+.rally--lead-intro .rally--hint {
+  margin-bottom: 0;
 }
 
-.rally--claim-warning {
-  font-size: 0.82rem;
-  color: var(--attention);
-  margin: 0 0 0.5rem;
+.rally--lead-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.rally--lead-how {
+  margin-top: auto;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgb(from var(--accent) r g b / 35%);
+}
+
+.rally--lead-how-title {
+  margin: 0 0 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-placeholder);
   font-family: 'Inconsolata', monospace;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
-.rally--link-panel .rally--link-url-block + .rally--link-url-block {
-  margin-top: 0.5rem;
+.rally--lead-how-steps {
+  margin: 0;
+  padding-left: 1.15rem;
+  font-size: 0.82rem;
+  color: var(--text);
+  font-family: 'Inconsolata', monospace;
+  line-height: 1.45;
+}
+
+.rally--lead-how-steps li + li {
+  margin-top: 0.2rem;
+}
+
+/* Take the Lead: confirmation after link exists (compact, not admin-panel) */
+.rally--link-ready {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 0.15rem;
+}
+
+.rally--link-ready-title {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--positive-indicator);
+  font-family: 'Inconsolata', monospace;
+  line-height: 1.45;
+}
+
+.rally--link-compact-row {
+  margin-bottom: 0;
+}
+
+.rally--link-compact-label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-placeholder);
+  font-family: 'Inconsolata', monospace;
+}
+
+.rally--link-compact-row .rally--clipboard-line {
+  gap: 0.25rem;
+}
+
+.rally--link-compact-value {
+  font-size: 0.8rem !important;
+  line-height: 1.25 !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.rally--claim-helper {
+  font-size: 0.72rem;
+  color: var(--text-placeholder);
+  margin: 0;
+  font-family: 'Inconsolata', monospace;
+  line-height: 1.45;
 }
 
 .rally--disclaimer {
@@ -363,7 +494,7 @@
 
 .rally--feedback-slot {
   /* Fits longest Rally email/share error copy in landscape column */
-  min-height: 4rem;
+  min-height: 1.35rem;
 }
 
 .rally--feedback-hidden {
@@ -376,15 +507,30 @@
 }
 
 #rally .rally--email-field.input--translucent .form-control {
+  box-sizing: border-box;
+  min-height: 2.5rem;
+  padding: 0.375rem 0.75rem;
+  line-height: 1.35;
   color: var(--input) !important;
   font-family: 'Inconsolata', monospace !important;
-  border: 1px solid var(--btn);
+  border: 1px solid var(--btn) !important;
+  border-style: solid !important;
   border-radius: 0.25rem !important;
+  box-shadow: inset 1px 1px 2px 1px transparent;
+  outline: none;
 }
 
-#rally .rally--email-field.input--translucent .form-control:focus {
-  background-color: #0a0a0a;
+#rally .rally--email-field.input--translucent .form-control:focus,
+#rally .rally--email-field.input--translucent .form-control:focus-visible,
+#rally .rally--email-field.input--translucent .form-control.is-invalid,
+#rally .rally--email-field.input--translucent .form-control.is-invalid:focus {
+  min-height: 2.5rem;
+  padding: 0.375rem 0.75rem;
+  border-width: 1px !important;
+  border-style: solid !important;
+  background-color: #0a0a0a !important;
   box-shadow: inset 1px 1px 2px 1px #cc99ff26;
+  outline: none;
 }
 
 .rally--platform-field {
@@ -411,7 +557,8 @@
   margin-bottom: 0.75rem;
 }
 
-.rally--suggested-message-preview {
+.rally--suggested-message-preview,
+.rally--suggested-message-input {
   margin: 0;
   padding: 0.5rem 0.6rem;
   font-size: 0.82rem;
@@ -423,6 +570,25 @@
   border-radius: 4px;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+#rally .rally--suggested-message-input.form-control {
+  max-height: 5rem;
+  resize: vertical;
+}
+
+#rally .rally--share-email-subject.form-control {
+  min-height: 2.25rem;
+  max-height: none;
+  resize: none;
+}
+
+#rally .rally--suggested-message-input.form-control:focus,
+#rally .rally--suggested-message-input.form-control:focus-visible {
+  color: var(--text-contrast);
+  background-color: var(--contrast-black);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgb(from var(--accent) r g b / 35%);
 }
 
 .rally--social-footer {
@@ -462,15 +628,36 @@
   text-decoration: underline;
 }
 
-/* BTC-style copy toast (Confirmation pattern) */
+.rally--social-icon-svg {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+  flex-shrink: 0;
+}
+
+/* Copy message toast — dark surface so icon/message contrast with Bootstrap defaults */
+.copy-notification.alert.styled-alert {
+  color: var(--text-contrast);
+  background-color: var(--semi-dark);
+  border: 1px solid var(--accent);
+}
+
 .copy-notification {
   position: fixed !important;
   top: 20px;
   right: 20px;
   z-index: 1050;
   min-width: 250px;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
   animation: rallyCopySlideIn 0.3s ease-out;
   pointer-events: auto;
+}
+
+.copy-notification i.bi-clipboard-check {
+  flex-shrink: 0;
+  color: var(--attention) !important;
 }
 
 @keyframes rallyCopySlideIn {
@@ -497,33 +684,40 @@
   width: 100%;
 }
 
-.rally--email .rally--email-submit {
-  width: 100%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  /* Lock height: matches label + btn padding so icon state does not shrink */
-  min-height: 2.625rem;
-  padding-top: 0.375rem;
-  padding-bottom: 0.375rem;
+.rally--actions-row .rally--email .rally--email-submit {
   margin: 0;
 }
 
 .rally--email-submit-inner {
-  display: grid;
+  display: inline-grid;
   place-items: center;
-  width: 100%;
   line-height: 1.35;
+  min-width: 100%;
 }
 
 .rally--email-submit-inner > * {
   grid-area: 1 / 1;
 }
 
+.rally--email-submit-label {
+  white-space: nowrap;
+}
+
+.rally--email-submit-label--reserve {
+  visibility: hidden;
+}
+
 .rally--email .rally--email-submit-check {
   font-size: 1.35rem;
   line-height: 1;
   color: var(--positive-indicator);
+}
+
+.rally--email-submit-spinner {
+  width: 1.15rem;
+  height: 1.15rem;
+  color: inherit;
+  border-width: 0.15em;
 }
 
 /* Portrait / narrow: three action sections stack vertically (default block flow) */
@@ -551,7 +745,7 @@
   }
 }
 
-/* Landscape: Share, Anonymous link, and Email updates in one row */
+/* Landscape wide: pills + single content panel */
 @media only screen and (orientation: landscape) and (min-width: 600px) {
   #rally.rally-page {
     max-width: min(96vw, 72rem);
@@ -561,52 +755,155 @@
   .rally--subcopy {
     margin-bottom: 1rem;
   }
+}
 
-  .rally--actions-row {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.65rem;
+/* Tablet landscape+: support section tabs (not three-column cards) */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .rally--actions-tabs {
+    margin-bottom: 0.5rem;
+  }
+
+  .rally--support-tab-row {
     align-items: stretch;
   }
 
-  .rally--actions-row > .rally--section {
-    margin-bottom: 0;
-    height: 100%;
-    min-width: 0;
+  .rally--support-nav-col {
     display: flex;
     flex-direction: column;
+    justify-content: center;
   }
 
-  .rally--section.rally--anonymous-link {
-    margin-bottom: 0;
-  }
-
-  .rally--manual-share .rally--hint,
-  .rally--anonymous-link .rally--hint,
-  .rally--email .rally--hint {
-    margin-bottom: 0.4rem;
-  }
-
-  .rally--manual-share .rally--btn-row {
-    flex-direction: column;
-    align-items: stretch !important;
-    margin-top: auto;
-  }
-
-  #rally .rally--actions-row .rally--copy-btn,
-  #rally .rally--actions-row .btn-outline-dark {
+  .rally--support-nav-stack {
     width: 100%;
   }
 
-  .rally--anonymous-link .rally--link-panel,
-  .rally--anonymous-link .rally--generate-btn.button--continue {
-    margin-top: auto;
+  .rally--support-nav {
+    gap: 0.4rem;
   }
 
-  .rally--email .rally--email-form {
-    margin-top: auto;
+  .rally--support-selector-label {
+    margin-bottom: 0.55rem;
   }
 
+  .rally--support-selector-lead {
+    margin: 0 0 0.2rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--text);
+    font-family: 'Inconsolata', monospace;
+  }
+
+  .rally--support-selector-sub {
+    margin: 0;
+    font-size: 0.72rem;
+    line-height: 1.3;
+    color: var(--text-placeholder);
+    font-family: 'Inconsolata', monospace;
+  }
+
+  .rally--support-nav .nav-item {
+    width: 100%;
+  }
+
+  #rally .rally--support-nav-link {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+    margin: 0;
+    padding: 0.55rem 0.65rem;
+    text-align: left;
+    border: 1px solid var(--border-gray);
+    border-radius: 4px;
+    background-color: rgb(from var(--elevated) r g b / 60%);
+  }
+
+  #rally .rally--support-nav-link:hover,
+  #rally .rally--support-nav-link:focus-visible {
+    background-color: var(--slate);
+    border-color: var(--btn-border);
+  }
+
+  #rally .rally--support-nav-link:not(.active):hover .rally--support-nav-title,
+  #rally .rally--support-nav-link:not(.active):focus-visible .rally--support-nav-title {
+    color: var(--rally-section-title-hover);
+  }
+
+  #rally .rally--support-nav-link.active {
+    color: var(--contrast);
+    background-color: rgb(from var(--slate) r g b / 90%);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgb(from var(--accent) r g b / 25%);
+  }
+
+  .rally--support-nav-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    min-width: 0;
+  }
+
+  .rally--support-nav-title {
+    color: inherit;
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.98rem;
+    font-weight: 600;
+    line-height: 1.15;
+    transition: color 0.15s ease;
+  }
+
+  .rally--support-nav-def {
+    color: var(--text-placeholder);
+    font-size: 0.78rem;
+    font-family: 'Inconsolata', monospace;
+    line-height: 1.25;
+  }
+
+  #rally .rally--support-nav-link.active .rally--support-nav-title {
+    color: var(--secondary);
+  }
+
+  #rally .rally--support-nav-link.active .rally--support-nav-def {
+    color: var(--text-contrast);
+  }
+
+  .rally--support-panel {
+    margin-bottom: 0;
+  }
+
+  /* Stack panes in one grid cell so panel height = tallest tab (no jump on pill change) */
+  .rally--support-panel .tab-content {
+    display: grid;
+  }
+
+  .rally--support-panel .tab-content > .rally--support-pane {
+    grid-area: 1 / 1;
+    display: block !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .rally--support-panel .tab-content > .rally--support-pane.active,
+  .rally--support-panel .tab-content > .rally--support-pane.active.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    z-index: 1;
+  }
+
+  .rally--support-panel .rally--support-pane--lead.active,
+  .rally--support-panel .rally--support-pane--lead.active.show {
+    display: flex !important;
+    flex-direction: column;
+  }
+
+  #rally .rally--support-panel .rally--btn-row {
+    flex-direction: column;
+    align-items: center !important;
+  }
 }
 
 @media only screen and (max-width: 599px) and (orientation: portrait) {
