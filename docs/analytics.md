@@ -74,15 +74,15 @@ External link clicks and UTM attribution are handled by the [Link Tracking](./li
 
 Rally instrumentation lives in [`Rally.tsx`](../client/src/pages/Rally/Rally.tsx) and [`recordShareLinkVisit.ts`](../client/src/utils/app/recordShareLinkVisit.ts). Product rules: [`specs/rally-page.md`](../specs/rally-page.md) §7; overview: [Rally and share links](./rally-share-links.md).
 
-| Event | When | Params |
-| ----- | ---- | ------ |
-| `rally_page_seen` | Rally mount (once per session) | `entry`: `splash` \| `share` (boolean session flag only) |
-| `rally_manual_share_seen` | Manual share section first seen/interaction | — |
-| `share_link_generated` | Successful `POST /api/share-links` after explicit generate | — |
-| `share_link_copied` | User copies public URL or claim code | `target`: `url` \| `claim` |
-| `share_link_visited` | Inbound visit API success | `has_share_param: true`, `entry: share_link` |
-| `rally_email_signup_started` | Email field focus or submit on Rally | — |
-| `rally_continue_to_lobby_click` | Continue to Lobby CTA | — |
+| Event                           | When                                                       | Params                                                   |
+| ------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------- |
+| `rally_page_seen`               | Rally mount (once per session)                             | `entry`: `splash` \| `share` (boolean session flag only) |
+| `rally_manual_share_seen`       | Manual share section first seen/interaction                | —                                                        |
+| `share_link_generated`          | Successful `POST /api/share-links` after explicit generate | —                                                        |
+| `share_link_copied`             | User copies public URL or claim code                       | `target`: `url` \| `claim`                               |
+| `share_link_visited`            | Inbound visit API success                                  | `has_share_param: true`, `entry: share_link`             |
+| `rally_email_signup_started`    | Email field focus or submit on Rally                       | —                                                        |
+| `rally_continue_to_lobby_click` | Take me to the Lobby CTA                                   | —                                                        |
 
 **Prohibited in Rally-related custom params:** `publicCode`, `claimCode`, email, full share URLs.
 

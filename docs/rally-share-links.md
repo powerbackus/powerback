@@ -6,41 +6,41 @@ POWERBACK’s **Rally** step sits between [Splash](../client/src/pages/Splash/) 
 
 ## Quick navigation
 
-| Topic | Document / code |
-| ----- | ---------------- |
-| Product requirements & acceptance | [`specs/rally-page.md`](../specs/rally-page.md) |
-| API endpoints | [API — Share links](./API.md#share-links-rally) |
-| GA events & `page_location` | [Analytics — Rally events](./analytics.md#rally-and-share-link-events) |
-| Client storage keys | [Utils — Rally storage](./utils.md#rally-share-link-storage) |
-| Inbound `?share=` bootstrap | [`recordShareLinkVisit.ts`](../client/src/utils/app/recordShareLinkVisit.ts), [`App.tsx`](../client/src/App.tsx) |
-| Rally UI | [`client/src/pages/Rally/`](../client/src/pages/Rally/) |
-| Backend model | [`models/ShareLink.js`](../models/ShareLink.js) |
-| Signup attribution | [`create.js`](../controller/users/account/create.js), [`activate.js`](../controller/users/account/utils/activate.js) |
+| Topic                             | Document / code                                                                                                      |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Product requirements & acceptance | [`specs/rally-page.md`](../specs/rally-page.md)                                                                      |
+| API endpoints                     | [API — Share links](./API.md#share-links-rally)                                                                      |
+| GA events & `page_location`       | [Analytics — Rally events](./analytics.md#rally-and-share-link-events)                                               |
+| Client storage keys               | [Utils — Rally storage](./utils.md#rally-share-link-storage)                                                         |
+| Inbound `?share=` bootstrap       | [`recordShareLinkVisit.ts`](../client/src/utils/app/recordShareLinkVisit.ts), [`App.tsx`](../client/src/App.tsx)     |
+| Rally UI                          | [`client/src/pages/Rally/`](../client/src/pages/Rally/)                                                              |
+| Backend model                     | [`models/ShareLink.js`](../models/ShareLink.js)                                                                      |
+| Signup attribution                | [`create.js`](../controller/users/account/create.js), [`activate.js`](../controller/users/account/utils/activate.js) |
 
 ## Guest funnel flow
 
 ```text
 Splash (primary CTA) → Rally → optional share / email / account
-                              → Continue to Lobby (Tour + pb:guestAccess)
+                              → Take me to the Lobby (Tour + pb:guestAccess)
 ```
 
 Logged-in users are **not** forced through Rally; see the spec §2.
 
 ## Two storage keys (do not confuse)
 
-| Key | Purpose |
-| --- | ------- |
-| `pb:shareLink` | **Outbound** link this visitor generated (`publicCode`, `claimCode`, `shareUrl`). Set only after explicit **Generate** on Rally. |
+| Key               | Purpose                                                                                                                                                                           |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pb:shareLink`    | **Outbound** link this visitor generated (`publicCode`, `claimCode`, `shareUrl`). Set only after explicit **Generate** on Rally.                                                  |
 | `pb:refShareCode` | **Inbound** referral that brought this visitor (`publicCode` + `storedAt`, 30-day TTL). Set only after successful visit API. Sent on signup; cleared after successful activation. |
 
 Session helpers: `pb:shareVisit:{code}` (visit dedupe), `pb:rallyShareInbound` (GA entry enum only).
 
 ## Public URL vs API
 
-| Use | URL |
-| --- | --- |
-| Share with others | `https://powerback.us/?share={publicCode}` |
-| Record visit (app only) | `GET /api/share-links/:publicCode` |
+| Use                     | URL                                        |
+| ----------------------- | ------------------------------------------ |
+| Share with others       | `https://powerback.us/?share={publicCode}` |
+| Record visit (app only) | `GET /api/share-links/:publicCode`         |
 
 Recipients must never be asked to copy `/api/share-links/...`.
 
