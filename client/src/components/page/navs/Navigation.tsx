@@ -72,6 +72,25 @@ const Navigation = ({
   const splashUnknown = typeof splash === 'undefined' || splash === null;
   const shouldShowSkeleton = isInitializing || (authUnknown && splashUnknown);
 
+  /** Guest splash inline FAQ/Eligibility/Terms — desktop always; mobile landing only (not Rally/Lobby). */
+  const isGuestSplashInlineContext =
+    route?.name === 'main' &&
+    !isLoggedIn &&
+    navContext === 'splash' &&
+    splash !== 'Tour';
+
+  const showGuestInlineNavLinks =
+    isGuestSplashInlineContext && (isDesktop || splash !== 'Rally');
+
+  /** Mobile/tablet brand row opens SideNav — same pattern as Lobby (funnel) for guest Rally. */
+  const showNavBrand =
+    isDesktop ||
+    isTabletPortrait ||
+    (!isDesktop &&
+      (isLoggedIn ||
+        (route?.name === 'main' &&
+          (navContext === 'funnel' || splash === 'Rally'))));
+
   // conditionally render the navbar skeleton
   if (shouldShowSkeleton) {
     return (
@@ -104,11 +123,7 @@ const Navigation = ({
         aria-label={'Main navigation'}
       >
         <Row>
-          {(isDesktop ||
-            (route?.name === 'main' &&
-              !isLoggedIn &&
-              navContext === 'splash' &&
-              splash !== 'Tour')) && (
+          {showGuestInlineNavLinks && (
             <Col lg={4}>
               <Row>
                 <Col>
@@ -135,11 +150,7 @@ const Navigation = ({
                     <Marquee id={'desktop-marquee'} />
                   </Col>
                 )) || <Col lg={3} />)) || <Col lg={1} />}
-              {(isDesktop ||
-                isTabletPortrait ||
-                (!isDesktop &&
-                  (isLoggedIn ||
-                    (route?.name === 'main' && navContext === 'funnel')))) && (
+              {showNavBrand && (
                 <Col
                   xs={12}
                   lg={isTabletPortrait ? 7 : 6}
