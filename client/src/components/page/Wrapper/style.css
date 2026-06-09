@@ -4,12 +4,25 @@
   main {
     height: min(35rem, 77vh) !important;
   }
+
+  /* Rally: unclamp main height for natural document scroll */
+  main.wrapper-rally {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
 }
 
 /* Mobile, portrait (tall) */
 @media (max-width: 599px) and (orientation: portrait) and (min-height: 800px) {
   main {
     height: max(35rem, 77vh) !important;
+  }
+
+  main.wrapper-rally {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
   }
 }
 

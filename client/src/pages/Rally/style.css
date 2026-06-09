@@ -23,8 +23,8 @@
 @media only screen and (max-width: 599px) and (orientation: portrait) {
   #rally--page.rally--page-shell {
     --bs-gutter-x: 0;
-    min-height: 507px;
-    height: 76vh;
+    min-height: 0;
+    height: auto;
   }
 }
 
@@ -89,15 +89,19 @@
   }
 }
 
-/* Beat App.css overflow: initial !important; clip 100vw carousel bleed at scrollport */
-html.rally-page,
-body.rally-page {
+/* Horizontal clip on html only — overflow-x:hidden on body/.App/main forces overflow-y:auto */
+html.rally-page {
   overflow-x: hidden !important;
   max-width: 100%;
 }
 
+body.rally-page {
+  overflow: visible !important;
+  max-width: 100%;
+}
+
 html.rally-page .App {
-  overflow-x: hidden !important;
+  overflow: visible !important;
 }
 
 @media only screen and (min-width: 900px) and (orientation: landscape) {
@@ -107,7 +111,7 @@ html.rally-page .App {
 }
 
 main.wrapper-rally {
-  overflow-x: hidden !important;
+  overflow: visible !important;
   max-width: 100%;
 }
 
@@ -115,11 +119,20 @@ main.wrapper-rally {
   position: relative;
   z-index: 1;
   width: 100%;
-  min-height: 100%;
 }
 
 #rally.rally-page--foreground {
   position: relative;
+}
+
+/* Desktop landscape: vertically center checkpoint card (unchanged) */
+@media only screen and (min-width: 900px) and (orientation: landscape) {
+  .rally--foreground-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+  }
 }
 
 /* Outer shell: vertically center card on landscape (Funnel #funnel--page pattern) */
@@ -174,6 +187,15 @@ main.wrapper-rally {
   border: none;
   background-color: transparent;
   padding: 0.5rem 0 0;
+}
+
+/* Desktop: single late CTA; mobile portrait: early + late (see mobile block) */
+.rally--continue--early {
+  display: none;
+}
+
+.rally--continue--late .rally--disclaimer {
+  display: block;
 }
 
 .rally--section-title {
@@ -684,8 +706,158 @@ main.wrapper-rally {
   width: 100%;
 }
 
-.rally--actions-row .rally--email .rally--email-submit {
+.rally--actions-tabs {
+  margin-bottom: 0.75rem;
+}
+
+.rally--support-tab-row {
+  --bs-gutter-x: 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.rally--support-selector-label {
+  margin-bottom: 0.5rem;
+}
+
+.rally--support-selector-lead {
+  margin: 0 0 0.15rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text);
+  font-family: 'Inconsolata', monospace;
+}
+
+.rally--support-selector-sub {
   margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--text-placeholder);
+  font-family: 'Inconsolata', monospace;
+}
+
+.rally--support-nav {
+  gap: 0.35rem;
+}
+
+.rally--support-nav .nav-item {
+  width: 100%;
+}
+
+#rally .rally--support-nav-link {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  margin: 0;
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  border: 1px solid var(--border-gray);
+  border-radius: 4px;
+  background-color: rgb(from var(--elevated) r g b / 60%);
+}
+
+#rally .rally--support-nav-link:hover,
+#rally .rally--support-nav-link:focus-visible {
+  background-color: var(--slate);
+  border-color: var(--btn-border);
+}
+
+#rally .rally--support-nav-link:not(.active):hover .rally--support-nav-title,
+#rally
+  .rally--support-nav-link:not(.active):focus-visible
+  .rally--support-nav-title {
+  color: var(--rally-section-title-hover);
+}
+
+#rally .rally--support-nav-link.active {
+  color: var(--contrast);
+  background-color: rgb(from var(--slate) r g b / 90%);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgb(from var(--accent) r g b / 25%);
+}
+
+.rally--support-nav-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.rally--support-nav-title {
+  color: inherit;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.15;
+  transition: color 0.15s ease;
+}
+
+.rally--support-nav-def {
+  color: var(--text-placeholder);
+  font-size: 0.78rem;
+  font-family: 'Inconsolata', monospace;
+  line-height: 1.25;
+}
+
+#rally .rally--support-nav-link.active .rally--support-nav-title {
+  color: var(--secondary);
+}
+
+#rally .rally--support-nav-link.active .rally--support-nav-def {
+  color: var(--text-contrast);
+}
+
+.rally--support-panel {
+  margin-bottom: 0;
+  min-width: 0;
+}
+
+.rally--support-panel-col {
+  min-width: 0;
+}
+
+.rally--support-panel .rally--email-submit {
+  margin: 0;
+}
+
+/* Non-desktop-landscape: one visible pane; full-width action buttons */
+@media not all and (min-width: 900px) and (orientation: landscape) {
+  .rally--support-panel .tab-content > .rally--support-pane--lead.active,
+  .rally--support-panel .tab-content > .rally--support-pane--lead.active.show {
+    display: flex !important;
+    flex-direction: column;
+  }
+
+  .rally--lead-panel {
+    height: auto;
+  }
+
+  .rally--lead-how {
+    margin-top: 0.5rem;
+  }
+
+  #rally .rally--support-panel .rally--btn-row {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.5rem;
+  }
+
+  #rally .rally--support-panel .rally--btn-row .btn,
+  #rally .rally--support-panel .rally--card-cta {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  #rally .rally--support-nav-link:not(.active) .rally--support-nav-def {
+    display: none;
+  }
+
+  .rally--link-compact-value {
+    white-space: normal;
+    text-overflow: unset;
+    overflow: visible;
+  }
 }
 
 .rally--email-submit-inner {
@@ -718,21 +890,6 @@ main.wrapper-rally {
   height: 1.15rem;
   color: inherit;
   border-width: 0.15em;
-}
-
-/* Portrait / narrow: three action sections stack vertically (default block flow) */
-.rally--actions-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.rally--actions-row > .rally--section {
-  margin-bottom: 1rem;
-}
-
-.rally--actions-row > .rally--section:last-child {
-  margin-bottom: 0;
 }
 
 /* Tablet, landscape: nav clearance on foreground card only (not carousel underlay) */
@@ -904,17 +1061,160 @@ main.wrapper-rally {
     flex-direction: column;
     align-items: center !important;
   }
+
+  #rally .rally--support-nav-link:not(.active) .rally--support-nav-def {
+    display: block;
+  }
 }
 
+/*
+ * Mobile portrait: long landing page — document scroll, Footer in normal flow after content.
+ *
+ * App.css locks html/body (position: fixed) and sets html { overflow: hidden } on mobile portrait.
+ * rally-page overrides restore a single document scrollport (html only); .App stays in flow.
+ */
 @media only screen and (max-width: 599px) and (orientation: portrait) {
+  html.rally-page {
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: none;
+    position: relative !important;
+    height: auto !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  body.rally-page {
+    overflow: visible !important;
+    position: relative !important;
+    height: auto !important;
+    min-height: 100% !important;
+    max-height: none !important;
+    overscroll-behavior: none;
+  }
+
+  html.rally-page .App {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0;
+    background-attachment: scroll !important;
+    overscroll-behavior: none;
+  }
+
+  html.rally-page .footer {
+    position: relative !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    width: 100% !important;
+    flex-shrink: 0;
+  }
+
+  main.wrapper-rally {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  #rally--page.rally--page-shell {
+    background-color: var(--mobile-bg);
+  }
+
+  .rally--lobby-underlay {
+    display: none;
+  }
+
+  .rally--foreground-wrap {
+    padding-top: 0.35rem;
+    padding-bottom: 0.75rem;
+  }
+
   #rally.rally-page {
-    padding: 1rem 0.85rem 2rem;
-    margin-left: 0.25rem;
-    margin-right: 0.25rem;
+    max-width: 100% !important;
+    margin: 0;
+    padding: 0 1rem 1.25rem;
+    background-color: transparent;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    text-align: left;
+  }
+
+  .rally--headline {
+    font-size: clamp(1.55rem, 7vw, 2rem);
+    margin-bottom: 0.45rem;
+  }
+
+  .rally--subcopy {
+    margin-bottom: 1rem;
+    padding-left: 0;
+    padding-right: 0;
+    font-size: 0.92rem;
+    line-height: 1.45;
+  }
+
+  .rally--continue--early {
+    display: block;
+    padding-top: 0;
+    margin-bottom: 1.15rem;
+  }
+
+  .rally--continue--late {
+    margin-top: 0.35rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .rally--section {
+    padding: 0.85rem 0.75rem 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .rally--support-selector-lead {
+    font-size: 0.85rem;
+  }
+
+  .rally--support-selector-sub {
+    font-size: 0.75rem;
+  }
+
+  #rally .rally--support-nav-link {
+    min-height: 2.75rem;
+    padding: 0.5rem 0.6rem;
+  }
+
+  .rally--support-nav-title {
+    font-size: 0.95rem;
+  }
+
+  .rally--hint {
+    font-size: 0.9rem;
+  }
+
+  #rally .rally--platform-field .form-select,
+  #rally .rally--suggested-message-input.form-control,
+  #rally .rally--email-field.input--translucent .form-control {
+    font-size: 1rem;
+    min-height: 2.75rem;
+  }
+
+  #rally .rally--card-cta {
+    min-height: 2.75rem;
   }
 
   #rally .splash-enter--btn.rally--continue-btn.button--continue {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 0;
     border: 1px solid var(--btn) !important;
+    letter-spacing: 0.12em;
+  }
+
+  .rally--social-footer {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.25rem;
+    border-top: 1px solid rgb(from var(--accent) r g b / 45%);
   }
 }
 

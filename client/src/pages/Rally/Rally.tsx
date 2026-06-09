@@ -13,7 +13,7 @@
  * - `handleContinueToLobby` — navigates splash Tour → funnel
  *
  * FLOW
- * CarouselBackdrop (decorative) → hero → SupportActions → continue CTA → social footer
+ * CarouselBackdrop (decorative) → hero → [early CTA mobile] → SupportActions → continue CTA → social footer
  */
 import React, {
   useRef,
@@ -23,7 +23,7 @@ import React, {
   useCallback,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { useDevice, useNavigation, type ShowAlert } from '@Contexts';
+import { useNavigation, type ShowAlert } from '@Contexts';
 import { SubmitBtn } from '@Components/buttons';
 import { CarouselBackdrop, SupportActions } from './subcomps';
 import { StyledAlert } from '@Components/alerts';
@@ -116,6 +116,44 @@ const RallyClipboardLine = ({
   </div>
 );
 
+type RallyContinueSectionProps = {
+  btnId: string;
+  onContinue: () => void;
+  showDisclaimer?: boolean;
+  variant: 'early' | 'late';
+};
+
+/**
+ * Take me to the Lobby CTA block (early + late on mobile; late only on desktop).
+ *
+ * @param props - Continue section props
+ */
+const RallyContinueSection = ({
+  btnId,
+  onContinue,
+  showDisclaimer = false,
+  variant,
+}: RallyContinueSectionProps) => (
+  <section
+    className={`rally--section rally--continue rally--continue--${variant} text-center`}
+  >
+    <SubmitBtn
+      classProp={'splash-enter--btn rally--continue-btn button--continue'}
+      btnId={btnId}
+      value={RALLY_COPY.CONTINUE.label}
+      onClick={onContinue}
+      variant={'dark'}
+      type={'button'}
+      size={'lg'}
+    />
+    {showDisclaimer && (
+      <small className={'rally--disclaimer d-block mt-2'}>
+        {RALLY_COPY.CONTINUE.disclaimer}
+      </small>
+    )}
+  </section>
+);
+
 /**
  * Rally page component — share-first guest funnel step.
  *
@@ -128,7 +166,6 @@ const RallyClipboardLine = ({
  */
 const Rally = () => {
   const { navigateToSplashView } = useNavigation();
-  const { isTabletLandscape } = useDevice();
 
   const [activeSupportTab, setActiveSupportTab] =
     useState<RallySupportTab>('tell');
@@ -288,12 +325,12 @@ const Rally = () => {
     trackGoogleAnalyticsEvent('rally_manual_share_seen');
   }, []);
 
-  /** Landscape pills default to Tell; count as manual-share seen without a click. */
+  /** Default Tell tab counts as manual-share seen without an extra click. */
   useEffect(() => {
-    if (isTabletLandscape && activeSupportTab === 'tell') {
+    if (activeSupportTab === 'tell') {
       markManualShareSeen();
     }
-  }, [isTabletLandscape, activeSupportTab, markManualShareSeen]);
+  }, [activeSupportTab, markManualShareSeen]);
 
   /** Confirmation toast after clipboard copy (portal to document.body). */
   const showCopyToast = useCallback((message: string) => {
@@ -473,7 +510,7 @@ const Rally = () => {
         <CarouselBackdrop />
         <div
           className={
-            'rally--foreground-wrap d-flex align-items-center justify-content-center'
+            'rally--foreground-wrap rally--foreground-wrap--mobile-flow'
           }
         >
           <Container
@@ -492,6 +529,12 @@ const Rally = () => {
               </h1>
               <p className={'rally--subcopy'}>{RALLY_COPY.HERO.subcopy}</p>
             </section>
+
+            <RallyContinueSection
+              btnId={'rally-continue-to-lobby-early'}
+              onContinue={handleContinueToLobby}
+              variant={'early'}
+            />
 
             <SupportActions
               markManualShareSeen={markManualShareSeen}
@@ -514,29 +557,18 @@ const Rally = () => {
               activeTab={activeSupportTab}
               sharePlatform={sharePlatform}
               generateError={generateError}
-              useTabsLayout={isTabletLandscape}
               shareMessage={shareMessage}
               onShareMessageChange={handleShareMessageChange}
               isEmailSubmitting={isEmailSubmitting}
               canUseNativeShare={canUseNativeShare}
             />
 
-            <section className={'rally--section rally--continue text-center'}>
-              <SubmitBtn
-                classProp={
-                  'splash-enter--btn rally--continue-btn button--continue'
-                }
-                btnId={'rally-continue-to-lobby'}
-                value={RALLY_COPY.CONTINUE.label}
-                onClick={handleContinueToLobby}
-                variant={'dark'}
-                type={'button'}
-                size={'lg'}
-              />
-              <small className={'rally--disclaimer d-block mt-2'}>
-                {RALLY_COPY.CONTINUE.disclaimer}
-              </small>
-            </section>
+            <RallyContinueSection
+              btnId={'rally-continue-to-lobby'}
+              onContinue={handleContinueToLobby}
+              showDisclaimer
+              variant={'late'}
+            />
 
             <footer className={'rally--social-footer text-center'}>
               <p

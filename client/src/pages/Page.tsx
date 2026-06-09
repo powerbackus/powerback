@@ -246,16 +246,18 @@ const Page = ({
 
   /**
    * Splash/Rally scroll + Rally horizontal overflow guards on html/body/.App.
-   * splash-scrollable: vertical scroll when landing content exceeds viewport.
-   * rally-page: block horizontal scroll from Lobby 100vw carousel underlay (100vw + scrollbar).
+   * splash-scrollable: unlock html/body fixed shell (Splash landing + Rally).
+   * rally-page: Rally long-page scroll + horizontal clip (see Rally/style.css mobile block).
    */
   useLayoutEffect(() => {
-    const isGuestMain =
-      route?.name === 'main' && !isInitializing && !isLoggedIn;
-    const isSplashPage = navContext === 'splash' && isGuestMain;
-    const isRallyPage = splash === 'Rally' && isGuestMain;
+    const isGuestOnMain = route?.name === 'main' && !isLoggedIn;
+    const isGuestMainReady = isGuestOnMain && !isInitializing;
+    const isSplashPage = navContext === 'splash' && isGuestMainReady;
+    // Rally class must not wait on isInitializing — shell lock wins without rally-page
+    const isRallyPage = splash === 'Rally' && isGuestOnMain;
 
-    if (isSplashPage) {
+    // splash-scrollable unlocks html/body fixed shell; rally-page adds Rally scroll + x-clip rules
+    if (isSplashPage || isRallyPage) {
       document.body.classList.add('splash-scrollable');
       document.documentElement.classList.add('splash-scrollable');
     } else {

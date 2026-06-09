@@ -1,7 +1,7 @@
 /**
  * Rally support actions — Tell the People, Take the Lead, Keep Watch.
  *
- * Portrait / narrow: three stacked sections with headings.
+ * Mobile / narrow: compact selector + one active panel.
  * Tablet landscape+: left pill nav + single panel (CSS grid keeps panel height stable).
  *
  * @module Rally/subcomps/SupportActions
@@ -55,11 +55,10 @@ type RallyClipboardLineProps = {
  * @property handleNativeShare - Native share sheet handler
  * @property generateError - User-visible generate failure (or null)
  * @property handleEmailFocus - Focus handler (analytics / clear errors)
- * @property activeTab - Selected pill when useTabsLayout
+ * @property activeTab - Selected support action tab
  * @property canUseNativeShare - Web Share API available
  * @property isEmailSubmitting - Rally subscriber POST in flight
  * @property emailError - Validation or API error message
- * @property useTabsLayout - True on tablet landscape (pill nav + single panel)
  * @property emailSuccess - Post-submit success (checkmark on button)
  * @property isGenerating - Share-link POST in flight
  * @property shareMessage - Editable manual-share post (copy / native share payload)
@@ -90,7 +89,6 @@ export type SupportActionsProps = {
   canUseNativeShare: boolean;
   isEmailSubmitting: boolean;
   emailError: string | null;
-  useTabsLayout: boolean;
   emailSuccess: boolean;
   isGenerating: boolean;
   shareMessage: string;
@@ -456,16 +454,10 @@ const KeepWatchContent = ({
  * share-link, email, and copy handlers from Rally.tsx.
  *
  * @param props - SupportActionsProps
- * @returns Stacked sections or pill + tab panel layout
+ * @returns Compact selector + single active support panel
  */
 const SupportActions = (props: SupportActionsProps) => {
-  const {
-    markManualShareSeen,
-    ClipboardLine,
-    useTabsLayout,
-    onSelectTab,
-    activeTab,
-  } = props;
+  const { markManualShareSeen, ClipboardLine, onSelectTab, activeTab } = props;
 
   const tell = <TellThePeopleContent {...props} />;
   const lead = (
@@ -476,150 +468,101 @@ const SupportActions = (props: SupportActionsProps) => {
   );
   const watch = <KeepWatchContent {...props} />;
 
-  if (useTabsLayout) {
-    return (
-      <div className={'rally--actions-tabs'}>
-        <Tab.Container
-          activeKey={activeTab}
-          // All panes stay mounted; CSS grid uses max pane height (see rally--support-panel)
-          unmountOnExit={false}
-          transition={false}
-          onSelect={(key) => {
-            if (key === 'tell' || key === 'lead' || key === 'watch') {
-              if (key === 'tell') {
-                markManualShareSeen();
-              }
-              onSelectTab(key);
-            }
-          }}
-        >
-          <Row className={'rally--support-tab-row g-3'}>
-            <Col
-              className={'rally--support-nav-col'}
-              xs={12}
-              lg={4}
-            >
-              <div className={'rally--support-nav-stack'}>
-                <div className={'rally--support-selector-label'}>
-                  <p className={'rally--support-selector-lead'}>
-                    {RALLY_COPY.SUPPORT_ACTIONS.selectorLead}
-                  </p>
-                  <p className={'rally--support-selector-sub'}>
-                    {RALLY_COPY.SUPPORT_ACTIONS.selectorSub}
-                  </p>
-                </div>
-                <Nav
-                  aria-label={RALLY_COPY.SUPPORT_ACTIONS.tabsAriaLabel}
-                  className={'flex-column rally--support-nav'}
-                  variant={'pills'}
-                  role={'tablist'}
-                >
-                  {RALLY_SUPPORT_TABS.map(({ key, title, definition }) => (
-                    <Nav.Item key={key}>
-                      <Nav.Link
-                        eventKey={key}
-                        className={'rally--support-nav-link'}
-                      >
-                        <span className={'rally--support-nav-copy'}>
-                          <span className={'rally--support-nav-title'}>
-                            {title}
-                          </span>
-                          <span className={'rally--support-nav-def'}>
-                            {definition}
-                          </span>
-                        </span>
-                      </Nav.Link>
-                    </Nav.Item>
-                  ))}
-                </Nav>
-              </div>
-            </Col>
-            <Col
-              xs={12}
-              lg={8}
-              className={'rally--support-panel-col'}
-            >
-              <div className={'rally--support-panel rally--section'}>
-                <Tab.Content>
-                  {[
-                    {
-                      key: 'tell',
-                      content: tell,
-                      className: 'rally--support-pane',
-                    },
-                    {
-                      key: 'lead',
-                      content: lead,
-                      className:
-                        'rally--support-pane rally--support-pane--lead',
-                    },
-                    {
-                      key: 'watch',
-                      content: watch,
-                      className:
-                        'rally--support-pane rally--support-pane--watch',
-                    },
-                  ].map(({ key, className, content }) => (
-                    <Tab.Pane
-                      key={key}
-                      className={className}
-                      mountOnEnter={false}
-                      eventKey={key}
-                    >
-                      {content}
-                    </Tab.Pane>
-                  ))}
-                </Tab.Content>
-              </div>
-            </Col>
-          </Row>
-        </Tab.Container>
-      </div>
-    );
-  }
-
   return (
-    <div className='rally--actions-row'>
-      <section
-        className={'rally--section rally--card--tell'}
-        aria-labelledby={'rally-manual-title'}
-        onMouseEnter={markManualShareSeen}
-        onFocus={markManualShareSeen}
+    <div className={'rally--actions-tabs'}>
+      <Tab.Container
+        activeKey={activeTab}
+        // Desktop: grid-stacked panes for stable height; mobile: Bootstrap show/hide
+        unmountOnExit={false}
+        transition={false}
+        onSelect={(key) => {
+          if (key === 'tell' || key === 'lead' || key === 'watch') {
+            if (key === 'tell') {
+              markManualShareSeen();
+            }
+            onSelectTab(key);
+          }
+        }}
       >
-        <h2
-          id={'rally-manual-title'}
-          className={'rally--section-title'}
-        >
-          {RALLY_COPY.MANUAL_SHARE.title}
-        </h2>
-        {tell}
-      </section>
-
-      <section
-        className={'rally--section rally--anonymous-link rally--card--lead'}
-        aria-labelledby={'rally-link-title'}
-      >
-        <h2
-          id={'rally-link-title'}
-          className={'rally--section-title'}
-        >
-          {RALLY_COPY.ANONYMOUS_LINK.title}
-        </h2>
-        {lead}
-      </section>
-
-      <section
-        className={'rally--section rally--email rally--card--follow'}
-        aria-labelledby={'rally-email-title'}
-      >
-        <h2
-          id={'rally-email-title'}
-          className={'rally--section-title'}
-        >
-          {RALLY_COPY.EMAIL.title}
-        </h2>
-        {watch}
-      </section>
+        <Row className={'rally--support-tab-row g-3'}>
+          <Col
+            className={'rally--support-nav-col'}
+            xs={12}
+            lg={4}
+          >
+            <div className={'rally--support-nav-stack'}>
+              <div className={'rally--support-selector-label'}>
+                <p className={'rally--support-selector-lead'}>
+                  {RALLY_COPY.SUPPORT_ACTIONS.selectorLead}
+                </p>
+                <p className={'rally--support-selector-sub'}>
+                  {RALLY_COPY.SUPPORT_ACTIONS.selectorSub}
+                </p>
+              </div>
+              <Nav
+                aria-label={RALLY_COPY.SUPPORT_ACTIONS.tabsAriaLabel}
+                className={'flex-column rally--support-nav'}
+                variant={'pills'}
+                role={'tablist'}
+              >
+                {RALLY_SUPPORT_TABS.map(({ key, title, definition }) => (
+                  <Nav.Item key={key}>
+                    <Nav.Link
+                      eventKey={key}
+                      className={'rally--support-nav-link'}
+                    >
+                      <span className={'rally--support-nav-copy'}>
+                        <span className={'rally--support-nav-title'}>
+                          {title}
+                        </span>
+                        <span className={'rally--support-nav-def'}>
+                          {definition}
+                        </span>
+                      </span>
+                    </Nav.Link>
+                  </Nav.Item>
+                ))}
+              </Nav>
+            </div>
+          </Col>
+          <Col
+            xs={12}
+            lg={8}
+            className={'rally--support-panel-col'}
+          >
+            <div className={'rally--support-panel rally--section'}>
+              <Tab.Content>
+                {[
+                  {
+                    key: 'tell',
+                    content: tell,
+                    className: 'rally--support-pane',
+                  },
+                  {
+                    key: 'lead',
+                    content: lead,
+                    className: 'rally--support-pane rally--support-pane--lead',
+                  },
+                  {
+                    key: 'watch',
+                    content: watch,
+                    className: 'rally--support-pane rally--support-pane--watch',
+                  },
+                ].map(({ key, className, content }) => (
+                  <Tab.Pane
+                    key={key}
+                    className={className}
+                    mountOnEnter={false}
+                    eventKey={key}
+                  >
+                    {content}
+                  </Tab.Pane>
+                ))}
+              </Tab.Content>
+            </div>
+          </Col>
+        </Row>
+      </Tab.Container>
     </div>
   );
 };
