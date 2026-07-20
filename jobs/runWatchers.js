@@ -134,7 +134,7 @@ function runWatchers() {
   // Schedule the tipLimitReached reset job
   scheduleTipLimitReachedReset();
 
-  async function runAll(POLL_SCHEDULE) {
+  async function runAll() {
     resetSocialPostRunCount();
 
     logger.info(
@@ -142,10 +142,10 @@ function runWatchers() {
     );
 
     const watchers = [
-      { name: 'houseWatcher', fn: () => houseWatcher(POLL_SCHEDULE) },
+      { name: 'houseWatcher', fn: () => houseWatcher() },
       {
         name: 'challengersWatcher',
-        fn: () => challengersWatcher(POLL_SCHEDULE),
+        fn: () => challengersWatcher(),
       },
       {
         name: 'pfpSync',
@@ -154,11 +154,11 @@ function runWatchers() {
           await runPfpSync({ manageConnection: false, argv: [] });
         },
       },
-      { name: 'checkHJRes54', fn: () => checkHJRes54(POLL_SCHEDULE) },
+      { name: 'checkHJRes54', fn: () => checkHJRes54() },
       { name: 'electionDatesUpdater', fn: () => electionDatesUpdater() },
       {
         name: 'defunctCelebrationWatcher',
-        fn: () => defunctCelebrationWatcher(POLL_SCHEDULE),
+        fn: () => defunctCelebrationWatcher(),
       },
     ];
 
@@ -201,7 +201,9 @@ function runWatchers() {
     POLL_SCHEDULE,
     () => {
       logger.info('cron tick - runWatchers');
-      runAll(POLL_SCHEDULE);
+      runAll().catch((err) =>
+        logger.error('scheduled runWatchers run failed', err.message)
+      );
     },
     { timezone: 'America/New_York' }
   );
@@ -209,7 +211,7 @@ function runWatchers() {
   // initial run - skip in test mode or if watchers are paused
   if (runWatchers && !isTestMode) {
     logger.info('Running initial watcher execution...');
-    runAll(POLL_SCHEDULE).catch((err) =>
+    runAll().catch((err) =>
       logger.error('initial runWatchers run failed', err.message)
     );
   } else if (!runWatchers && !isTestMode) {

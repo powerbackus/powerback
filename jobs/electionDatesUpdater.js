@@ -137,12 +137,14 @@ async function fetchAllElectionDates(electionYear) {
     const url = `${FEC.ELECTION_CYCLE.API_BASE}${FEC.ELECTION_CYCLE.ELECTION_ENDPOINT}`;
     const params = {
       per_page: 100, // More reasonable page size for API
-      api_key: apiKey,
       election_year: electionYear,
       office: 'H', // House elections
     };
 
-    const response = await axios.get(url, { params });
+    const response = await axios.get(url, {
+      params,
+      headers: { 'X-Api-Key': apiKey },
+    });
 
     if (response.data && response.data.results) {
       const elections = response.data.results;

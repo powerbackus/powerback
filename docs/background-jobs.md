@@ -270,7 +270,7 @@ The snapshot system provides utilities for managing snapshots and deltas:
 Ensures database connectivity before running check functions:
 
 - Connects to MongoDB before running check
-- Handles errors gracefully
+- Logs watcher errors and re-throws them to the caller
 - Used by all watcher jobs
 
 ## Scheduling Configuration
@@ -280,6 +280,7 @@ Ensures database connectivity before running check functions:
 - **Schedule**: Daily at 3 PM Eastern Time on weekdays
 - **Timezone**: America/New_York (Eastern Time)
 - **Configuration**: `SERVER.CRON_SCHEDULES.WEEKDAY_3PM`
+- **Ownership**: `runWatchers.js` owns the sole watcher cron schedule. Individual watcher modules execute one run and do not schedule themselves.
 
 ### Run control
 
@@ -294,9 +295,9 @@ Ensures database connectivity before running check functions:
 
 ### Independent Execution
 
-- Each watcher runs independently
-- Failures in one watcher don't stop others
-- Results logged for monitoring
+- `runWatchers.js` executes watchers sequentially and tracks each result
+- `runCheck.js` propagates watcher failures to the orchestrator
+- Failures in one watcher don't stop later watchers
 - Summary logged at end (completed/failed counts)
 
 ### Logging

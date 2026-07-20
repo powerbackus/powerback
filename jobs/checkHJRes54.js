@@ -8,7 +8,6 @@
  * @module jobs/checkHJRes54
  * @requires path
  * @requires axios
- * @requires node-cron
  * @requires ../models
  * @requires ./runCheck
  * @requires ../services/logger
@@ -30,7 +29,6 @@
  */
 
 const axios = require('axios');
-const cron = require('node-cron');
 const { Bill, User } = require('../models');
 const { EMAIL_TOPICS } = require('../constants');
 const {
@@ -452,38 +450,14 @@ async function checkBill() {
 }
 
 /**
- * Main watcher function that sets up scheduled bill monitoring
- *
- * This function:
- * 1. Sets up a cron job to run checkBill on the specified schedule
- * 2. Runs an initial check immediately on startup
- * 3. Returns a promise that resolves when the initial check completes
+ * Executes one H.J.Res. 54 monitoring check.
+ * Scheduling is handled by runWatchers.
  *
  * @function hjres54Watcher
- * @param {string} POLL_SCHEDULE - Cron schedule string (e.g., '0 2 * * *' for daily at 2 AM)
- * @returns {Promise<void>} Promise that resolves when initial check completes
- *
- * @example
- * // Run every day at 3 PM Eastern
- * hjres54Watcher('0 15 * * *');
+ * @returns {Promise<void>} Resolves when the check completes; rejects on failure
  */
-module.exports = function hjres54Watcher(POLL_SCHEDULE) {
+module.exports = function hjres54Watcher() {
   logger.info('HJRes54 watcher booted');
 
-  /**
-   * Schedule recurring checks using cron
-   * The schedule is provided as a parameter to allow flexibility in deployment
-   */
-  cron.schedule(POLL_SCHEDULE, () => {
-    logger.info('cron tick - checking HJRes54');
-    runCheck(logger, checkBill);
-  });
-
-  /**
-   * Run initial check immediately on startup
-   * This ensures we have current data even if the next cron run is hours away
-   */
-  const initialRun = runCheck(logger, checkBill);
-  initialRun.catch((err) => logger.error('initial HJRes54 run failed', err));
-  return initialRun;
+  return runCheck(logger, checkBill);
 };
