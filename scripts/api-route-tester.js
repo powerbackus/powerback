@@ -911,8 +911,8 @@ async function testExternalAPIs() {
             sort_hide_null: false,
             sort_null_only: false,
             sort_nulls_last: false,
-            api_key: FEC_API_KEY,
           },
+          headers: { 'X-Api-Key': FEC_API_KEY },
           timeout: 20000, // Increased timeout for FEC API (may be slow)
           validateStatus: () => true,
         }
@@ -920,7 +920,7 @@ async function testExternalAPIs() {
       const duration = Date.now() - startTime;
 
       results.openFEC = {
-        success: response.status >= 200 && response.status < 500,
+        success: response.status >= 200 && response.status < 300,
         status: response.status,
         error: response.status >= 400 ? `HTTP ${response.status}` : null,
         duration,

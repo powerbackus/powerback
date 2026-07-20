@@ -14,7 +14,7 @@
  *
  * ERROR HANDLING
  * - Catches and logs errors from check function
- * - Does not re-throw errors (allows job to continue)
+ * - Re-throws errors so callers can report watcher failure
  * - Logs errors for monitoring and debugging
  *
  * USAGE
@@ -38,7 +38,7 @@ const { connect } = require('../services/utils/db');
  *
  * @param {Object} logger - Logger instance for error logging
  * @param {Function} check - Check function to execute after connecting
- * @returns {Promise<void>} Resolves when check completes
+ * @returns {Promise<void>} Resolves when check completes; rejects on failure
  *
  * @example
  * ```javascript
@@ -65,5 +65,6 @@ module.exports = async function runCheck(logger, check) {
       reqUrl:
         e.config && typeof e.config === 'object' ? e.config.url : undefined,
     });
+    throw err;
   }
 };
