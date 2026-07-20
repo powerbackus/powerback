@@ -55,7 +55,6 @@
  * - fs: File system operations
  * - path: Path manipulation
  * - axios: HTTP client for API calls
- * - node-cron: Cron scheduling
  * - nodemailer: Email sending
  * - models/Pol: Politician model
  * - services/utils: sendSMS, fixPolName, DockingManager
@@ -69,7 +68,6 @@
  * @requires fs
  * @requires path
  * @requires axios
- * @requires node-cron
  * @requires nodemailer
  * @requires ../models
  * @requires mongoose
@@ -90,7 +88,6 @@
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
-const cron = require('node-cron');
 // const twilio = require('twilio');
 
 const nodemailer = require('nodemailer');
@@ -317,10 +314,9 @@ function saveFecCache() {
  *
  * @async
  * @function houseWatcher
- * @param {string} POLL_SCHEDULE - Cron schedule string for polling frequency
  * @returns {Promise<void>} Promise that resolves after initial check completes
  */
-module.exports = async function houseWatcher(POLL_SCHEDULE) {
+module.exports = async function houseWatcher() {
   // Parse CLI args for single-member test mode
   const args = process.argv.slice(2);
   const singleIdx = args.indexOf('--single');
@@ -488,14 +484,15 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
         candidate_status: 'C',
         is_active_candidate: 'true',
         election_year: ELECTION_YEAR,
-        api_key: process.env.FEC_API_KEY,
       });
 
       const url = `${base}search/?${params.toString()}`;
       logger.info(`FEC API request for state-wide candidates: ${url}`);
 
       await rateLimitFec();
-      const { data } = await axios.get(url);
+      const { data } = await axios.get(url, {
+        headers: { 'X-Api-Key': process.env.FEC_API_KEY },
+      });
       const results = data.results || [];
 
       // Cache state-wide results (even if empty) to avoid repeat requests
@@ -1027,22 +1024,5 @@ module.exports = async function houseWatcher(POLL_SCHEDULE) {
     await runIntegrityChecks(db, sendEmailForIntegrity, logger);
   }
 
-  // SCHEDULE ────────────────────────────────────────────────────────
-  // Every 2 min. for testing
-  // cron.schedule('*/2 * * * *', checkMembership);
-
-  /**
-   * Wrapper function to run the membership check with error handling
-   *
-   * @function bringDownTheHouse
-   * @returns {Promise<void>}
-   */
-  const bringDownTheHouse = () => runCheck(logger, checkMembership);
-  cron.schedule(POLL_SCHEDULE, async () => {
-    logger.info('cron tick - fetching roster...'); // cycle start
-    bringDownTheHouse();
-  });
-
-  // kick once at start-up and return promise
-  return bringDownTheHouse();
+  return runCheck(logger, checkMembership);
 };

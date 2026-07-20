@@ -51,7 +51,7 @@ async function testBillUpdate() {
 
     // Run the bill check once
     logger.info('Running bill check...');
-    await hjres54Watcher('* * * * *'); // Pass any schedule, it will run immediately anyway
+    await hjres54Watcher();
 
     // Wait a moment for the update to complete
     await new Promise((resolve) => setTimeout(resolve, 2000));

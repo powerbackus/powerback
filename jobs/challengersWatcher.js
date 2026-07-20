@@ -66,7 +66,6 @@
  * - fs: File system operations
  * - path: Path manipulation
  * - axios: HTTP client for OpenFEC API
- * - node-cron: Cron scheduling
  * - nodemailer: Email sending
  * - models: Pol, Celebration, User
  * - services/celebration/statusService: Status management
@@ -78,7 +77,6 @@
  * @requires fs
  * @requires path
  * @requires axios
- * @requires node-cron
  * @requires nodemailer
  * @requires ../models
  * @requires ../services/celebration/statusService
@@ -90,7 +88,6 @@
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
-const cron = require('node-cron');
 const nodemailer = require('nodemailer');
 
 const { Pol, Celebration } = require('../models');
@@ -210,7 +207,7 @@ function loadSnapshot() {
  * Builds OpenFEC /candidates/ query URL for House, filtered by incumbent_challenge
  * types (I incumbents, C/O challengers and open-seat).
  * @param {{ page: number, challengeTypes: string[] }} opts
- * @returns {string} Full URL with api_key
+ * @returns {string} Full URL without credentials
  */
 function getFecUrl({ page, challengeTypes }) {
   const base = process.env.FEC_API_CANDIDATES_ENDPOINT;
@@ -223,7 +220,6 @@ function getFecUrl({ page, challengeTypes }) {
     has_raised_funds: 'true',
     is_active_candidate: 'true',
     election_year: ELECTION_YEAR,
-    api_key: process.env.FEC_API_KEY,
   });
 
   challengeTypes.forEach((type) => query.append('incumbent_challenge', type));
@@ -245,7 +241,9 @@ async function fetchIncumbents() {
   let page = 1;
   while (true) {
     const url = getFecUrl({ page, challengeTypes: ['I'] });
-    const { data } = await axios.get(url);
+    const { data } = await axios.get(url, {
+      headers: { 'X-Api-Key': process.env.FEC_API_KEY },
+    });
     ids.push(...data.results.map((c) => c.candidate_id));
     if (page >= data.pagination.pages) break;
     page++;
@@ -274,7 +272,9 @@ async function fetchChallengers() {
   let page = 1;
   while (true) {
     const url = getFecUrl({ page, challengeTypes: ['C', 'O'] });
-    const { data } = await axios.get(url);
+    const { data } = await axios.get(url, {
+      headers: { 'X-Api-Key': process.env.FEC_API_KEY },
+    });
     challengers.push(...data.results);
     if (page >= data.pagination.pages) break;
     page++;
@@ -316,7 +316,7 @@ async function sendEmail(to, subject, html) {
   }
 }
 
-module.exports = async function challengersWatcher(POLL_SCHEDULE) {
+module.exports = async function challengersWatcher() {
   let snapshot = loadSnapshot();
   logger.info('challengersWatcher booted');
   logger.info(`Using election year: ${ELECTION_YEAR}`);
@@ -335,7 +335,7 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
       logger.info(`fetched ${challengers.length} serious challengers`);
     } catch (err) {
       logger.error('fetch failed:', serializeErr(err));
-      return;
+      throw err;
     }
 
     // --- Competitive districts: any House district with a C/O FEC row this cycle
@@ -1069,18 +1069,5 @@ module.exports = async function challengersWatcher(POLL_SCHEDULE) {
     snapshot = polsArray;
   }
 
-  cron.schedule(
-    POLL_SCHEDULE,
-    () => {
-      logger.info('cron tick - checking challengers');
-      runCheck(logger, checkChallengers);
-    },
-    { timezone: 'America/New_York' } // Eastern Time (Washington DC timezone)
-  );
-
-  const initialRun = runCheck(logger, checkChallengers);
-  initialRun.catch((err) =>
-    logger.error('challengersWatcher initial run failed', serializeErr(err))
-  );
-  return initialRun;
+  return runCheck(logger, checkChallengers);
 };

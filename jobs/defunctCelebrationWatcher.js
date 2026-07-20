@@ -67,7 +67,7 @@ const { DefunctCelebrationService } = require('../services/celebration');
 const { Celebration, User } = require('../models');
 const logger = require('../services/utils/logger')(__filename);
 const { postToSocial } = require('../services/utils');
-module.exports = async function defunctCelebrationWatcher(POLL_SCHEDULE) {
+module.exports = async function defunctCelebrationWatcher() {
   logger.info('Starting defunct celebration watcher job');
 
   try {
