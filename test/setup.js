@@ -42,7 +42,11 @@ afterAll(async () => {
 
 // Mock environment variables for testing
 process.env.NODE_ENV = 'test';
+process.env.ORIGIN = 'http://localhost:3000';
+process.env.PROD_URL = 'https://powerback.us';
+process.env.DEV_URL = 'http://localhost:3000';
 process.env.SERVER_SESSION_SECRET = 'test-secret';
+process.env.JWT_SECRET = 'test-jwt-secret';
 process.env.STRIPE_SK_TEST = 'sk_test_mock';
 process.env.TWILIO_ACCOUNT_SID = 'test-sid';
 process.env.TWILIO_AUTH_TOKEN = 'test-token';

@@ -96,8 +96,11 @@ lib-cov/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
-__mocks__/
-client/src/__mocks__/
+/__mocks__/*
+!/__mocks__/url-join.js
+!/__mocks__/scureBip32.js
+/client/src/__mocks__/*
+!/client/src/__mocks__/axios.js
 scripts/tests/
 scripts/build/.temp-*.cjs
 tests/
