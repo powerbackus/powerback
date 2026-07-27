@@ -59,7 +59,7 @@
     "@testing-library/user-event": "13.5.0",
     "@types/jest": "^29.2.4",
     "accounting": "^0.4.1",
-    "axios": "^1.2.0-alpha.1",
+    "axios": "1.18.1",
     "bcryptjs": "^2.4.3",
     "bitcoinjs-lib": "^7.0.0",
     "cookie-parser": "^1.4.7",
