@@ -7,8 +7,6 @@ const {
   PB_LINK,
 } = require('../../utils/celebrations');
 
-const PHONE_NUMBER = process.env.PHONE_NUMBER;
-
 module.exports = {
   Update: async (update, firstName) => {
     const BTC_ADDRESS = await getBTCAddress();
@@ -64,9 +62,7 @@ module.exports = {
       )}
       
       ${emailUtils.createParagraph(
-        `Problems or questions about this update? Call us at ${
-          PHONE_NUMBER || 'the number listed on our site'
-        } or email ${emailUtils.createLink(
+        `Problems or questions about this update? Email ${emailUtils.createLink(
           SUPPORT_EMAIL,
           `mailto:${SUPPORT_EMAIL}`
         )}`,

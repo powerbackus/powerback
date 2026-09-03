@@ -25,7 +25,7 @@ Define comprehensive testing approach to achieve 80%+ coverage and ensure applic
 
 - **API Endpoints**: All routes with authentication
 - **Database Operations**: CRUD operations, migrations
-- **External Services**: Stripe, email, SMS integration
+- **External Services**: Stripe, email integration
 - **Context Integration**: React Context interactions
 
 ### E2E Tests (Top - 10% of tests)
@@ -70,7 +70,7 @@ npm install --save-dev supertest mongodb-memory-server
 - `controller/` - Business logic controllers
 - `models/` - Database models and operations
 - Payment processing flows
-- Email/SMS integration
+- Email integration
 - Authentication middleware integration
 
 ### Phase 3: E2E (Weeks 5-6)

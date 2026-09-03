@@ -177,7 +177,7 @@ const createAlertEmail = (firstName, alertType, details) => {
     
     ${emailUtils.createParagraph(
       `
-      Questions? Call us or email support@powerback.us
+      Questions? Email support@powerback.us
     `,
       { textAlign: 'center', fontSize: '12px' }
     )}

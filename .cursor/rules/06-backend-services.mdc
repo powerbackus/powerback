@@ -51,7 +51,6 @@ services/
     dockingManager.js
     fixPolName.js
     rateLimitHelpers.js
-    sendSMS.js
     index.js
 ```
 

@@ -135,7 +135,7 @@ const createEmailTemplate = (content, options = {}) => {
           border-top: 1px solid #333;
           padding-top: 10px;
         ">
-          Questions? Call us or email ${emailUtils.createLink(
+          Questions? Email ${emailUtils.createLink(
             SUPPORT_EMAIL,
             `mailto:${SUPPORT_EMAIL}`
           )}

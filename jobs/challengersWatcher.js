@@ -59,7 +59,7 @@
  * 4. updateMany: has_stakes true for roles[0].fec_candidate_id in finalIds;
  *    has_stakes false for everyone else (full recompute each run).
  * 5. diffSnapshot compares current competitive incumbents vs file snapshot;
- *    drive emails, SMS, social posts, celebration cancel/defunct on transitions.
+ *    drive emails, social posts, celebration cancel/defunct on transitions.
  * 6. First run with empty snapshot is bootstrap: DB updates run, alerts skipped.
  *
  * DEPENDENCIES
@@ -95,14 +95,8 @@ const { getSnapshotsDir } = require('../constants/paths');
 const { CONFIG: MAIL_CONFIG } = require('../controller/comms/sendEmail');
 const { StatusService } = require('../services/celebration/statusService');
 
-// const twilio = require('twilio');
-// const TWILIO_SID = process.env.TWILIO_ACCOUNT_SID;
-// const TWILIO_TOKEN = process.env.TWILIO_AUTH_TOKEN;
-// const TO_SMS = process.env.PHONE_NUMBER;
-
 // Service layer for user/celebration logic
 const {
-  sendSMS,
   getUsersInDistrict,
   getUsersWithActiveCelebration,
   cancelCelebrationsForCandidate,
@@ -513,7 +507,7 @@ module.exports = async function challengersWatcher() {
       logger.info(`${addedIncumbents.length} incumbents added.`);
     }
 
-    // Challenger snapshot diff: who gained/lost competitive status → emails/SMS/social
+    // Challenger snapshot diff: who gained/lost competitive status → emails/social
     const { changes, removals } = diffSnapshot({
       name: 'challengers',
       current: polsArray,
@@ -536,7 +530,7 @@ module.exports = async function challengersWatcher() {
       (change) => change.old && change.old.has_stakes
     );
 
-    // Empty snapshot = first deploy or wiped file; avoid email/SMS storms
+    // Empty snapshot = first deploy or wiped file; avoid email storms
     const isBootstrapRun = snapshot.length === 0;
     if (isBootstrapRun && (added.length > 0 || removals.length > 0)) {
       logger.info(
@@ -656,15 +650,6 @@ module.exports = async function challengersWatcher() {
             `Found ${districtUsers.length} users in district ${state}-${district}`
           );
 
-          try {
-            await sendSMS(
-              `New challenger in ${state}-${district}. ${districtUsers.length} users notified.`
-            );
-            logger.info('Alert SMS sent');
-          } catch (err) {
-            logger.error('Failed to send SMS alert:', serializeErr(err));
-          }
-
           if (!districtUsers.length) {
             logger.info(
               `No users found in ${state}-${district}, skipping notifications`
@@ -735,17 +720,6 @@ module.exports = async function challengersWatcher() {
         logger.info(
           `Found ${celebrationUsers.length} users with active celebrations for removed pol ${polId}`
         );
-
-        if (!isBootstrapRun) {
-          try {
-            await sendSMS(
-              `Challenger left race in ${state}-${district}. ${celebrationUsers.length} celebrations paused.`
-            );
-            logger.info('Alert SMS sent');
-          } catch (err) {
-            logger.error('Failed to send SMS alert:', serializeErr(err));
-          }
-        }
 
         if (!celebrationUsers.length) {
           logger.info(
@@ -881,17 +855,6 @@ module.exports = async function challengersWatcher() {
         logger.info(
           `Found ${celebrationUsers.length} users with active celebrations for dropped-out incumbent ${polId}`
         );
-
-        if (!isBootstrapRun) {
-          try {
-            await sendSMS(
-              `Incumbent dropped out in ${state}-${district}. ${celebrationUsers.length} celebrations defuncted.`
-            );
-            logger.info('Alert SMS sent');
-          } catch (err) {
-            logger.error('Failed to send SMS alert:', serializeErr(err));
-          }
-        }
 
         if (!celebrationUsers.length) {
           logger.info(

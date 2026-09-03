@@ -18,7 +18,7 @@
  *
  * UTILS SERVICES
  * - Logger, database, cookies, CSRF, rate limiting, audit logging,
- *   error responses, docking manager, name formatting, SMS
+ *   error responses, docking manager, name formatting
  *
  * DEPENDENCIES
  * - ./celebration: Celebration services

@@ -105,7 +105,6 @@ services/
 ├── fixPolName.js                  # Politician name normalization
 ├── logger.js                      # Structured logging service
 ├── promoteUser.js                 # User privilege management
-├── sendSMS.js                     # SMS notification service
 ├── statusService.js               # System status and health
 └── userDistrict.js                # User district management
 ```

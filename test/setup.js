@@ -48,8 +48,6 @@ process.env.DEV_URL = 'http://localhost:3000';
 process.env.SERVER_SESSION_SECRET = 'test-secret';
 process.env.JWT_SECRET = 'test-jwt-secret';
 process.env.STRIPE_SK_TEST = 'sk_test_mock';
-process.env.TWILIO_ACCOUNT_SID = 'test-sid';
-process.env.TWILIO_AUTH_TOKEN = 'test-token';
 process.env.PORT = '3002'; // Use different port for tests
 
 // Disable background jobs during tests

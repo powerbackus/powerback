@@ -1,7 +1,6 @@
 const { createEmailTemplate, emailUtils } = require('../template');
 
 const SUPPORT_EMAIL = process.env.REACT_APP_EMAIL_SUPPORT_USER,
-  PHONE_NUMBER = process.env.PHONE_NUMBER,
   PROD_URL = process.env.PROD_URL;
 
 const PB_LINK = emailUtils.createLink('POWERBACK.us', PROD_URL);
@@ -13,9 +12,7 @@ module.exports = {
     const content = `
       ${emailUtils.createHeading('Reset your POWERBACK.us password', 1)}
       
-      ${emailUtils.createParagraph(
-        `Hi ${firstName ?? 'Powerbacker'},`
-      )}
+      ${emailUtils.createParagraph(`Hi ${firstName ?? 'Powerbacker'},`)}
       
       ${emailUtils.createParagraph(
         'We received a request to reset the password for your POWERBACK.us account.'
@@ -49,7 +46,7 @@ module.exports = {
       ${emailUtils.createSignature('official')}
       
       ${emailUtils.createParagraph(
-        `Problems or questions? Call us at ${PHONE_NUMBER} or email ${emailUtils.createLink(
+        `Problems or questions? Email ${emailUtils.createLink(
           SUPPORT_EMAIL,
           `mailto:${SUPPORT_EMAIL}`
         )}`,
