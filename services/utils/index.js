@@ -33,7 +33,6 @@
  * - fixPolName: Politician name formatting
  *
  * COMMUNICATIONS
- * - sendSMS: SMS notification service (currently disabled)
  * - postToSocial: Post to social media webhook automations
  *
  * AUDIT LOGGING
@@ -56,7 +55,6 @@
  *
  * DEPENDENCIES
  * - ./rateLimitHelpers: Rate limiting utilities
- * - ./sendSMS: SMS service
  * - ./db: Database connection
  * - ./csrf: CSRF protection
  * - ./fixPolName: Name formatting
@@ -67,7 +65,6 @@
  *
  * @module services/utils
  * @requires ./rateLimitHelpers
- * @requires ./sendSMS
  * @requires ./db
  * @requires ./csrf
  * @requires ./fixPolName
@@ -83,7 +80,6 @@ const {
   rateLimiters,
   createRateLimiter,
 } = require('./rateLimitHelpers');
-const { sendSMS } = require('./sendSMS');
 const { ...dbServices } = require('./db');
 const { ...csrfServices } = require('./csrf');
 const { fixPolName } = require('./fixPolName');
@@ -112,7 +108,6 @@ module.exports = {
   buildHouseRoleOcdId,
   HOUSE_AT_LARGE_STORAGE,
   isNonVotingHouseJurisdiction,
-  sendSMS,
   rateLimiters,
   ...dbServices,
   ...csrfServices,

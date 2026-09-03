@@ -4,7 +4,7 @@
  * This background job monitors changes in House of Representatives membership
  * from the Congress.gov API and OpenFEC API. It automatically adds new
  * politicians to the database, updates has_stakes flags based on competitive
- * race status, and sends email/SMS alerts about membership changes.
+ * race status, and sends email alerts about membership changes.
  *
  * KEY FEATURES
  *
@@ -30,7 +30,6 @@
  *
  * ALERT SYSTEM
  * - Sends email alerts for membership, candidate and election changes
- * - Optional SMS alerts (commented out, not yet implemented)
  * - Notifies administrators of changes
  *
  * BUSINESS LOGIC
@@ -57,7 +56,7 @@
  * - axios: HTTP client for API calls
  * - nodemailer: Email sending
  * - models/Pol: Politician model
- * - services/utils: sendSMS, fixPolName, DockingManager
+ * - services/utils: fixPolName, DockingManager
  * - services/utils/socialPoster: Social media webhook automation
  * - controller/congress/config: Session configuration
  * - controller/comms/sendEmail: Email configuration
@@ -72,7 +71,6 @@
  * @requires ../models
  * @requires mongoose
  * @requires ../services
- * @requires ../services/utils/sendSMS
  * @requires ../services/utils/fixPolName
  * @requires ../controller/congress/config
  * @requires ../controller/comms/sendEmail
@@ -81,14 +79,9 @@
  * @requires ./snapshotManager
  */
 
-// Twilio for phone pushes
-// const TWILIO_SID = process.env.TWILIO_SID;
-// const TWILIO_TOKEN =  process.env.TWILIO_TOKEN;
-// const TO_SMS = process.env.TO_SMS; // "+15551234567"
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
-// const twilio = require('twilio');
 
 const nodemailer = require('nodemailer');
 require('../services/utils/db');
@@ -97,7 +90,6 @@ const { Pol } = require('../models');
 const { getSnapshotsDir } = require('../constants/paths');
 const { session } = require('../controller/congress/config');
 const {
-  // sendSMS,
   fixPolName,
   normalizeHouseDistrictKeyPart,
   resolveHouseDistrictForPolRole,
@@ -720,31 +712,6 @@ module.exports = async function houseWatcher() {
   }
 
   /**
-   * Sends SMS-like alert via email (for testing)
-   *
-   * @async
-   * @function mimicSMS
-   * @param {string} subject - Email subject line
-   * @param {string} html - HTML content of the email
-   * @returns {Promise<void>}
-   */
-  async function mimicSMS(subject, html) {
-    const mailer = nodemailer.createTransport({
-      auth: {
-        user: process.env.EMAIL_NO_REPLY_USER,
-        pass: process.env.EMAIL_NO_REPLY_PASS,
-      },
-      ...MAIL_CONFIG,
-    });
-    await mailer.sendMail({
-      from: process.env.EMAIL_NO_REPLY_USER,
-      to: `${process.env.PHONE_NUMBER.replace('.', '')}@txt.att.net`,
-      subject,
-      html,
-    });
-  }
-
-  /**
    * Loads the previous snapshot of House member IDs from file
    *
    * @function loadSnapshot
@@ -974,29 +941,6 @@ module.exports = async function houseWatcher() {
         );
       }
     }
-
-    // *** TOGGLE TEST SMS
-    try {
-      await mimicSMS(
-        isBootstrapRun ? 'House watcher bootstrap' : 'House membership change',
-        html
-      );
-      logger.info('alert mimic SMS sent');
-    } catch (err) {
-      logger.error('mimicSMS failed', {
-        message: err.message,
-        stack: err.stack,
-      });
-    }
-
-    // try {
-    //   await sendSMS(
-    //     `House changed. +${added.length} / -${removed.length}.`
-    //   );
-    //   logger.info('alert SMS sent'); // success
-    // } catch (err) {
-    //   logger.error('sendSMS failed: ', err);
-    // }
 
     // save new snapshot
     try {

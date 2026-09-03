@@ -88,7 +88,6 @@
     "stripe": "^8.193.0",
     "superagent": "^7.1.1",
     "tiny-secp256k1": "^2.2.4",
-    "twilio": "^5.5.2",
     "url-join": "^5.0.0",
     "winston": "^3.17.0",
     "winston-daily-rotate-file": "^5.0.0"

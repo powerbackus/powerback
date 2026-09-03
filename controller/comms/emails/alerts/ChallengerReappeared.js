@@ -2,7 +2,6 @@ const { createEmailTemplate, emailUtils } = require('../template');
 const { EMAIL_TOPICS } = require('../../../../constants');
 
 const PB_URL = process.env.PROD_URL,
-  PHONE_NUMBER = process.env.PHONE_NUMBER,
   SUPPORT_EMAIL = process.env.REACT_APP_EMAIL_SUPPORT_USER;
 
 module.exports = {
@@ -45,7 +44,7 @@ module.exports = {
       )}
       
       ${emailUtils.createParagraph(
-        `Questions? Call us at ${PHONE_NUMBER} or email ${emailUtils.createLink(
+        `Questions? Email ${emailUtils.createLink(
           SUPPORT_EMAIL,
           `mailto:${SUPPORT_EMAIL}`
         )}`,

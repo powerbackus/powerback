@@ -18,7 +18,6 @@ const TWITTER_URI = process.env.TWITTER_INTENT_BASE_URL,
   TWITTER_TEXT =
     "I made a campaign celebration that you can't cash until action is taken on ",
   TWITTER_CTA = '! Find out at @PowerbackApp',
-  PHONE_NUMBER = process.env.PHONE_NUMBER,
   TCO_URL = process.env.PROD_TCO_URL;
 
 const PB_LINK = emailUtils.createLink('POWERBACK.us', PROD_URL);
@@ -187,9 +186,7 @@ module.exports = {
       )}
       
       ${emailUtils.createParagraph(
-        `Problems or questions about this receipt? Call us at ${
-          PHONE_NUMBER || 'the number listed on our site'
-        } or email ${emailUtils.createLink(
+        `Problems or questions about this receipt? Email ${emailUtils.createLink(
           SUPPORT_EMAIL,
           `mailto:${SUPPORT_EMAIL}`
         )}`,

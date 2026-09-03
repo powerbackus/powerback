@@ -80,7 +80,7 @@ services/
 ├── congressional/        # Political data integration
 ├── payment/             # Stripe integration and processing
 ├── compliance/          # FEC compliance checking
-├── notification/        # Email and SMS services
+├── notification/        # Email notification services
 ├── background/          # Job processing and scheduling
 └── data/                # Database operations and caching
 ```
@@ -124,14 +124,13 @@ models/
 - **Congress.gov**: Congressional data and bills
 - **OpenFEC**: Federal election commission data
 - **Email Services**: SMTP for notifications
-- **SMS Services**: Text message notifications
 
 ### Background Jobs
 
 - **Election Updates**: Real-time election date changes
 - **Congressional Watchers**: Bill and politician updates
 - **Data Snapshots**: Local caching of external data
-- **Notification Processing**: Email and SMS delivery
+- **Notification Processing**: Email delivery
 
 ## Data Flow Patterns
 

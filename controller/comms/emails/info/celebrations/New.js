@@ -17,7 +17,6 @@ const TWITTER_URI = process.env.TWITTER_INTENT_BASE_URL,
   TWITTER_TEXT =
     "I made my first campaign celebration that you can't cash until action is taken on ",
   TWITTER_CTA = '! Find out at @PowerbackApp',
-  PHONE_NUMBER = process.env.PHONE_NUMBER,
   TCO_URL = process.env.PROD_TCO_URL; // Use shortened URL for Twitter
 
 const BRANDED_DOMAIN = process.env.BRANDED_DOMAIN || 'POWERBACK.us';
@@ -277,9 +276,7 @@ module.exports = {
     )}
     
     ${emailUtils.createParagraph(
-      `Questions about this Celebration or your limits? Call us at ${
-        PHONE_NUMBER || 'the number on our site'
-      } or email ${emailUtils.createLink(
+      `Questions about this Celebration or your limits? Email ${emailUtils.createLink(
         SUPPORT_EMAIL,
         `mailto:${SUPPORT_EMAIL}`
       )}`,

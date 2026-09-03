@@ -37,7 +37,7 @@ All background jobs are orchestrated through the `runWatchers` system, which:
 - Compares with previous snapshot to detect changes
 - Automatically adds new members to database
 - Sets `has_stakes: false` on newly shaped House Pols; **competitive** `has_stakes` is recomputed by `challengersWatcher`, not here
-- Sends email/SMS alerts for membership changes
+- Sends email alerts for membership changes
 
 **FEC Integration**:
 
@@ -73,7 +73,7 @@ All background jobs are orchestrated through the `runWatchers` system, which:
 3. **Challenger district keys** — For each challenger row, find the index in `election_years` for the target cycle (values may be **numbers or strings**). Read the same index in `election_districts`. Require a non-empty two-letter `state` and a normalizable district via `normalizeHouseDistrictKeyPart(district, state)` from `services/utils/normalizeHouseDistrict.js`; otherwise skip that row (never emit keys with a missing state prefix).
 4. **Competitive incumbent FEC ids** — For each incumbent FEC id from OpenFEC, load the `Pol` whose **`roles` array** contains that id (any index) and build the state–district key from **that** role row. If the key is in the challenger set, the incumbent is a **district match**. **Committed `finalIds`** (used for `has_stakes` and the challenger snapshot) include the id only when `roles[0].fec_candidate_id === incId` — **`roles[0]` is the current House role**; later entries are historical. If the district match uses a historical role only, the watcher logs structured diagnostics and **does not** add that id to `finalIds`.
 5. **`Pol.has_stakes` writes** — Two `updateMany` calls: set `has_stakes: true` where `roles[0].fec_candidate_id` is in `finalIds`; set `has_stakes: false` where `roles[0].fec_candidate_id` is not in `finalIds`. Full recompute each run.
-6. **Snapshot and notifications** — `diffSnapshot` compares the committed competitive set to `challengers.snapshot.json` and drives email/SMS/social and celebration side effects. Bootstrap (empty snapshot) still updates the DB and snapshot but skips bulk alerts.
+6. **Snapshot and notifications** — `diffSnapshot` compares the committed competitive set to `challengers.snapshot.json` and drives email/social and celebration side effects. Bootstrap (empty snapshot) still updates the DB and snapshot but skips bulk alerts.
 
 **Carousel alignment**
 

@@ -188,7 +188,6 @@ The system includes robust error handling:
 ### Environment Variables Required
 
 - `PROD_URL` - Base URL for POWERBACK (server config)
-- `PHONE_NUMBER` - Support phone number (server config)
 - `REACT_APP_EMAIL_SUPPORT_USER` - Support email address (shared; see [Environment Management](./environment-management.md#shared-react_app_-variables))
 - Email configuration (SMTP settings: `EMAIL_HOST`, `EMAIL_JONATHAN_USER`, etc.)
 
@@ -210,7 +209,6 @@ To test the notification system:
 
 Potential improvements to consider:
 
-- **SMS Notifications:** Add SMS alerts for critical changes
 - **Preference Settings:** Allow users to opt out of certain notification types
 - **Impact Scoring:** More sophisticated impact analysis algorithms
 - **Batch Processing:** Process multiple states more efficiently
