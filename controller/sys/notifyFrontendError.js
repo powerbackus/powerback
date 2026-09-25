@@ -52,18 +52,35 @@ module.exports = {
    */
   notifyFrontendError: (req, res) => {
     try {
-      const { message, stack, componentStack, url } = req.body;
+      const {
+        url,
+        extra,
+        stack,
+        message,
+        componentStack,
+        context: clientContext,
+      } = req.body;
 
       logger.error('Frontend Error from ErrorBoundary:', {
         timestamp: new Date().toISOString(),
         error: {
-          message: message || 'Unknown error',
-          stack: stack || 'No stack trace available',
           componentStack: componentStack || 'No component stack available',
           url: url || req.get('Referer') || 'Unknown',
+          stack: stack || 'No stack trace available',
+          message: message || 'Unknown error',
         },
         context: {
           userAgent: req.get('User-Agent') || 'Unknown',
+          httpStatus:
+            Number.isInteger(extra?.status) &&
+            extra.status >= 100 &&
+            extra.status <= 599
+              ? extra.status
+              : null,
+          clientContext:
+            typeof clientContext === 'string'
+              ? clientContext.slice(0, 100)
+              : 'Unknown',
           ip: req.ip || 'Unknown',
           method: req.method,
           path: req.path,
